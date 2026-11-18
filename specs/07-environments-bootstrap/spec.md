@@ -69,5 +69,5 @@ Later phases, not built in P0 or P0.5:
 - [ ] `production` `docker-compose.yml`, `Dockerfile`, `docker/nginx.conf` (PB-3)
 - [ ] Vercel project, environment variables per environment, Upstash databases (preview + production)
 - [ ] Domain `tsogo.karaboseipelo.com` + DNS
-- [ ] `DEMO_MODE` (in `.env.example`), banner in the root layout, `noindex` headers + `robots.txt`
-- [ ] Run AC-07.1, AC-07.2 and AC-07.4 – AC-07.6, AC-07.8 before handover
+- [ ] `DEMO_MODE` banner in the root layout, `noindex` headers + `robots.txt` → AC-07.6 (P5). The variable itself is in `.env.example` (T-07.4)
+- [ ] Run AC-07.1, AC-07.4 – AC-07.6 and AC-07.8 before handover

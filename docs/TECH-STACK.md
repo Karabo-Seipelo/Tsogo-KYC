@@ -10,13 +10,13 @@ Versions are taken from `pnpm-lock.yaml` at scaffold time (PLAN, P0) and updated
 
 | Technology | Role | Version | Official docs |
 |---|---|---|---|
-| Next.js (App Router) | App framework, route handlers for the mock API | 16.x, ≥ 16.4.5 (November 2026 security release) | https://nextjs.org/docs |
-| React | UI | 19.x | https://react.dev |
-| TypeScript (`strict`) | Language | Pinned at P0 | https://www.typescriptlang.org/docs/ |
+| Next.js (App Router) | App framework, route handlers for the mock API | 16.4.6 | https://nextjs.org/docs |
+| React | UI | 19.3.0 | https://react.dev |
+| TypeScript (`strict`) | Language | 5.9.3 | https://www.typescriptlang.org/docs/ |
 | XState + `@xstate/react` | Journey state machine | 5.x | https://stately.ai/docs |
 | TanStack Query | Server state, polling, mutations | 5.x | https://tanstack.com/query/latest |
-| Tailwind CSS | Styling | Pinned at P0 | https://tailwindcss.com/docs |
-| Vitest + Testing Library | Unit and component tests | Pinned at P0 | https://vitest.dev · https://testing-library.com/docs/react-testing-library/intro/ |
+| Tailwind CSS | Styling | tailwindcss 4.3.3 | https://tailwindcss.com/docs |
+| Vitest + Testing Library | Unit and component tests | vitest 5.1.0, @testing-library/react 16.3.3 | https://vitest.dev · https://testing-library.com/docs/react-testing-library/intro/ |
 | Upstash Redis (`@upstash/redis`) | Session store on Vercel | Pinned at P0 | https://upstash.com/docs/redis |
 | Vercel | Hosting, previews, production | — | https://vercel.com/docs |
 | GitHub Actions | CI: the checks in constitution §10 on every push and PR | — | https://docs.github.com/actions |
@@ -40,7 +40,8 @@ One line per package, with the spec that needs it. A new package is added here w
 | `tailwindcss` | Styling | All | dev |
 | `typescript`, `@types/*` | Types | All | dev |
 | `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` | Tests | All | dev |
-| `eslint`, `eslint-config-next`, `@typescript-eslint/*` | Linting, incl. the hard-coded-string check (AC-09.1) | All | dev |
+| `eslint`, `eslint-config-next`, `typescript-eslint` | Linting, incl. `@typescript-eslint/strict` (constitution §10) and the hard-coded-string check (AC-09.1) | All | dev |
+| `eslint-config-prettier` | Turns off ESLint rules that conflict with Prettier. Required by the Next.js ESLint guide when Prettier is installed | All | dev |
 | `prettier` | Formatting | All | dev |
 | `@tailwindcss/postcss`, `postcss` | Tailwind v4's Next.js setup: the official PostCSS plugin | All | dev |
 | `husky` | Installs the git hooks on `pnpm install` | 07 (P0.5) | dev |
