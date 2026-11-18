@@ -10,7 +10,11 @@ import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
 import { HelpProvider } from "@/features/help/HelpDialog";
 import { SaveExitProvider } from "@/features/save-exit/SaveExit";
 import { useKycMachine } from "@/machines/useKycMachine";
-import { QrHandoff } from "@/features/handoff/QrHandoff";
+import {
+  HandoffScreen,
+  handoffCodeFrom,
+  type HandoffCode,
+} from "@/features/handoff/QrExpired";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
 
@@ -33,7 +37,7 @@ function JourneyFlow() {
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
   const [documentType, setDocumentType] = useState<DocumentKind | null>(null);
   const [checks, setChecks] = useState<ReviewCheck[]>([]);
-  const [handoffToken, setHandoffToken] = useState<string | null>(null);
+  const [handoff, setHandoff] = useState<HandoffCode | null>(null);
 
   if (state === "deviceSelection") {
     return (
@@ -44,12 +48,14 @@ function JourneyFlow() {
     );
   }
 
-  if (state === "qrHandoff" && handoffToken) {
+  if (state === "qrHandoff" && handoff) {
     return (
-      <QrHandoff
-        token={handoffToken}
+      <HandoffScreen
+        token={handoff.token}
+        expiresAt={handoff.expiresAt}
         host={window.location.host}
         onContinueHere={() => send({ type: "CHOOSE_THIS_DEVICE" })}
+        onIssued={setHandoff}
       />
     );
   }
@@ -122,7 +128,7 @@ function JourneyFlow() {
     return (
       <StartScreen
         onStart={() => {
-          void startDesktopSession(setHandoffToken).finally(() => {
+          void startDesktopSession(setHandoff).finally(() => {
             send({ type: "START", device: "desktop" });
           });
         }}
@@ -133,27 +139,19 @@ function JourneyFlow() {
   return <main />;
 }
 
-async function startDesktopSession(setHandoffToken: (token: string) => void) {
+async function startDesktopSession(setHandoff: (code: HandoffCode) => void) {
   try {
     const response = await fetch("/api/session", { method: "POST" });
     if (!response.ok) {
       return;
     }
-    const token = handoffTokenFrom(await response.json());
-    if (token) {
-      setHandoffToken(token);
+    const code = handoffCodeFrom(await response.json());
+    if (code) {
+      setHandoff(code);
     }
   } catch {
     return;
   }
-}
-
-function handoffTokenFrom(body: unknown) {
-  if (!body || typeof body !== "object" || !("handoffToken" in body)) {
-    return null;
-  }
-  const token = body.handoffToken;
-  return typeof token === "string" ? token : null;
 }
 
 async function submitReview(send: (event: { type: "SUBMIT" }) => void) {

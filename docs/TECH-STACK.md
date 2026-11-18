@@ -21,6 +21,7 @@ Versions are taken from `pnpm-lock.yaml` at scaffold time (PLAN, P0) and updated
 | Vitest + Testing Library | Unit and component tests | vitest 5.1.0, @testing-library/react 16.3.3 | https://vitest.dev · https://testing-library.com/docs/react-testing-library/intro/ |
 | Upstash Redis (`@upstash/redis`) | Session store on Vercel | Pinned at P0 | https://upstash.com/docs/redis |
 | Vercel | Hosting, previews, production | — | https://vercel.com/docs |
+| Montserrat (via `next/font/google`, self-hosted at build) | Typeface for all UI text (spec 10) | — | https://nextjs.org/docs/app/getting-started/fonts |
 | GitHub Actions | CI: the checks in constitution §10 on every push and PR | — | https://docs.github.com/actions |
 | Node.js / pnpm | Runtime / package manager | Node `>=20.9.0` (`engines`); Node 22.18.0 (`devEngines.runtime`, what CI installs); pnpm 12.18.0 (`packageManager`) | https://nodejs.org/docs · https://pnpm.io |
 | `cloudflared` (quick tunnel) | HTTPS tunnel for real-phone testing (`pnpm dev:phone`); dev tool, not shipped | Latest | https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/ |

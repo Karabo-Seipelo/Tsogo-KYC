@@ -18,6 +18,7 @@ Each phase ends at a checkpoint. The next phase doesn't start until the checkpoi
 | **P2 · Single-device happy path** | `SessionStore` (memory) + sessions/status API; D1, D2 ("this device"); document capture + validation; selfie, liveness, face match; review, submit, processing, complete | 02 (store + sessions, Help, Save & exit, `/privacy`), 03, 04, 05 | AC-07.1: a fresh clone completes the whole journey on one device with `pnpm dev`; AC-09.1 (no hard-coded strings) enforced by `pnpm lint` from here on; AC-08.6 (request logs) |
 | **P3 · Cross-device** | Handoff issue/redeem, QR (D3, D3b), heartbeat, desktop status polling (D4), phone handback (M7); Redis adapter | 02 (handoff), 05 (D4, M7) | AC-02.1 – AC-02.7; AC-07.8 (`pnpm dev:phone`: handoff to a real phone over HTTPS); AC-07.4 (the same on a Vercel preview, the real multi-instance environment) |
 | **P4 · Resilience** | Offline, timeout warning/expiry, rejection, camera/upload errors, manual review (E9), `?fail=` / `?ttl=` switches | 06, 08 (E9) | Every scenario E1 – E9 can be forced and recovers as specified; switches listed in the README |
+| **P4.5 · Visual design** | Tokens and Montserrat, contrast test, raw-colour lint rule, restyled components with all states, layouts matched to the five Figma reference screens | 10 | AC-10.1 – AC-10.6; screenshots at 390 / 768 / 1440 px in the PR |
 | **P5 · Ship** | Vercel + Upstash per environment, domain, demo banner + `noindex`; accessibility pass; README TBCs filled | 07 | AC-07.4 – AC-07.6; keyboard-only run of the full journey; README has no _TBC_ left |
 
 ## Dependencies
@@ -33,7 +34,8 @@ flowchart LR
   C08 --> UI
   UI --> X[P3 Cross-device]
   X --> R[P4 Resilience]
-  R --> S[P5 Ship]
+  R --> V[P4.5 Visual design]
+  V --> S[P5 Ship]
 ```
 
 - **In parallel:** 09 and 01 don't depend on each other. Within P2, the document (03) and selfie (04) screens can be built side by side once the machine and content exist.
@@ -81,3 +83,4 @@ Designed in the specs, not built for the demo. Effort: S < half a day, M ≈ 1�
 | PB-12 | Signed handoff tokens, rate limiting (per IP and per session), device binding between QR issue and redemption | 02 | The demo threat model is low | Go-live | M |
 | PB-13 | Encryption at rest, retention policy, durable access-controlled audit storage for the FICA retention period | 08 · R-08.2; constitution §5 | The demo keeps nothing beyond the session | Go-live | M |
 | PB-14 | Error tracking, tracing, alerts and SLOs (time to verify, BR-3; failure-rate spikes), real-user Web Vitals | 08 | Request logs cover the demo | Go-live | M |
+| PB-15 | Dark theme and a client brand theme as token sets | 10 · R-10.8, T-10.6 | One neutral theme is enough for the demo | Brand guidelines from the client | S |
