@@ -86,5 +86,5 @@ stateDiagram-v2
 - [x] T-01.2 Machine with states, transitions, guards and actions → AC-01.1 – AC-01.7 · verify: T-01.3 passes · files: `src/machines/kycMachine.ts`
 - [x] T-01.4 `progressSteps` and the state → step mapping → R-01.7, AC-01.9 · verify: `pnpm test src/machines` · files: `src/machines/progress.ts`, `src/machines/progress.test.ts`
 - [x] T-01.5 `useKycMachine` hook exposing `state`, `send` and `stepNumber` (1–4) → AC-01.1, AC-01.9 · verify: `pnpm test src/machines` · files: `src/machines/useKycMachine.ts`, `src/machines/useKycMachine.test.tsx`
-- [ ] T-01.6 Check the machine in the Stately visualiser against the flow map → all · verify: manual; screenshot in the PR · files: none
+- [x] T-01.6 Check the machine in the Stately visualiser against the flow map → all · verify: manual; screenshot in the PR · files: none
 - [ ] T-01.7 `production` Model-based paths with `createTestModel` (PB-4) → AC-01.1 – AC-01.9 · verify: `pnpm test src/machines` · files: `src/machines/kycMachine.paths.test.ts`

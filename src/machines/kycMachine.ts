@@ -20,11 +20,6 @@ function initialContext(): KycContext {
   };
 }
 
-const sessionExpired = {
-  target: "error",
-  actions: "setSessionExpired",
-} as const;
-
 export const kycMachine = setup({
   types: {
     context: {} as KycContext,
@@ -75,26 +70,26 @@ export const kycMachine = setup({
           },
           { target: "deviceSelection", actions: "setDevice" },
         ],
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     deviceSelection: {
       on: {
         CHOOSE_PHONE: { target: "qrHandoff" },
         CHOOSE_THIS_DEVICE: { target: "documentUpload" },
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     qrHandoff: {
       on: {
         PHONE_CONNECTED: { target: "documentUpload" },
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     documentUpload: {
       on: {
         DOC_CAPTURED: { target: "documentValidation" },
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     documentValidation: {
@@ -108,19 +103,19 @@ export const kycMachine = setup({
           },
           { target: "error", actions: "docMaxAttempts" },
         ],
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     selfieCapture: {
       on: {
         SELFIE_CAPTURED: { target: "livenessCheck" },
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     livenessCheck: {
       on: {
         LIVENESS_PASSED: { target: "faceMatch" },
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     faceMatch: {
@@ -134,7 +129,7 @@ export const kycMachine = setup({
           },
           { target: "error", actions: "matchMaxAttempts" },
         ],
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     review: {
@@ -144,14 +139,14 @@ export const kycMachine = setup({
           { guard: "retakeDocument", target: "documentUpload" },
           { target: "selfieCapture" },
         ],
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     processing: {
       on: {
         VERIFIED: { target: "complete" },
         REJECTED: { target: "error" },
-        SESSION_EXPIRED: sessionExpired,
+        SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
     complete: { type: "final" },
