@@ -98,6 +98,7 @@ Applies to any AI agent working in this repo (see `.cursor/rules/`).
 - Put the session ID in the QR code.
 - Use `any`, `@ts-ignore` or turn off strict mode to get past an error.
 - Change a test so that it passes instead of fixing the code.
+- Bypass git hooks (`--no-verify`) or push past a red CI run.
 - Edit files under `.cursor/skills/` or `.cursor/references/`. They're pinned third-party dependencies; project behaviour is set by overrides in `.cursor/rules/spec-driven.mdc`.
 - Implement a requirement, AC or task tagged `production`. Those are designed and agreed, but not built for the demo (see the production backlog in `specs/PLAN.md`).
 
@@ -157,10 +158,21 @@ export function RetryNotice({ attempt, max, onRetry }: Props) {
 }
 ```
 
+### Checks
+
+The same checks run locally and in CI (spec 07, R-07.9 – R-07.10). Hooks keep commits clean; CI is the gate.
+
+| Where | Runs |
+|---|---|
+| pre-commit | ESLint `--fix` and Prettier on staged files; `pnpm typecheck`; skill checksums |
+| commit-msg | commitlint (Conventional Commits) |
+| pre-push | `pnpm test` |
+| CI (every push and PR) | Frozen-lockfile install, `typecheck`, `lint`, `test`, `build`, skill checksums |
+
 ### Git workflow
 
 - `main` deploys to production; every branch gets a Vercel preview.
 - Branches: `feat/NN-short-name`, `fix/NN-short-name` (`NN` = spec number).
 - Commits: Conventional Commits scoped by spec, e.g. `feat(02): redeem handoff token`, `test(01): AC-01.3 retry guard`, `docs(specs): …`.
 - One pull request per plan checkpoint or spec slice. The description lists the spec, the ACs covered, how each was verified, and any still unmet.
-- Nothing merges with failing `typecheck`, `lint` or `test`.
+- Nothing merges to `main` while CI is red.

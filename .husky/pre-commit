@@ -1,0 +1,4 @@
+set -e
+pnpm exec lint-staged
+pnpm typecheck
+cd .cursor && shasum -a 256 -c agent-deps.sha256
