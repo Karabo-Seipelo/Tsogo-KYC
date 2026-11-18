@@ -35,11 +35,22 @@ async function readStatus(request: Request, log: { step: string | null }) {
   log.step = session.step;
   return NextResponse.json({
     step: session.step,
-    phoneConnected: session.phoneConnected === true,
+    phoneConnected: connectedWithin(session.lastSeen, 30_000),
     lastSeen: session.lastSeen ?? null,
     checks: Array.isArray(session.checks) ? session.checks : [],
     handoffExpired: handoff === null,
   });
+}
+
+function connectedWithin(
+  lastSeen: string | null | undefined,
+  windowMs: number,
+) {
+  if (typeof lastSeen !== "string") {
+    return false;
+  }
+  const seen = Date.parse(lastSeen);
+  return !Number.isNaN(seen) && Date.now() - seen <= windowMs;
 }
 
 function readSessionId(request: Request) {
