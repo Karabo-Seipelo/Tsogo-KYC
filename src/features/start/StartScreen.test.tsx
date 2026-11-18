@@ -10,7 +10,7 @@ const content = contentSchema.parse(bundled);
 test("AC-02.1 D1 shows the estimate, the requirements, the privacy line and Start verification", () => {
   render(
     <ContentProvider content={content}>
-      <StartScreen />
+      <StartScreen onStart={() => undefined} />
     </ContentProvider>,
   );
 

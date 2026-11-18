@@ -5,7 +5,11 @@ import { useContent } from "@/lib/content/useContent";
 
 const estimateMinutes = { min: 3, max: 5 };
 
-export function StartScreen() {
+type Props = {
+  onStart: () => void;
+};
+
+export function StartScreen({ onStart }: Props) {
   const { content, t } = useContent();
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -46,6 +50,7 @@ export function StartScreen() {
         <button
           type="button"
           className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
+          onClick={onStart}
         >
           {t("start.cta")}
         </button>
