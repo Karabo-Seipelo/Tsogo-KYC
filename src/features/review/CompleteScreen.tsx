@@ -18,6 +18,19 @@ export function CompleteScreen() {
     <Screen
       action={<Button className="w-full md:w-fit">{t("complete.cta")}</Button>}
     >
+      <span
+        aria-hidden="true"
+        className="grid size-12 place-items-center rounded-full bg-success-soft text-success"
+      >
+        <svg viewBox="0 0 16 16" className="size-6">
+          <path
+            d="M3 8.2 6.2 11.5 13 4.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+        </svg>
+      </span>
       <h1 ref={heading} tabIndex={-1} className={screenTitle}>
         {t("complete.title")}
       </h1>

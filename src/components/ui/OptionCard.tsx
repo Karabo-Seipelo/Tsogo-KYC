@@ -56,31 +56,13 @@ export function OptionCard({
 function RadioMark({ checked }: { checked: boolean }) {
   return (
     <span
-      className="mt-0.5 flex shrink-0 items-center gap-2"
+      className={classes(
+        "mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 border-ink",
+        checked && "bg-ink",
+      )}
       aria-hidden="true"
     >
-      <span
-        className={classes(
-          "grid size-5 place-items-center rounded-full border-2 border-ink",
-          checked && "bg-ink",
-        )}
-      >
-        {checked ? <span className="size-2 rounded-full bg-on-ink" /> : null}
-      </span>
-      {checked ? <Tick /> : null}
+      {checked ? <span className="size-2 rounded-full bg-on-ink" /> : null}
     </span>
-  );
-}
-
-function Tick() {
-  return (
-    <svg viewBox="0 0 16 16" className="size-4 text-ink" aria-hidden="true">
-      <path
-        d="M3 8.2 6.2 11.5 13 4.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-    </svg>
   );
 }

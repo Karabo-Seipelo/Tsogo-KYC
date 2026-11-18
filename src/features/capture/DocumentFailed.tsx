@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Screen } from "@/components/ui/Screen";
+import { screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 import { MAX_ATTEMPTS } from "@/machines/kycMachine";
 
@@ -38,30 +42,26 @@ export function DocumentFailed({ reason, attempt, onRetake }: FailedProps) {
   }, []);
 
   return (
-    <Screen>
-      <h1
-        ref={heading}
-        tabIndex={-1}
-        className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-      >
+    <Screen
+      action={
+        <Button className="w-full md:w-fit" onClick={onRetake}>
+          {t("common.actions.retakePhoto")}
+        </Button>
+      }
+    >
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
         {t("document.result.failed.title")}
       </h1>
-      <p className="text-base leading-6">{copy.intro}</p>
-      <ul className="list-disc pl-5">
-        {copy.tips.map((tip) => (
-          <li key={tip}>{tip}</li>
-        ))}
-      </ul>
+      <Alert tone="danger" title={copy.intro}>
+        <ul className="flex flex-col gap-1">
+          {copy.tips.map((tip) => (
+            <li key={tip}>{tip}</li>
+          ))}
+        </ul>
+      </Alert>
       <p className="text-sm font-medium">
         {t("common.attempt", { attempt, max: MAX_ATTEMPTS })}
       </p>
-      <button
-        type="button"
-        className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
-        onClick={onRetake}
-      >
-        {t("common.actions.retakePhoto")}
-      </button>
     </Screen>
   );
 }
@@ -74,21 +74,24 @@ export function CameraBlocked({ error, onRetry, onUpload }: CameraProps) {
     ? content.errors.CAMERA_DENIED
     : content.errors.CAMERA_NOT_FOUND;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     heading.current?.focus();
   }, []);
 
   return (
-    <Screen>
-      <div role="alert" className="flex flex-col gap-6">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {copy.title}
-        </h1>
-        <p className="text-base leading-6">{copy.intro}</p>
+    <Screen
+      action={
+        denied ? (
+          <Button className="w-full md:w-fit" onClick={onRetry}>
+            {t("errors.CAMERA_DENIED.cta")}
+          </Button>
+        ) : null
+      }
+    >
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {copy.title}
+      </h1>
+      <Alert tone="danger" title={copy.intro}>
         {denied ? (
           <ol className="list-decimal pl-5">
             {content.errors.CAMERA_DENIED.steps.map((step) => (
@@ -96,16 +99,7 @@ export function CameraBlocked({ error, onRetry, onUpload }: CameraProps) {
             ))}
           </ol>
         ) : null}
-      </div>
-      {denied ? (
-        <button
-          type="button"
-          className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
-          onClick={onRetry}
-        >
-          {t("errors.CAMERA_DENIED.cta")}
-        </button>
-      ) : null}
+      </Alert>
       <UploadInput
         label={
           denied
@@ -127,35 +121,20 @@ export function UploadFailed({ onRetry }: UploadProps) {
   }, []);
 
   return (
-    <Screen>
+    <Screen
+      action={
+        <Button className="w-full md:w-fit" onClick={onRetry}>
+          {t("errors.UPLOAD_FAILED.cta")}
+        </Button>
+      }
+    >
       <div role="alert" className="flex flex-col gap-6">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
+        <h1 ref={heading} tabIndex={-1} className={screenTitle}>
           {t("errors.UPLOAD_FAILED.message")}
         </h1>
         <p className="text-base leading-6">{t("errors.UPLOAD_FAILED.hint")}</p>
       </div>
-      <button
-        type="button"
-        className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
-        onClick={onRetry}
-      >
-        {t("errors.UPLOAD_FAILED.cta")}
-      </button>
     </Screen>
-  );
-}
-
-function Screen({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        {children}
-      </div>
-    </main>
   );
 }
 
@@ -167,10 +146,10 @@ function UploadInput({
   onUpload: (file: File) => void;
 }) {
   return (
-    <label className="text-sm underline">
+    <label className="text-sm text-gold-strong underline">
       {label}
       <input
-        className="mt-2 block"
+        className="mt-2 block text-ink"
         type="file"
         accept="image/*"
         onChange={(event) => {

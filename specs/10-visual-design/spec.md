@@ -22,7 +22,6 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
 
 - R-10.1 All visual values come from design tokens defined once in `src/app/globals.css` with Tailwind v4 `@theme`, and mirrored as Figma variables with the same names. Components never use raw colour values, pixel font sizes or arbitrary radii.
 - R-10.2 **Colour tokens.** Contrast ratios are on the token they're used with.
-
   | Token | Value | Use | Contrast |
   |---|---|---|---|
   | `ink` | `#323437` | Body text, primary button fill, dark surfaces | 12.49 : 1 on white |
@@ -39,12 +38,11 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
   | `danger` / `danger-soft` | `#B3261E` / `#FBEAE9` | Errors, failed checks | 6.54 : 1 on white |
   | `warning` / `warning-soft` | `#9A5B00` / `#FBF1E3` | Timeouts, retries | 5.43 : 1 on white |
   | `info` / `info-soft` | `#2457A6` / `#EAF0FA` | Neutral notices | 7.03 : 1 on white |
-
 - R-10.3 **Type.** Montserrat for everything (Google Fonts via `next/font`, self-hosted, `display: swap`). Scale: `display` 32/40 semibold (desktop h1), `title` 24/32 semibold (mobile h1, desktop h2), `heading` 18/26 semibold, `body` 16/24 regular, `small` 14/20 regular, `caption` 12/16 medium. Body text is never below 16 px on the phone.
 - R-10.4 **Space, radius, elevation, motion.** Spacing on a 4 px base (4, 8, 12, 16, 24, 32, 48, 64). Radius: `sm` 6 (chips), `md` 10 (buttons, inputs), `lg` 16 (cards, dialogs), `full` (pills, avatars). One elevation for cards (`0 1px 2px rgb(50 52 55 / 0.06), 0 4px 16px rgb(50 52 55 / 0.06)`) and one for dialogs. Motion 150 ms for state changes, 250 ms for panels, ease-out; all of it off under `prefers-reduced-motion`.
 - R-10.5 **Components**, each with every state it can be in:
   - Button: primary (`ink` fill), secondary (`surface` + `line-strong` border), text link (`gold-strong`); default, hover, focus-visible, pressed, disabled, loading.
-  - OptionCard (device choice, document type): default, hover, selected (`ink` 2 px border **and** a check icon), focus-visible.
+  - OptionCard (device choice, document type): default, hover, selected (`ink` 2 px border **and** a filled radio), focus-visible.
   - Progress: "Step n of 4 · name" plus four segments (`gold-strong` filled, `line` empty).
   - Alert / inline status: success, warning, danger, info; icon + title + text + optional action.
   - Checklist row (D4, M3a/M3b, review): icon + label + status text.

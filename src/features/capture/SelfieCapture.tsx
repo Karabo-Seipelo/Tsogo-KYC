@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Screen } from "@/components/ui/Screen";
+import {
+  classes,
+  focusRing,
+  screenTitle,
+  stateMotion,
+} from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 import { resizeImage } from "@/lib/image/resizeImage";
 import { CameraBlocked } from "./DocumentFailed";
@@ -77,49 +84,58 @@ export function SelfieCapture({ onDone }: Props) {
   }
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {t("selfie.title")}
-        </h1>
-        {uploading ? (
-          <p role="status" aria-busy="true">
-            {t("selfie.instruction")}
-          </p>
-        ) : (
-          <p className="text-base leading-6">{t("selfie.instruction")}</p>
-        )}
-        <div className="relative border-2 border-neutral-950 p-3">
-          <video
-            ref={video}
-            className="aspect-[3/4] w-full -scale-x-100 bg-neutral-100 object-cover"
-            autoPlay
-            muted
-            playsInline
-            aria-label={t("selfie.cameraAlt")}
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute top-[16%] right-[18%] bottom-[16%] left-[18%] rounded-[50%] border-2 border-neutral-950"
-          />
-        </div>
-        {uploading ? null : (
-          <button
-            type="button"
-            className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
-            onClick={() => {
-              void takeSelfie();
-            }}
-          >
-            {t("selfie.cta")}
-          </button>
-        )}
+    <Screen
+      action={
+        uploading ? null : (
+          <div className="flex justify-center md:justify-start">
+            <button
+              type="button"
+              className={classes(
+                "inline-flex size-18 items-center justify-center rounded-full bg-ink",
+                "hover:opacity-[92%] active:opacity-[84%]",
+                focusRing,
+                stateMotion,
+              )}
+              aria-label={t("selfie.cta")}
+              onClick={() => {
+                void takeSelfie();
+              }}
+            >
+              <span className="sr-only">{t("selfie.cta")}</span>
+              <span
+                aria-hidden="true"
+                className="size-14 rounded-full border-4 border-on-ink"
+              />
+            </button>
+          </div>
+        )
+      }
+    >
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t("selfie.title")}
+      </h1>
+      {uploading ? (
+        <p role="status" aria-busy="true">
+          {t("selfie.instruction")}
+        </p>
+      ) : (
+        <p className="text-base leading-6">{t("selfie.instruction")}</p>
+      )}
+      <div className="relative overflow-hidden rounded-lg border border-ink bg-ink">
+        <video
+          ref={video}
+          className="aspect-[3/4] w-full -scale-x-100 bg-ink object-cover"
+          autoPlay
+          muted
+          playsInline
+          aria-label={t("selfie.cameraAlt")}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-[16%] right-[18%] bottom-[16%] left-[18%] rounded-[50%] border-2 border-dashed border-on-ink"
+        />
       </div>
-    </main>
+    </Screen>
   );
 }
 

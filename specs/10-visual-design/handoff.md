@@ -39,7 +39,7 @@ Body (16/24), small (14/20) and caption (12/16) use Tailwind's `text-base`, `tex
 | Figma component | Node | Code | States to build |
 |---|---|---|---|
 | `HF/Button/Primary`, `HF/Button/Secondary` | 41:34, 41:36 | `components/ui/Button.tsx` (`variant`) | Default, hover (92 % opacity), focus-visible (2 px `gold-strong` ring, 2 px offset), pressed (84 %), disabled (`line` fill, `ink-muted` text), loading (label "…", `aria-busy`). See the "Button states" sheet (51:129) |
-| `HF/OptionCard/Default`, `/Selected` | 51:70, 51:75 | `components/ui/OptionCard.tsx` | Radio-group item. Selected = 2 px `ink` border + filled radio + tick. Never gold alone |
+| `HF/OptionCard/Default`, `/Selected` | 51:70, 51:75 | `components/ui/OptionCard.tsx` | Radio-group item. Selected = 2 px `ink` border + filled radio. Never gold alone |
 | `HF/Progress` | 41:55 | `components/ui/Progress.tsx` | "Step n of 4 · name" + 4 segments, `gold-strong` filled, `line` empty |
 | `HF/Alert/Info`, `/Success`, `/Warning`, `/Danger` | 51:83, 51:89, 51:95, 51:101 | `components/ui/Alert.tsx` (`tone`) | Soft background, 4 px left border in the tone colour, icon + title + body (body optional) |
 | `HF/StatusRow`, `/Done`, `/InProgress`, `/Waiting` | 41:62, 51:107, 51:112, 51:117 | `components/ui/StatusRow.tsx` (`status`) | Icon + label + status text. Done = filled tick; in progress = ringed dot + bold label; waiting = empty ring + muted label |

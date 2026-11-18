@@ -29,7 +29,11 @@ export function Header({ onHelp, onSaveExit }: Props) {
           {onSaveExit ? (
             <button
               type="button"
-              className={classes(textButton, "hidden md:inline-flex")}
+              className={classes(
+                "hidden min-h-11 items-center px-3 text-sm text-gold-strong md:inline-flex",
+                focusRing,
+                stateMotion,
+              )}
               onClick={onSaveExit}
             >
               {t("common.header.saveAndExit")}

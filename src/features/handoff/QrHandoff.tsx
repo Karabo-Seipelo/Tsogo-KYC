@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { Button } from "@/components/ui/Button";
+import { Screen } from "@/components/ui/Screen";
+import { screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 
 type Props = {
@@ -26,45 +29,47 @@ export function QrHandoff({
   }, []);
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
+    <Screen
+      width="wide"
+      action={
+        <Button
+          variant="secondary"
+          className="w-full md:w-fit"
+          onClick={onContinueHere}
         >
-          {t("handoff.title")}
-        </h1>
+          {t("handoff.fallback")}
+        </Button>
+      }
+    >
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t("handoff.title")}
+      </h1>
+      <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="w-fit rounded-lg border border-line bg-surface p-4">
+          <QRCodeSVG
+            value={url}
+            title={t("handoff.qrAlt")}
+            size={192}
+            marginSize={4}
+            aria-describedby="handoff-url"
+          />
+        </div>
         <ol className="list-decimal pl-5 leading-6">
           {content.handoff.steps.map((step) => (
             <li key={step}>{step}</li>
           ))}
         </ol>
-        <QRCodeSVG
-          value={url}
-          title={t("handoff.qrAlt")}
-          size={192}
-          marginSize={4}
-          aria-describedby="handoff-url"
-        />
-        <p id="handoff-url" className="sr-only">
-          {url}
-        </p>
-        {phoneConnected ? (
-          <p role="status" aria-live="polite" className="text-base leading-6">
-            {t("handoff.connected")}
-          </p>
-        ) : (
-          <p className="text-base leading-6">{t("handoff.waiting")}</p>
-        )}
-        <button
-          type="button"
-          className="w-full border border-neutral-950 px-4 py-3 sm:w-fit"
-          onClick={onContinueHere}
-        >
-          {t("handoff.fallback")}
-        </button>
       </div>
-    </main>
+      <p id="handoff-url" className="sr-only">
+        {url}
+      </p>
+      {phoneConnected ? (
+        <p role="status" aria-live="polite" className="text-base leading-6">
+          {t("handoff.connected")}
+        </p>
+      ) : (
+        <p className="text-base leading-6">{t("handoff.waiting")}</p>
+      )}
+    </Screen>
   );
 }

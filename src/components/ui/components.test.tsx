@@ -50,7 +50,7 @@ test("R-10.5 button variants, loading and disabled", () => {
   expect(loading.className).toContain("text-gold-strong");
 });
 
-test("R-10.5 a selected option card uses an ink border and a tick", () => {
+test("R-10.5 a selected option card uses an ink border and a filled radio", () => {
   render(
     <OptionCard
       name="document"
@@ -64,7 +64,7 @@ test("R-10.5 a selected option card uses an ink border and a tick", () => {
   const card = screen.getByRole("radio", { name: /Passport/ }).closest("label");
   expect(card?.className).toContain("border-ink");
   expect(card?.className).not.toContain("border-gold ");
-  expect(card?.querySelector("svg")).toBeTruthy();
+  expect(card?.querySelector("svg")).toBeNull();
   expect(card?.className).toContain("outline-gold-strong");
 });
 

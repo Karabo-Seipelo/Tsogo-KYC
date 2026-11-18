@@ -61,6 +61,10 @@ export function ProcessingScreen({ onComplete }: Props) {
 
   return (
     <Screen>
+      <span className="grid size-12 place-items-center" aria-hidden="true">
+        <span className="col-start-1 row-start-1 size-10 rounded-full border-2 border-line border-t-ink motion-safe:animate-spin motion-reduce:hidden" />
+        <span className="col-start-1 row-start-1 hidden size-3 rounded-full bg-ink motion-reduce:block" />
+      </span>
       <h1 ref={heading} tabIndex={-1} className={screenTitle}>
         {t("processing.title")}
       </h1>
