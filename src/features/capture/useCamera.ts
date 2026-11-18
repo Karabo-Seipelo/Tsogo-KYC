@@ -22,10 +22,10 @@ export function useCamera() {
     };
   }, []);
 
-  async function start() {
+  async function start(facingMode: "user" | "environment" = "environment") {
     try {
       const next = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
+        video: { facingMode },
       });
       stopTracks(streamRef.current);
       streamRef.current = next;

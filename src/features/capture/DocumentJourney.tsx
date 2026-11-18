@@ -17,9 +17,10 @@ type DocumentEvent =
 
 type Props = {
   send: (event: DocumentEvent) => void;
+  onThumbnail?: (thumbnail: Blob) => void;
 };
 
-export function DocumentJourney({ send }: Props) {
+export function DocumentJourney({ send, onThumbnail }: Props) {
   const { content } = useContent();
   const [choice, setChoice] = useState<DocumentChoice | null>(null);
   const [phase, setPhase] = useState<Phase>("type");
@@ -36,9 +37,11 @@ export function DocumentJourney({ send }: Props) {
 
     setPhase("checking");
     try {
+      const upload = await documentForm(file, side);
+      onThumbnail?.(upload.thumbnail);
       const response = await fetch("/api/session/document", {
         method: "POST",
-        body: await documentForm(file, side),
+        body: upload.form,
       });
       if (!response.ok) {
         send({ type: "UPLOAD_FAILED" });
@@ -122,5 +125,5 @@ async function documentForm(file: File | undefined, side: number) {
   form.set("side", side === 1 ? "front" : "back");
   form.set("image", image, "image.jpg");
   form.set("thumbnail", thumbnail, "thumb.jpg");
-  return form;
+  return { form, thumbnail };
 }
