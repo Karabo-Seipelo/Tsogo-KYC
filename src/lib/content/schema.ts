@@ -265,6 +265,10 @@ export const contentSchema = z.object({
       contactSupport: text,
       tryAgain: text,
     }),
+    generic: z.object({
+      title: text,
+      body: text,
+    }),
   }),
   help: z.object({
     title: text,

@@ -180,10 +180,7 @@
           },
           "expired": {
             "intro": "This document looks expired. Please use a valid document.",
-            "tips": [
-              "Check the expiry date",
-              "Try a different document"
-            ]
+            "tips": ["Check the expiry date", "Try a different document"]
           }
         }
       }
@@ -312,6 +309,10 @@
       ],
       "contactSupport": "Contact support",
       "tryAgain": "Try again"
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "body": "We couldn't complete that step. Please try again."
     }
   },
   "help": {
