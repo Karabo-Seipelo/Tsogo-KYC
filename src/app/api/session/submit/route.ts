@@ -45,9 +45,14 @@ async function recordResult(sessionId: string) {
   if (!isRecord(existing)) {
     return;
   }
+  const rejected = existing.fail === "reject";
   await store.set(
     `session:${sessionId}`,
-    { ...existing, step: "complete" },
+    {
+      ...existing,
+      step: rejected ? "error" : "complete",
+      ...(rejected ? { outcome: "rejected" } : {}),
+    },
     sessionTtlSeconds,
   );
   if (typeof existing.handoffToken === "string") {

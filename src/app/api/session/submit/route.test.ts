@@ -76,9 +76,38 @@ test("AC-05.6 the passing result follows between 3 and 8 seconds and closes the 
   });
 });
 
-async function sessionId() {
+test("AC-06.5 ?fail=reject stays in processing, then rejects with no check detail", async () => {
+  vi.useFakeTimers();
+  const id = await sessionId("http://localhost:3000/api/session?fail=reject");
+  const store = createMemoryStore();
+
+  const response = await POST(submit(id));
+
+  expect(response.status).toBe(202);
+  expect(await response.json()).toEqual({ step: "processing" });
+  await vi.advanceTimersByTimeAsync(2_999);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    step: "processing",
+  });
+
+  await vi.advanceTimersByTimeAsync(5_001);
+  const poll = await status(submit(id));
+  const body: unknown = await poll.json();
+  const stored = await store.get(`session:${id}`);
+
+  expect(poll.status).toBe(200);
+  expect(body).toMatchObject({ step: "error" });
+  expect(stored).toMatchObject({ step: "error", outcome: "rejected" });
+  const revealed = JSON.stringify(body) + JSON.stringify(stored);
+  expect(revealed).not.toMatch(
+    /blurry|glare|cropped|fraud|confidence|corners|readable|notExpired/i,
+  );
+  expect(JSON.stringify(body)).not.toContain(id);
+});
+
+async function sessionId(url = "http://localhost:3000/api/session") {
   const response = await createSession(
-    new Request("http://localhost:3000/api/session", {
+    new Request(url, {
       method: "POST",
       headers: { host: "localhost:3000", origin: "http://localhost:3000" },
     }),
