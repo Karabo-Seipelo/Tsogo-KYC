@@ -56,11 +56,14 @@ test("R-03.6 a failed check sends DOC_INVALID", async () => {
     screen.getByRole("button", { name: content.document.capture.takePhoto }),
   );
 
+  const heading = await screen.findByRole("heading", {
+    name: content.document.result.failed.title,
+  });
+  expect(heading).toBe(document.activeElement);
   expect(
-    await screen.findByRole("button", {
-      name: content.document.capture.takePhoto,
-    }),
+    screen.getByText(content.document.result.failed.reasons.blurry.intro),
   ).toBeDefined();
+  expect(screen.getByText("Attempt 1 of 3")).toBeDefined();
   expect(send).toHaveBeenCalledWith({ type: "DOC_CAPTURED" });
   expect(send).toHaveBeenCalledWith({ type: "DOC_INVALID" });
 });
@@ -81,12 +84,52 @@ test("R-03.6 an upload that does not complete sends UPLOAD_FAILED", async () => 
   );
 
   expect(
-    await screen.findByRole("button", {
-      name: content.document.capture.takePhoto,
+    await screen.findByRole("heading", {
+      name: content.errors.UPLOAD_FAILED.message,
     }),
   ).toBeDefined();
   expect(send).toHaveBeenCalledWith({ type: "UPLOAD_FAILED" });
   expect(send).not.toHaveBeenCalledWith({ type: "DOC_CAPTURED" });
+  expect(vi.mocked(fetch)).toHaveBeenCalledTimes(3);
+});
+
+test("AC-03.8 Try again sends the saved photo after the automatic retries", async () => {
+  const user = userEvent.setup();
+  const bodies: FormData[] = [];
+  let calls = 0;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((_url: string, init: { body: FormData }) => {
+      calls += 1;
+      bodies.push(init.body);
+      if (calls < 4) {
+        return Promise.reject(new Error("offline"));
+      }
+      return Promise.resolve(json({ passed: true, checks: [] }));
+    }),
+  );
+  renderJourney(vi.fn());
+
+  await user.click(radio(content.document.select.options.passport.title));
+  await user.click(screen.getByRole("button", { name: "Continue" }));
+  await user.click(
+    screen.getByRole("button", { name: content.document.capture.takePhoto }),
+  );
+  await user.click(
+    await screen.findByRole("button", {
+      name: content.errors.UPLOAD_FAILED.cta,
+    }),
+  );
+
+  expect(
+    await screen.findByRole("heading", {
+      name: content.document.result.passed.title,
+    }),
+  ).toBeDefined();
+  expect(calls).toBe(4);
+  const first = bodies[0]?.get("thumbnail");
+  const again = bodies[3]?.get("thumbnail");
+  expect(await blobText(first)).toBe(await blobText(again));
 });
 
 function renderJourney(send: (event: { type: string }) => void) {
@@ -127,6 +170,13 @@ function deferredResponse(body: unknown) {
     promise,
     resolve: (response: Response = json(body)) => resolve(response),
   };
+}
+
+async function blobText(value: FormDataEntryValue | null | undefined) {
+  if (value && typeof value !== "string" && "text" in value) {
+    return value.text();
+  }
+  return "";
 }
 
 function radio(title: string) {

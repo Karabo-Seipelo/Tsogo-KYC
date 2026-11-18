@@ -51,6 +51,32 @@ test("AC-03.4 checking shows while the upload is in progress", () => {
   ).toBeDefined();
 });
 
+test("AC-03.7 a denied camera shows the steps and the upload fallback", async () => {
+  denyCamera("NotAllowedError");
+  renderCapture({ side: 1, total: 1, checking: false });
+
+  const heading = await screen.findByRole("heading", {
+    name: content.errors.CAMERA_DENIED.title,
+  });
+  expect(heading).toBe(document.activeElement);
+  for (const step of content.errors.CAMERA_DENIED.steps) {
+    expect(screen.getByText(step)).toBeDefined();
+  }
+  expect(screen.getByText(content.errors.CAMERA_DENIED.fallback)).toBeDefined();
+});
+
+test("AC-03.7 a missing camera offers an upload", async () => {
+  denyCamera("NotFoundError");
+  renderCapture({ side: 1, total: 1, checking: false });
+
+  expect(
+    await screen.findByRole("heading", {
+      name: content.errors.CAMERA_NOT_FOUND.title,
+    }),
+  ).toBeDefined();
+  expect(screen.getByText(content.errors.CAMERA_NOT_FOUND.cta)).toBeDefined();
+});
+
 function renderCapture(props: {
   side: number;
   total: number;
@@ -61,6 +87,16 @@ function renderCapture(props: {
       <DocumentCapture {...props} onCapture={() => undefined} />
     </ContentProvider>,
   );
+}
+
+function denyCamera(name: string) {
+  vi.stubGlobal("navigator", {
+    mediaDevices: {
+      getUserMedia: vi.fn(async () => {
+        throw new DOMException("camera", name);
+      }),
+    },
+  });
 }
 
 function fakeCamera() {

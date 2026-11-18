@@ -39,18 +39,72 @@ async function saveDocument(request: Request, log: { step: string | null }) {
     return new NextResponse(null, { status: 400 });
   }
 
+  const forced = forcedFailure(existing);
+  if (forced === "upload") {
+    await store.set(
+      `session:${sessionId}`,
+      { ...existing, failTries: failTries(existing) + 1 },
+      sessionTtlSeconds,
+    );
+    return new NextResponse(null, { status: 503 });
+  }
+
+  const result = forced === "document" ? failedChecks : checks;
   await store.set(
     `session:${sessionId}`,
     {
-      ...existing,
+      ...withoutSpentSwitch(existing, forced),
       side,
       thumbnail,
-      checks,
+      checks: result,
     },
     sessionTtlSeconds,
   );
 
-  return NextResponse.json({ passed: true, checks });
+  return NextResponse.json({ passed: forced !== "document", checks: result });
+}
+
+const uploadAttempts = 3;
+
+const failedChecks = [
+  { id: "blurry", label: "Part of the photo is blurry", passed: false },
+  { id: "readable", label: "Text is readable", passed: true },
+  { id: "notExpired", label: "Document hasn't expired", passed: true },
+];
+
+function forcedFailure(existing: Record<string, unknown>) {
+  const fail = existing.fail;
+  const tries = failTries(existing);
+  if (
+    fail === "upload:always" ||
+    (fail === "upload" && tries < uploadAttempts)
+  ) {
+    return "upload" as const;
+  }
+  if (fail === "document:always" || (fail === "document" && tries < 1)) {
+    return "document" as const;
+  }
+  return null;
+}
+
+function failTries(existing: Record<string, unknown>) {
+  return typeof existing.failTries === "number" ? existing.failTries : 0;
+}
+
+function withoutSpentSwitch(
+  existing: Record<string, unknown>,
+  forced: "document" | null,
+) {
+  if (forced === "document" && existing.fail === "document:always") {
+    return existing;
+  }
+  if (existing.fail !== "upload" && existing.fail !== "document") {
+    return existing;
+  }
+  const next = { ...existing };
+  delete next.fail;
+  delete next.failTries;
+  return next;
 }
 
 function originAllowed(request: Request) {

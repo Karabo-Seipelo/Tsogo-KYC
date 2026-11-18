@@ -182,9 +182,26 @@ async function sendHeartbeat(step: string) {
   }
 }
 
+function switchQuery() {
+  const page = new URLSearchParams(window.location.search);
+  const switches = new URLSearchParams();
+  const fail = page.get("fail");
+  const ttl = page.get("ttl");
+  if (fail) {
+    switches.set("fail", fail);
+  }
+  if (ttl) {
+    switches.set("ttl", ttl);
+  }
+  const query = switches.toString();
+  return query ? `?${query}` : "";
+}
+
 async function startDesktopSession(setHandoff: (code: HandoffCode) => void) {
   try {
-    const response = await fetch("/api/session", { method: "POST" });
+    const response = await fetch(`/api/session${switchQuery()}`, {
+      method: "POST",
+    });
     if (!response.ok) {
       return;
     }
