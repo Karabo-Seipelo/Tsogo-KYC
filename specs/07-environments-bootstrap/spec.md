@@ -36,9 +36,22 @@
 
 ## Tasks
 
-- [ ] `.env.example`, `scripts/bootstrap.mjs`, `dev:phone` script (cloudflared)
+P0 is the local scaffold. `dev:phone` is P3. The banner, `noindex`, Vercel and the domain are P5.
+
+- [x] T-07.1 Scaffold Next.js (App Router, TypeScript strict, Tailwind, `src/`, alias `@/*`) into this repo without replacing `README.md`, `content/` or `.cursor/`. Home page is an empty `<main>` → P0 scaffold · verify: `git diff -- README.md content` is empty · files: `package.json`, `tsconfig.json`, `next.config.ts`, `src/app/layout.tsx`, `src/app/page.tsx`
+- [x] T-07.2 ESLint (`next/core-web-vitals` + `@typescript-eslint/strict` + Prettier), Tailwind via PostCSS, merge `.gitignore` → P0 scaffold · verify: `pnpm lint` · files: `eslint.config.mjs`, `postcss.config.mjs`, `src/app/globals.css`, `.gitignore`
+- [x] T-07.3 P0 scripts: `dev`, `build`, `typecheck`, `lint`, `test`, `bootstrap` → constitution §10 · verify: `pnpm run` · files: `package.json`
+- [x] T-07.4 `.env.example` with demo defaults (`STORE_DRIVER`, Upstash URL and token, session and handoff TTLs, `MOCK_FAILURE_RATE`, `DEMO_MODE`) → R-07.2, R-07.7 · verify: file review · files: `.env.example`
+- [x] T-07.5 `scripts/bootstrap.mjs`: Node ≥ 20.9, pnpm ≥ 9, create `.env.local` from `.env.example` if missing, print the run modes → AC-07.2 · verify: `pnpm bootstrap` · files: `scripts/bootstrap.mjs`, `package.json`
+- [x] T-07.6 Vitest + one test that the home page renders `<main>` → P0 scaffold · verify: `pnpm test` · files: `vitest.config.mts`, `src/app/page.test.tsx`
+- [x] T-07.7 Record lockfile versions in `docs/TECH-STACK.md` §1 → P0 scaffold · verify: cells match `pnpm-lock.yaml` · files: `docs/TECH-STACK.md`
+- [x] T-07.8 Checkpoint → AC-07.2 · verify: `pnpm typecheck && pnpm lint && pnpm test`, then `pnpm dev` serves a page, then `pnpm bootstrap` · files: none
+
+Later phases, not built in P0:
+
+- [ ] `dev:phone` script (cloudflared) → AC-07.8 (P3)
 - [ ] `production` `docker-compose.yml`, `Dockerfile`, `docker/nginx.conf` (PB-3)
 - [ ] Vercel project, environment variables per environment, Upstash databases (preview + production)
 - [ ] Domain `tsogo.karaboseipelo.com` + DNS
-- [ ] `DEMO_MODE` (in `.env.example`), banner in the root layout, `noindex` headers + `robots.txt`
-- [ ] Run AC-07.1, AC-07.2 and AC-07.4 – AC-07.6, AC-07.8 before handover
+- [ ] `DEMO_MODE` banner in the root layout, `noindex` headers + `robots.txt` → AC-07.6 (P5). The variable itself is in `.env.example` (T-07.4)
+- [ ] Run AC-07.1, AC-07.4 – AC-07.6 and AC-07.8 before handover
