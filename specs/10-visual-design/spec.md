@@ -2,7 +2,7 @@
 
 **Covers:** the look of the journey: design principles, design tokens, components and their states, and the high-fidelity screens.
 **Serves:** BR-2 (a calm, trustworthy flow is one people finish), BR-9 (the brand is configuration, like the copy).
-**Screens:** all. High-fidelity references: D1, D3, M2, E3, D5 (Figma, page "6 · Visual design").
+**Screens:** all. Thirteen high-fidelity reference screens and every component are on Figma page "6 · Visual design"; [`handoff.md`](handoff.md) maps them to code and to the screens that reuse their patterns.
 
 ## Context
 
@@ -63,7 +63,7 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
 - **AC-10.3** GIVEN keyboard navigation THEN every interactive element shows the `gold-strong` focus ring.
 - **AC-10.4** GIVEN `prefers-reduced-motion: reduce` THEN no transitions or animations run.
 - **AC-10.5** GIVEN widths of 390, 768 and 1440 px THEN no screen overflows horizontally and the primary action is visible without horizontal scrolling.
-- **AC-10.6** GIVEN the five reference screens THEN the built screens match their Figma layouts, tokens and states.
+- **AC-10.6** GIVEN the thirteen reference screens THEN the built screens match their Figma layouts, tokens and states.
 
 ## Design notes
 
@@ -78,5 +78,5 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
 - [ ] T-10.2 Contrast test over the token pairs **(tests first)** → AC-10.2 · verify: `pnpm test src/styles` · files: `src/styles/contrast.test.ts` · gate: tests reviewed
 - [ ] T-10.3 Lint rule against raw colours → AC-10.1 · verify: `pnpm lint` flags a raw hex in a test fixture · files: `eslint.config.mjs`
 - [ ] T-10.4 Restyle the shared components with all states → R-10.5, AC-10.3, AC-10.4 · verify: `pnpm test src/components` · files: `src/components/ui/*`
-- [ ] T-10.5 Apply layouts and check the five reference screens against Figma → R-10.6, AC-10.5, AC-10.6 · verify: manual at 390 / 768 / 1440 px; screenshots in the PR · files: screen components
+- [ ] T-10.5 Apply layouts to every screen using the patterns in `handoff.md`, and check the thirteen reference screens against `docs/design/hifi/` → R-10.6, AC-10.5, AC-10.6 · verify: manual at 390 / 768 / 1440 px; screenshots in the PR · files: screen components
 - [ ] T-10.6 `production` Dark and brand themes (PB-15)
