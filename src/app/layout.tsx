@@ -3,6 +3,7 @@ import bundled from "../../content/en-ZA.json";
 import { DemoBanner } from "@/components/DemoBanner";
 import { ContentProvider } from "@/lib/content/ContentProvider";
 import { contentSchema } from "@/lib/content/schema";
+import { demoModeEnabled } from "@/lib/demoMode";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -22,14 +23,10 @@ export default function RootLayout({ children }: Props) {
     <html lang="en-ZA" className={montserrat.variable}>
       <body className="bg-canvas text-ink">
         <ContentProvider content={content}>
-          {demoBannerEnabled() ? <DemoBanner /> : null}
+          {demoModeEnabled() ? <DemoBanner /> : null}
           {children}
         </ContentProvider>
       </body>
     </html>
   );
-}
-
-export function demoBannerEnabled(mode = process.env.DEMO_MODE) {
-  return mode === undefined || mode === "true";
 }

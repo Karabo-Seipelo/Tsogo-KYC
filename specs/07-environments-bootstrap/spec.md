@@ -71,7 +71,7 @@ Later phases, not built in P0 or P0.5:
 P5 · Ship:
 
 - [x] T-07.14 (P5) Show the demo banner from the root layout on every route, including `/privacy`, the saved page and error pages, while `DEMO_MODE` is unset or `true`. Long copy from 768 px up, short copy below → AC-07.6 · verify: `pnpm test src/app` · files: `src/app/layout.tsx`, `src/components/DemoBanner.tsx`, `src/app/layout.test.tsx`
-- [ ] T-07.15 (P5) Send `X-Robots-Tag: noindex` and add `robots.txt` while `DEMO_MODE` is unset or `true` → AC-07.6 · verify: `pnpm test` · files: `src/app/robots.ts`, `next.config.ts`
+- [x] T-07.15 (P5) Send `X-Robots-Tag: noindex` and add `robots.txt` while `DEMO_MODE` is unset or `true` → AC-07.6 · verify: `pnpm test` · files: `src/app/robots.ts`, `next.config.ts`
 - [ ] T-07.16 (P5) Vercel project with preview and production env vars, and a separate Upstash database for each. The preview QR uses the preview URL and the preview database → AC-07.4 · verify: a preview deploy · files: `src/lib/store`, `docs/TECH-STACK.md`, `.env.example`
 - [ ] T-07.17 (P5) Attach `tsogo.karaboseipelo.com` and the DNS record Vercel shows → AC-07.5 · verify: `https://tsogo.karaboseipelo.com` over HTTPS with `X-Robots-Tag: noindex` · files: none
 - [ ] T-07.18 (P5) Keyboard-only run of the full journey → P5 checkpoint · verify: manual · files: none
