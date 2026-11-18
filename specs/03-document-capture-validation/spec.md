@@ -1,0 +1,52 @@
+# 03 · Document capture & validation
+
+**Covers:** brief requirements 4 (document capture) and 5 (validation with success/failure); API: document upload; resilience: camera denial, upload failure.
+**Serves:** BR-1, BR-2, BR-4, BR-7, BR-8 (clear failure reasons fix problems before another paid check; no full images stored).
+**Screens:** M1, M2, M3a, M3b, E1, E2.
+
+## Context
+
+The user picks a document type, captures it with the device camera (or uploads a photo), and gets a clear pass or fail. OCR is mocked; the mock returns per-check results so the UI can explain what was checked.
+
+## Requirements
+
+- R-03.1 Document types: passport (1 side), national ID / Smart ID card (front + back), driver's licence (front + back).
+- R-03.2 Capture uses `getUserMedia({ video: { facingMode: 'environment' } })` with a document outline guide.
+- R-03.3 An upload fallback ("Upload a photo instead") is always visible.
+- R-03.4 Before upload, images are resized on the device to ~1600 px JPEG, plus a ~320 px thumbnail (stays under Vercel's ~4.5 MB request limit).
+- R-03.5 `POST /api/session/document` returns `{ passed, checks: [{ id, label, passed, hint? }] }`. Only the thumbnail and the results are stored.
+- R-03.6 Up to 3 attempts, then manual review (spec 01, AC-01.4).
+
+## Acceptance criteria
+
+- **AC-03.1** GIVEN M1 WHEN a type is chosen THEN the number of sides to capture is set (1 or 2) AND the choice is a keyboard-usable radio group.
+- **AC-03.2** GIVEN M2 with camera permission WHEN the camera starts THEN a live preview shows inside the outline AND "Take photo" is a real `<button>` with an accessible name.
+- **AC-03.3** GIVEN an ID or licence WHEN the front is captured THEN the user is asked for the back with a clear "Side 2 of 2" label.
+- **AC-03.4** GIVEN an upload is in progress THEN a "Checking your document…" state shows (no blank wait).
+- **AC-03.5** GIVEN the mock passes THEN M3a lists each check with ✓ and offers "Continue" and "Retake photo".
+- **AC-03.6** GIVEN the mock fails (or `?fail=document`) THEN M3b shows the specific reason and how to fix it; focus moves to the error heading; the attempt count shows.
+- **AC-03.7** GIVEN camera permission is denied (`NotAllowedError`) THEN E1 shows browser-specific steps to re-enable the camera AND the upload fallback; `NotFoundError` shows "No camera found" with the upload fallback.
+- **AC-03.8** GIVEN an upload fails (or `?fail=upload`) THEN it retries twice with backoff automatically; then E2 shows "Your photo is saved", with "Try again" re-sending the **same** image (no retake).
+- **AC-03.9** GIVEN any upload THEN the request body is under 4.5 MB AND the server stores no full-size image.
+
+## API
+
+| Method | Endpoint | Request | Response |
+|---|---|---|---|
+| `POST` | `/api/session/document` | `multipart/form-data`: `side`, `image` (resized), `thumbnail` | `{ passed, checks[] }` |
+
+## Design notes
+
+- `useCamera()` hook: start/stop, error mapping (`NotAllowedError`, `NotFoundError`, `NotReadableError`), cleanup on unmount (stop tracks).
+- `resizeImage(file|blob, maxEdge, quality)` in `src/lib/image/` using a canvas. Unit-tested with a fixture.
+- React Query `useMutation({ retry: 2, retryDelay: backoff })`; the blob is held in component state so a manual retry re-sends it.
+- Mock: random latency 300–1500 ms; `MOCK_FAILURE_RATE` and `?fail=` switches (rules in spec 06, R-06.6).
+
+## Tasks
+
+- [ ] `useCamera` hook with error mapping + tests
+- [ ] `resizeImage` + thumbnail util + tests
+- [ ] M1 document type, M2 capture (with front/back), upload fallback
+- [ ] Document route handler with mock checks and failure switches
+- [ ] M3a / M3b result screens, E1, E2
+- [ ] Wire events: `DOC_CAPTURED`, `DOC_VALID`, `DOC_INVALID`, `UPLOAD_FAILED`
