@@ -47,8 +47,8 @@ The technical brief describes the player's journey. The business also needs to *
 
 ## Tasks
 
-- [ ] T-08.1 `track()` and the typed event union from the funnel table; a recorded event has those props and no personal data → R-08.1, AC-08.1 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/events.ts`, `src/lib/analytics/track.ts`, `src/lib/analytics/track.test.ts` · gate: tests reviewed
-- [ ] T-08.2 One subscriber appends every transition, in order, to an in-memory list → R-08.2, AC-08.2 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/audit.ts`, `src/lib/analytics/audit.test.ts` · gate: tests reviewed
+- [x] T-08.1 `track()` and the typed event union from the funnel table; a recorded event has those props and no personal data → R-08.1, AC-08.1 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/events.ts`, `src/lib/analytics/track.ts`, `src/lib/analytics/track.test.ts` · gate: tests reviewed
+- [x] T-08.2 One subscriber appends every transition, in order, to an in-memory list → R-08.2, AC-08.2 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/audit.ts`, `src/lib/analytics/audit.test.ts` · gate: tests reviewed
 - [ ] T-08.3 (P2) One structured log line per API request → R-08.5, AC-08.6 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/requestLog.ts`
 - [ ] T-08.4 (P4) E9 manual-review screen and the `manualReview` outcome → AC-08.3
 - [ ] T-08.5 (P3) Desktop shows the same manual-review outcome → AC-08.4
