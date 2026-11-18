@@ -19,6 +19,7 @@ Versions are taken from `pnpm-lock.yaml` at scaffold time (PLAN, P0) and updated
 | Vitest + Testing Library | Unit and component tests | Pinned at P0 | https://vitest.dev · https://testing-library.com/docs/react-testing-library/intro/ |
 | Upstash Redis (`@upstash/redis`) | Session store on Vercel | Pinned at P0 | https://upstash.com/docs/redis |
 | Vercel | Hosting, previews, production | — | https://vercel.com/docs |
+| GitHub Actions | CI: the checks in constitution §10 on every push and PR | — | https://docs.github.com/actions |
 | Node.js / pnpm | Runtime / package manager | Node 20+, pnpm 9+ | https://nodejs.org/docs · https://pnpm.io |
 | `cloudflared` (quick tunnel) | HTTPS tunnel for real-phone testing (`pnpm dev:phone`); dev tool, not shipped | Latest | https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/ |
 
@@ -41,8 +42,26 @@ One line per package, with the spec that needs it. A new package is added here w
 | `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` | Tests | All | dev |
 | `eslint`, `eslint-config-next`, `@typescript-eslint/*` | Linting, incl. the hard-coded-string check (AC-09.1) | All | dev |
 | `prettier` | Formatting | All | dev |
+<<<<<<< Updated upstream
+=======
+| `@tailwindcss/postcss`, `postcss` | Tailwind v4's Next.js setup: the official PostCSS plugin | All | dev |
+| `husky` | Installs the git hooks on `pnpm install` | 07 (P0.5) | dev |
+| `lint-staged` | Runs ESLint and Prettier on staged files only, in pre-commit | 07 (P0.5) | dev |
+| `@commitlint/cli`, `@commitlint/config-conventional` | Checks commit messages follow Conventional Commits, in commit-msg | 07 (P0.5) | dev |
+| `@vitejs/plugin-react`, `@testing-library/dom` | Vitest + Testing Library setup from the Next.js guide. `@/` paths use Vitest 5's `resolve.tsconfigPaths` | All | dev |
+>>>>>>> Stashed changes
 
 Versions come from `pnpm-lock.yaml`; this table records *why* each package is here.
+
+**CI actions** (third-party code that runs in CI, so tracked the same way):
+
+| Action | Why | Pinned to |
+|---|---|---|
+| `actions/checkout` | Check out the repo | Major release tag, set in P0.5 |
+| `pnpm/action-setup` | Install pnpm at the repo's `packageManager` version | Major release tag, set in P0.5 |
+| `actions/setup-node` | Install Node at the repo's version, with the pnpm cache | Major release tag, set in P0.5 |
+
+Pinning to a full commit SHA instead of a tag is stricter; it's part of the go-live hardening (PB-12).
 
 ## 3. Agent dependencies
 

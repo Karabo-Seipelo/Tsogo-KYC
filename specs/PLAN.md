@@ -13,6 +13,7 @@ Each phase ends at a checkpoint. The next phase doesn't start until the checkpoi
 | Phase | Work | Specs | Checkpoint |
 |---|---|---|---|
 | **P0 · Foundation** | Scaffold (Next.js, TS strict, Tailwind, Vitest, ESLint), record versions in constitution §2, `.env.example` + `pnpm bootstrap` | 07 (local part) | `pnpm typecheck && pnpm lint && pnpm test` pass on an empty app; AC-07.2 |
+| **P0.5 · Checks** | CI on GitHub Actions (install with frozen lockfile, typecheck, lint, test, build, skill checksums); local git hooks with husky + lint-staged (pre-commit, pre-push) and commitlint (commit-msg) | 07 | AC-07.9 – AC-07.11: CI green on the branch; a lint error, a bad commit message and a failing test are each rejected locally; editing a vendored skill fails the checksum step |
 | **P1 · Core logic, no UI** | Content layer (copy must exist before any screen); journey machine + `progressSteps`; `track()` + audit subscriber on the machine | 09, 01, 08 (events + audit only) | AC-01.1 – AC-01.9, AC-09.2, AC-09.5, AC-09.7 and AC-08.1 – AC-08.2 pass as unit tests (logic tasks test-first); machine checked in the Stately visualiser against the flow map |
 | **P2 · Single-device happy path** | `SessionStore` (memory) + sessions/status API; D1, D2 ("this device"); document capture + validation; selfie, liveness, face match; review, submit, processing, complete | 02 (store + sessions, Help, Save & exit, `/privacy`), 03, 04, 05 | AC-07.1: a fresh clone completes the whole journey on one device with `pnpm dev`; AC-09.1 (no hard-coded strings) enforced by `pnpm lint` from here on; AC-08.6 (request logs) |
 | **P3 · Cross-device** | Handoff issue/redeem, QR (D3, D3b), heartbeat, desktop status polling (D4), phone handback (M7); Redis adapter | 02 (handoff), 05 (D4, M7) | AC-02.1 – AC-02.7; AC-07.8 (`pnpm dev:phone`: handoff to a real phone over HTTPS); AC-07.4 (the same on a Vercel preview, the real multi-instance environment) |
@@ -23,8 +24,9 @@ Each phase ends at a checkpoint. The next phase doesn't start until the checkpoi
 
 ```mermaid
 flowchart LR
-  P0[P0 Foundation] --> C09[09 Content]
-  P0 --> C01[01 Machine]
+  P0[P0 Foundation] --> Q[P0.5 Checks]
+  Q --> C09[09 Content]
+  Q --> C01[01 Machine]
   C01 --> C08[08 Events + audit]
   C09 --> UI[P2 Screens]
   C01 --> UI
@@ -35,7 +37,7 @@ flowchart LR
 ```
 
 - **In parallel:** 09 and 01 don't depend on each other. Within P2, the document (03) and selfie (04) screens can be built side by side once the machine and content exist.
-- **Strictly in order:** nothing with copy before 09; nothing with journey behaviour before 01; cross-device before resilience, because E4/E8 depend on the heartbeat and polling.
+- **Strictly in order:** checks (P0.5) before any feature code, so every agent-written change from P1 on is gated; nothing with copy before 09; nothing with journey behaviour before 01; cross-device before resilience, because E4/E8 depend on the heartbeat and polling.
 
 ## Risks
 

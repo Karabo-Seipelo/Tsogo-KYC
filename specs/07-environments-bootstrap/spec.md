@@ -1,6 +1,6 @@
 # 07 · Environments & bootstrap
 
-**Covers:** running the same app locally, on Vercel previews and in production (Docker is designed here but in the production backlog); deployment to `tsogo.karaboseipelo.com`.
+**Covers:** running the same app locally, on Vercel previews and in production (Docker is designed here but in the production backlog); deployment to `tsogo.karaboseipelo.com`; the automated checks that run locally (git hooks) and in CI.
 **Serves:** BR-8 (noindex, demo safety); delivery confidence for everything else.
 
 ## Requirements
@@ -16,6 +16,12 @@
 - R-07.6 The demo is `noindex` (`X-Robots-Tag` + `robots.txt`) and shows the demo banner.
 - R-07.7 `DEMO_MODE` (server-side env var, default `true` in every environment) controls both. The banner is rendered once in the root layout, above every route including `/privacy` and the saved page, with copy from `common.demoBanner` (`long` on desktop, `short` on the phone).
 - R-07.8 `production` Starting with `DEMO_MODE=false` while the mock verification API is in use fails at startup with a clear error, so the demo can never run as if it were real (PB-8).
+- R-07.9 **CI.** GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`, and the agent-skill checksum check (`shasum -a 256 -c .cursor/agent-deps.sha256`, run in `.cursor/`). Node and pnpm versions come from the repo (`package.json` `engines` / `packageManager`), not hard-coded in the workflow. CI is the gate: nothing merges to `main` red.
+- R-07.10 **Local hooks.** Installed automatically by `pnpm install` (husky, via the `prepare` script):
+  - **pre-commit:** lint-staged runs ESLint `--fix` and Prettier on staged files only; then `pnpm typecheck` and the checksum check.
+  - **commit-msg:** commitlint with `@commitlint/config-conventional`, so every message follows Conventional Commits (constitution §10).
+  - **pre-push:** `pnpm test`.
+  `pnpm build` runs in CI only, to keep commits fast. Hooks can be skipped with `--no-verify`, which is why CI is the gate, and why skipping them is a *Never* (constitution §9).
 
 ## Acceptance criteria
 
@@ -27,6 +33,9 @@
 - **AC-07.6** GIVEN `DEMO_MODE` is unset or `true` THEN every route, including error pages, `/privacy` and the saved page, shows the banner AND carries `noindex`.
 - **AC-07.7** `production` GIVEN `DEMO_MODE=false` with the mock API THEN the app refuses to start.
 - **AC-07.8** GIVEN `pnpm dev:phone` THEN it prints an HTTPS tunnel URL; WHEN that URL is opened on desktop and the QR is scanned with a phone THEN the handoff works and the phone camera opens.
+- **AC-07.9** GIVEN a push or pull request THEN CI runs all six checks; GIVEN any check fails THEN the run fails and the commit shows a red ✗; GIVEN a file under `.cursor/skills/` or `.cursor/references/` is edited THEN the checksum step fails.
+- **AC-07.10** GIVEN a fresh clone WHEN `pnpm install` runs THEN the hooks are installed; GIVEN a staged file with a lint or type error WHEN committing THEN the commit is rejected; GIVEN staged files with fixable formatting THEN they're fixed and included.
+- **AC-07.11** GIVEN a commit message that isn't Conventional Commits (e.g. `chore:missing space`) THEN the commit is rejected with the reason; GIVEN `feat(01): add retry guard` THEN it's accepted. GIVEN a failing test WHEN pushing THEN the push is rejected.
 
 ## Design notes
 
@@ -36,7 +45,31 @@
 
 ## Tasks
 
+<<<<<<< Updated upstream
 - [ ] `.env.example`, `scripts/bootstrap.mjs`, `dev:phone` script (cloudflared)
+=======
+P0 is the local scaffold. `dev:phone` is P3. The banner, `noindex`, Vercel and the domain are P5.
+
+- [x] T-07.1 Scaffold Next.js (App Router, TypeScript strict, Tailwind, `src/`, alias `@/*`) into this repo without replacing `README.md`, `content/` or `.cursor/`. Home page is an empty `<main>` → P0 scaffold · verify: `git diff -- README.md content` is empty · files: `package.json`, `tsconfig.json`, `next.config.ts`, `src/app/layout.tsx`, `src/app/page.tsx`
+- [x] T-07.2 ESLint (`next/core-web-vitals` + `@typescript-eslint/strict` + Prettier), Tailwind via PostCSS, merge `.gitignore` → P0 scaffold · verify: `pnpm lint` · files: `eslint.config.mjs`, `postcss.config.mjs`, `src/app/globals.css`, `.gitignore`
+- [x] T-07.3 P0 scripts: `dev`, `build`, `typecheck`, `lint`, `test`, `bootstrap` → constitution §10 · verify: `pnpm run` · files: `package.json`
+- [x] T-07.4 `.env.example` with demo defaults (`STORE_DRIVER`, Upstash URL and token, session and handoff TTLs, `MOCK_FAILURE_RATE`, `DEMO_MODE`) → R-07.2, R-07.7 · verify: file review · files: `.env.example`
+- [x] T-07.5 `scripts/bootstrap.mjs`: Node ≥ 20.9, pnpm ≥ 9, create `.env.local` from `.env.example` if missing, print the run modes → AC-07.2 · verify: `pnpm bootstrap` · files: `scripts/bootstrap.mjs`, `package.json`
+- [x] T-07.6 Vitest + one test that the home page renders `<main>` → P0 scaffold · verify: `pnpm test` · files: `vitest.config.mts`, `src/app/page.test.tsx`
+- [x] T-07.7 Record lockfile versions in `docs/TECH-STACK.md` §1 → P0 scaffold · verify: cells match `pnpm-lock.yaml` · files: `docs/TECH-STACK.md`
+- [x] T-07.8 Checkpoint → AC-07.2 · verify: `pnpm typecheck && pnpm lint && pnpm test`, then `pnpm dev` serves a page, then `pnpm bootstrap` · files: none
+
+P0.5 · Checks:
+
+- [ ] T-07.9 CI workflow with the six checks → R-07.9, AC-07.9 · verify: push the branch and see a green run; then a deliberately failing commit shows red · files: `.github/workflows/ci.yml`, `package.json` (`engines`, `packageManager`)
+- [ ] T-07.10 husky + lint-staged: pre-commit (staged lint and format, typecheck, checksum) and pre-push (tests) → R-07.10, AC-07.10 · verify: a staged lint error is rejected; `git push` with a failing test is rejected · files: `package.json` (`prepare`, `lint-staged`), `.husky/pre-commit`, `.husky/pre-push`
+- [ ] T-07.11 commitlint commit-msg hook → R-07.10, AC-07.11 · verify: `chore:missing space` is rejected, `chore(07): add commitlint` is accepted · files: `commitlint.config.mjs`, `.husky/commit-msg`, `package.json`
+- [ ] T-07.12 Checkpoint → AC-07.9 – AC-07.11 · verify: all three hooks fire on a throwaway commit; CI is green on the branch · files: none
+
+Later phases, not built in P0 or P0.5:
+
+- [ ] `dev:phone` script (cloudflared) → AC-07.8 (P3)
+>>>>>>> Stashed changes
 - [ ] `production` `docker-compose.yml`, `Dockerfile`, `docker/nginx.conf` (PB-3)
 - [ ] Vercel project, environment variables per environment, Upstash databases (preview + production)
 - [ ] Domain `tsogo.karaboseipelo.com` + DNS
