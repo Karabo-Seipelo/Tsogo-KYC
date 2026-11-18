@@ -13,6 +13,7 @@ Versions are taken from `pnpm-lock.yaml` at scaffold time (PLAN, P0) and updated
 | Next.js (App Router) | App framework, route handlers for the mock API | 16.4.6 | https://nextjs.org/docs |
 | React | UI | 19.3.0 | https://react.dev |
 | TypeScript (`strict`) | Language | 5.9.3 | https://www.typescriptlang.org/docs/ |
+| Zod | Content schema and the type inferred from it | 4.6.7 | https://zod.dev |
 | XState + `@xstate/react` | Journey state machine | 5.x | https://stately.ai/docs |
 | TanStack Query | Server state, polling, mutations | 5.x | https://tanstack.com/query/latest |
 | Tailwind CSS | Styling | tailwindcss 4.3.3 | https://tailwindcss.com/docs |
