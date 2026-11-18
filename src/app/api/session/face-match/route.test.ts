@@ -46,9 +46,38 @@ test("R-04.3 a passing face match returns the result and keeps confidence off th
   expect(JSON.stringify(stored)).not.toContain("0.99");
 });
 
-async function sessionId() {
+test("AC-04.7 ?fail=match misses once and the retake matches", async () => {
+  const id = await sessionId("http://localhost:3000/api/session?fail=match");
+  const store = createMemoryStore();
+
+  const first = await POST(faceMatch(id));
+  const missed = (await first.json()) as { match: boolean; confidence: number };
+
+  expect(first.status).toBe(200);
+  expect(missed.match).toBe(false);
+  expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
+    "confidence",
+  );
+
+  const second = await POST(faceMatch(id));
+  expect(await second.json()).toMatchObject({ match: true });
+});
+
+test("AC-04.7 ?fail=match:always keeps missing", async () => {
+  const id = await sessionId(
+    "http://localhost:3000/api/session?fail=match:always",
+  );
+
+  const first = await POST(faceMatch(id));
+  const second = await POST(faceMatch(id));
+
+  expect(await first.json()).toMatchObject({ match: false });
+  expect(await second.json()).toMatchObject({ match: false });
+});
+
+async function sessionId(url = "http://localhost:3000/api/session") {
   const response = await createSession(
-    new Request("http://localhost:3000/api/session", {
+    new Request(url, {
       method: "POST",
       headers: { host: "localhost:3000", origin: "http://localhost:3000" },
     }),
