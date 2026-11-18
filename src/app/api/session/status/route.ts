@@ -10,6 +10,8 @@ type SessionRecord = {
   handoffToken?: string;
   expiresAt?: string;
   ttl?: number;
+  outcome?: string;
+  reference?: string;
 };
 
 export async function GET(request: Request) {
@@ -45,6 +47,10 @@ async function readStatus(request: Request, log: { step: string | null }) {
     expired: expiry.expired,
     expiresAt: expiry.expiresAt,
     ...(session.ttl === 1 ? { ttl: 1 } : {}),
+    ...(session.outcome === "rejected" ? { outcome: "rejected" } : {}),
+    ...(typeof session.reference === "string"
+      ? { reference: session.reference }
+      : {}),
   });
 }
 

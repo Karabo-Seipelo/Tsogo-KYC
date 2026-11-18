@@ -18,6 +18,7 @@ import {
 } from "@/features/handoff/QrExpired";
 import { PhoneDone } from "@/features/review/PhoneDone";
 import { OfflineBanner } from "@/features/resilience/OfflineBanner";
+import { Rejected } from "@/features/resilience/Rejected";
 import { SessionExpired } from "@/features/resilience/SessionExpired";
 import {
   TimeoutWarning,
@@ -77,6 +78,13 @@ function JourneyFlow({ device }: { device: Device }) {
     send({ type: "SESSION_EXPIRED" });
   }, [heldRemaining, send, state, status?.expired]);
 
+  useEffect(() => {
+    if (status?.outcome !== "rejected" || state !== "processing") {
+      return;
+    }
+    send({ type: "REJECTED" });
+  }, [send, state, status?.outcome]);
+
   function restart() {
     void refreshSession().finally(() => {
       setDocumentPhoto((current) => {
@@ -106,6 +114,10 @@ function JourneyFlow({ device }: { device: Device }) {
         onRestart={restart}
       />
     );
+  }
+
+  if (state === "error" && status?.outcome === "rejected" && status.reference) {
+    return <Rejected reference={status.reference} onRetry={restart} />;
   }
 
   let screen: ReactNode;
