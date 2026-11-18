@@ -74,7 +74,7 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
 
 ## Tasks
 
-- [ ] T-10.1 Tokens in `globals.css` (`@theme`) and Montserrat via `next/font` → R-10.1 – R-10.4 · verify: `pnpm build`; token values match this spec · files: `src/app/globals.css`, `src/app/layout.tsx`
+- [x] T-10.1 Tokens in `globals.css` (`@theme`) and Montserrat via `next/font` → R-10.1 – R-10.4 · verify: `pnpm build`; token values match this spec · files: `src/app/globals.css`, `src/app/layout.tsx`
 - [ ] T-10.2 Contrast test over the token pairs **(tests first)** → AC-10.2 · verify: `pnpm test src/styles` · files: `src/styles/contrast.test.ts` · gate: tests reviewed
 - [ ] T-10.3 Lint rule against raw colours → AC-10.1 · verify: `pnpm lint` flags a raw hex in a test fixture · files: `eslint.config.mjs`
 - [ ] T-10.4 Restyle the shared components with all states → R-10.5, AC-10.3, AC-10.4 · verify: `pnpm test src/components` · files: `src/components/ui/*`
