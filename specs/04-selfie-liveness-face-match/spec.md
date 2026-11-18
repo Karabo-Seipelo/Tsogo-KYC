@@ -42,8 +42,7 @@ After the document passes, the user takes a selfie, completes a mocked liveness 
 
 ## Tasks
 
-- [ ] M4 selfie capture (front camera, mirrored, oval guide)
-- [ ] M5 liveness prompt sequence + announcements
-- [ ] Selfie, liveness and face-match route handlers with failure switches
-- [ ] M6 match, E3 no match
-- [ ] Wire events: `SELFIE_CAPTURED`, `LIVENESS_PASSED`, `MATCHED`, `NO_MATCH`
+- [x] T-04.1 Passing selfie, liveness, and face-match handlers. Confidence stays out of any copy shown to the user → R-04.3 · verify: `pnpm test src/app/api/session` · files: `src/app/api/session/selfie/route.ts`, `src/app/api/session/liveness/route.ts`, `src/app/api/session/face-match/route.ts` · gate: tests reviewed
+- [x] T-04.2 M4 selfie, M5 liveness, and passing M6 → R-04.1, R-04.2, AC-04.1 – AC-04.6 · verify: `pnpm test src/features/capture` · files: `src/features/capture/SelfieCapture.tsx`, `src/features/capture/LivenessCheck.tsx`, `src/features/capture/FaceMatch.tsx`
+- [x] T-04.3 Send `SELFIE_CAPTURED`, `LIVENESS_PASSED`, `MATCHED`, and `NO_MATCH` → spec 01 · verify: `pnpm test src/features/capture` · files: `src/features/capture/SelfieCapture.tsx`, `src/features/capture/LivenessCheck.tsx`, `src/features/capture/FaceMatch.tsx`
+- [ ] T-04.4 (P4) E3 no match and the failure switches → AC-04.7, AC-04.8 · verify: `pnpm test src/features/capture` · files: `src/features/capture/FaceMatch.tsx`

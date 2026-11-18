@@ -55,6 +55,6 @@ Compliance may need to change legal wording, marketing will want to tune tone, a
 - [x] T-09.3 `t(key, values)` fills `{time}`, `{reference}`, and `{attempt}`; a missing value fails in development → R-09.6, AC-09.5 · verify: `pnpm test src/lib/content` · files: `src/lib/content/t.ts`, `src/lib/content/t.test.ts` · gate: tests reviewed
 - [x] T-09.4 `ContentProvider` and `useContent()` pass the server-loaded copy to the client → R-09.2 · verify: `pnpm test src/lib/content` · files: `src/lib/content/ContentProvider.tsx`, `src/lib/content/useContent.ts`, `src/lib/content/ContentProvider.test.tsx` · gate: tests reviewed
 - [x] T-09.5 Known API codes resolve to `errors.{CODE}`; an unknown code uses `errors.generic` → R-09.7, AC-09.7 · verify: `pnpm test src/lib/content` · files: `src/lib/content/errors.ts`, `src/lib/content/errors.test.ts`, `content/en-ZA.json` · gate: tests reviewed
-- [ ] T-09.6 (P2) Lint or test that components contain no hard-coded user-facing strings → AC-09.1 · verify: `pnpm lint` · files: `eslint.config.mjs`
+- [x] T-09.6 (P2) Lint or test that components contain no hard-coded user-facing strings → AC-09.1 · verify: `pnpm lint` · files: `eslint.config.mjs`
 - [ ] T-09.7 `production` `GET /api/content/[locale]` and the CMS fallback (PB-1)
 - [ ] T-09.8 `production` `cms` source and publish revalidation (PB-1)

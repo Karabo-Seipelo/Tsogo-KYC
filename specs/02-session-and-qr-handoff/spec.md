@@ -88,13 +88,15 @@ sequenceDiagram
 
 ## Tasks
 
-- [ ] `SessionStore` interface + memory + Redis adapters, with tests
-- [ ] Route handlers: sessions, status, handoff (issue + redeem), heartbeat
-- [ ] Request-host helper (`x-forwarded-host` / `x-forwarded-proto`)
-- [ ] D1, D2, D3, D3b components
-- [ ] Phone entry `/m/[handoffToken]` → redeem → `/m`
-- [ ] Desktop status polling → machine events; heartbeat hook on the phone
-- [ ] Verify the full handoff on a Vercel preview with a real phone (AC-07.4)
-- [ ] `production` Verify AC-02.8 with Docker `prodlike` (PB-3)
-- [ ] Header Help dialog, Save & exit confirmation + saved page
-- [ ] `/privacy` page
+- [x] T-02.1 `SessionStore` (`get`, `set`, `getDel`, `expire`) and the memory adapter on `globalThis` → design note · verify: `pnpm test src/lib/store` · files: `src/lib/store/sessionStore.ts`, `src/lib/store/memoryStore.ts`, `src/lib/store/memoryStore.test.ts` · gate: tests reviewed
+- [x] T-02.2 `POST /api/session`: create the session, set the httpOnly cookie, reject a bad `Origin` with 403, return 401 without a cookie, and keep the session id out of the body and the URL → R-02.3, R-02.13, AC-02.13, AC-02.14 · verify: `pnpm test src/app/api/session` · files: `src/app/api/session/route.ts`, `src/app/api/session/route.test.ts` · gate: tests reviewed
+- [x] T-02.3 `GET /api/session/status` returns the single-device step and checks → R-02.6 · verify: `pnpm test src/app/api/session` · files: `src/app/api/session/status/route.ts`, `src/app/api/session/status/route.test.ts` · gate: tests reviewed
+- [x] T-02.4 D1 start screen → R-02.1, AC-02.1 · verify: `pnpm test src/features/start` · files: `src/features/start/StartScreen.tsx`, `src/features/start/StartScreen.test.tsx`
+- [x] T-02.5 D2 device choice. "Use my phone" is pre-selected; choosing this computer continues. The QR screen is T-02.9 → R-02.2, AC-02.2 · verify: `pnpm test src/features/start` · files: `src/features/start/DeviceSelection.tsx`, `src/features/start/DeviceSelection.test.tsx`
+- [x] T-02.6 Help dialog → R-02.9, R-02.12, AC-02.9 · verify: `pnpm test src/features/help` · files: `src/features/help/HelpDialog.tsx`, `src/features/help/HelpDialog.test.tsx`
+- [x] T-02.7 Save & exit confirmation and the saved page → R-02.10, AC-02.10, AC-02.11 · verify: `pnpm test src/features/save-exit` · files: `src/features/save-exit/SaveExit.tsx`, `src/features/save-exit/SaveExit.test.tsx`
+- [x] T-02.8 `/privacy` → R-02.11, AC-02.12 · verify: `pnpm test src/app/privacy` · files: `src/app/privacy/page.tsx`, `src/app/privacy/page.test.tsx`
+- [ ] T-02.9 (P3) Handoff issue and redeem, request-host helper, D3 and D3b, `/m/[handoffToken]`, heartbeat, and desktop polling → R-02.4 – R-02.8, AC-02.3 – AC-02.7, AC-07.4 · verify: `pnpm test src/features/handoff` · files: `src/app/api/handoff/[token]/route.ts`, `src/app/api/session/heartbeat/route.ts`, `src/app/api/session/handoff/route.ts`
+- [ ] T-02.10 `production` Docker `prodlike` handoff (PB-3) → AC-02.8
+- [ ] T-02.11 `production` Resume a saved session in the same browser (PB-5) → AC-02.15
+- [ ] T-02.12 `production` Phone Help opens as a bottom sheet (PB-6) → R-02.14

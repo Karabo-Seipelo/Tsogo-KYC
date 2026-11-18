@@ -34,8 +34,8 @@ While the phone does the capture steps, the desktop shows live progress. When th
 
 ## Tasks
 
-- [ ] D4 status list bound to the status poll
-- [ ] M7 handback screen
-- [ ] D5 review with thumbnails, results, retake links and confirmation
-- [ ] Submit route handler + mock processing (random 3–8 s, `?fail=reject`)
-- [ ] D6 processing (with the "taking longer" state) and D7 complete
+- [x] T-05.1 D5 review: document type, thumbnails, check results, a retake per capture, and the confirmation checkbox → R-05.3, AC-05.4, AC-05.5 · verify: `pnpm test src/features/review` · files: `src/features/review/ReviewScreen.tsx`, `src/features/review/ReviewScreen.test.tsx`
+- [x] T-05.2 `POST /api/session/submit` moves the session to `processing`; the mock result follows after 3–8 s → R-05.4, AC-05.6 · verify: `pnpm test src/app/api/session/submit` · files: `src/app/api/session/submit/route.ts`, `src/app/api/session/submit/route.test.ts` · gate: tests reviewed
+- [x] T-05.3 D6 processing, including "taking longer", and D7 complete → R-05.5, AC-05.6 · verify: `pnpm test src/features/review` · files: `src/features/review/ProcessingScreen.tsx`, `src/features/review/CompleteScreen.tsx`
+- [ ] T-05.4 (P3) D4 status list and M7 handback → R-05.1, R-05.2, AC-05.1 – AC-05.3 · verify: `pnpm test src/features/review` · files: `src/features/review/StatusScreen.tsx`, `src/features/review/PhoneDone.tsx`
+- [ ] T-05.5 (P4) `?fail=reject` on submit → spec 06 · verify: `pnpm test src/app/api/session/submit` · files: `src/app/api/session/submit/route.ts`
