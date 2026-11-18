@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
+import { logRequest } from "@/lib/analytics/requestLog";
 import { createMemoryStore } from "@/lib/store/memoryStore";
 
 const sessionTtlSeconds = 15 * 60;
 const resultDelayMs = 5_000;
 
 export async function POST(request: Request) {
+  const log = { step: null as string | null, errorCode: null as string | null };
+  return logRequest(request, () => beginProcessing(request, log), log);
+}
+
+async function beginProcessing(request: Request, log: { step: string | null }) {
   if (!originAllowed(request)) {
     return new NextResponse(null, { status: 403 });
   }
@@ -29,6 +35,7 @@ export async function POST(request: Request) {
     void recordResult(sessionId);
   }, resultDelayMs);
 
+  log.step = "processing";
   return NextResponse.json({ step: "processing" }, { status: 202 });
 }
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logRequest } from "@/lib/analytics/requestLog";
 import { createMemoryStore } from "@/lib/store/memoryStore";
 
 type SessionRecord = {
@@ -10,6 +11,11 @@ type SessionRecord = {
 };
 
 export async function GET(request: Request) {
+  const log = { step: null as string | null, errorCode: null as string | null };
+  return logRequest(request, async () => readStatus(request, log), log);
+}
+
+async function readStatus(request: Request, log: { step: string | null }) {
   const sessionId = readSessionId(request);
   if (!sessionId) {
     return new NextResponse(null, { status: 401 });
@@ -26,6 +32,7 @@ export async function GET(request: Request) {
       ? await store.get(`handoff:${session.handoffToken}`)
       : null;
 
+  log.step = session.step;
   return NextResponse.json({
     step: session.step,
     phoneConnected: session.phoneConnected === true,

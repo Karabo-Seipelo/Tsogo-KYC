@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logRequest } from "@/lib/analytics/requestLog";
 import { createMemoryStore } from "@/lib/store/memoryStore";
 
 const sessionTtlSeconds = 15 * 60;
@@ -10,6 +11,11 @@ const checks = [
 ];
 
 export async function POST(request: Request) {
+  const log = { step: null as string | null, errorCode: null as string | null };
+  return logRequest(request, () => saveDocument(request, log), log);
+}
+
+async function saveDocument(request: Request, log: { step: string | null }) {
   if (!originAllowed(request)) {
     return new NextResponse(null, { status: 403 });
   }
@@ -24,6 +30,7 @@ export async function POST(request: Request) {
   if (!isRecord(existing)) {
     return new NextResponse(null, { status: 401 });
   }
+  log.step = typeof existing.step === "string" ? existing.step : null;
 
   const form = await request.formData();
   const side = form.get("side");
