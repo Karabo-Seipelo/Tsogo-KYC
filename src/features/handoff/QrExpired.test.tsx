@@ -30,6 +30,7 @@ test("AC-02.6 an expired code shows D3b and a new code restores the QR on the sa
         host="preview.example"
         onContinueHere={onContinueHere}
         onIssued={onIssued}
+        onReview={vi.fn()}
       />
     </ContentProvider>,
   );

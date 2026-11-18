@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useContent } from "@/lib/content/useContent";
 import { QrHandoff } from "./QrHandoff";
 import { useStatusPoll } from "./useStatusPoll";
+import { StatusScreen } from "@/features/review/StatusScreen";
 
 export const handoffWindowMinutes = 10;
 
@@ -18,6 +19,7 @@ type ScreenProps = {
   host: string;
   onContinueHere: () => void;
   onIssued: (code: HandoffCode) => void;
+  onReview: () => void;
 };
 
 export function HandoffScreen({
@@ -26,13 +28,30 @@ export function HandoffScreen({
   host,
   onContinueHere,
   onIssued,
+  onReview,
 }: ScreenProps) {
   const [override, setOverride] = useState<HandoffCode | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  const [sawPhone, setSawPhone] = useState(false);
+  const [qrAgain, setQrAgain] = useState(false);
   const status = useStatusPoll();
   const code = override ?? { token, expiresAt };
   const remaining = Date.parse(code.expiresAt) - now;
   const expired = Number.isNaN(remaining) || remaining <= 0;
+  const connected = status?.phoneConnected === true;
+
+  if (connected && !sawPhone) {
+    setSawPhone(true);
+  }
+  if (connected && qrAgain) {
+    setQrAgain(false);
+  }
+
+  useEffect(() => {
+    if (status?.step === "review") {
+      onReview();
+    }
+  }, [status?.step, onReview]);
 
   useEffect(() => {
     const wait = Date.parse(code.expiresAt) - Date.now();
@@ -43,7 +62,7 @@ export function HandoffScreen({
     return () => window.clearTimeout(id);
   }, [code.expiresAt]);
 
-  if (expired) {
+  if (expired && !sawPhone) {
     return (
       <QrExpired
         onContinueHere={onContinueHere}
@@ -55,12 +74,23 @@ export function HandoffScreen({
     );
   }
 
+  if (sawPhone && !qrAgain) {
+    return (
+      <StatusScreen
+        step={status?.step ?? "qrHandoff"}
+        phoneConnected={connected}
+        onShowQr={() => setQrAgain(true)}
+        onReview={onReview}
+      />
+    );
+  }
+
   return (
     <QrHandoff
       token={code.token}
       host={host}
       onContinueHere={onContinueHere}
-      phoneConnected={status?.phoneConnected === true}
+      phoneConnected={connected}
     />
   );
 }

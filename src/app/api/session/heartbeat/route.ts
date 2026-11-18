@@ -27,14 +27,18 @@ async function recordHeartbeat(request: Request, log: { step: string | null }) {
     return new NextResponse(null, { status: 401 });
   }
 
+  const reported = await reportedStep(request);
   await store.set(
     `session:${sessionId}`,
-    { ...existing, lastSeen: new Date().toISOString() },
+    {
+      ...existing,
+      lastSeen: new Date().toISOString(),
+      ...(reported ? { step: reported } : {}),
+    },
     sessionTtlSeconds,
   );
-  if (typeof existing.step === "string") {
-    log.step = existing.step;
-  }
+  log.step =
+    reported ?? (typeof existing.step === "string" ? existing.step : null);
   return new NextResponse(null, { status: 204 });
 }
 
@@ -54,4 +58,19 @@ function readSessionId(request: Request) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function reportedStep(request: Request) {
+  if (!request.headers.get("content-type")?.includes("application/json")) {
+    return null;
+  }
+  try {
+    const body: unknown = await request.json();
+    if (isRecord(body) && typeof body.step === "string") {
+      return body.step;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }

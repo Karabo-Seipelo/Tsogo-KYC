@@ -68,7 +68,7 @@ test("R-02.2 the phone journey starts without the device choice", async () => {
   render(<PhonePage />);
   await user.click(screen.getByRole("button", { name: content.start.cta }));
 
-  expect(fetchMock).not.toHaveBeenCalled();
+  expect(fetchMock).not.toHaveBeenCalledWith("/api/session", expect.anything());
   expect(
     screen.queryByRole("heading", { name: content.device.title }),
   ).toBeNull();

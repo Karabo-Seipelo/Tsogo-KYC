@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { DocumentKind } from "@/features/capture/DocumentType";
 import { DocumentJourney } from "@/features/capture/DocumentJourney";
 import { SelfieJourney } from "@/features/capture/SelfieJourney";
@@ -16,6 +16,7 @@ import {
   handoffCodeFrom,
   type HandoffCode,
 } from "@/features/handoff/QrExpired";
+import { PhoneDone } from "@/features/review/PhoneDone";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
 
@@ -38,6 +39,7 @@ export function Journey({ device = "desktop" }: Props) {
 
 function JourneyFlow({ device }: { device: Device }) {
   const { state, send } = useKycMachine();
+  usePhoneHeartbeat(device, state);
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
   const [documentType, setDocumentType] = useState<DocumentKind | null>(null);
@@ -61,6 +63,7 @@ function JourneyFlow({ device }: { device: Device }) {
         host={window.location.host}
         onContinueHere={() => send({ type: "CHOOSE_THIS_DEVICE" })}
         onIssued={setHandoff}
+        onReview={() => send({ type: "HANDBACK" })}
       />
     );
   }
@@ -104,10 +107,14 @@ function JourneyFlow({ device }: { device: Device }) {
     );
   }
 
-  if (state === "review" && documentType) {
+  if (state === "review" && device === "phone") {
+    return <PhoneDone />;
+  }
+
+  if (state === "review") {
     return (
       <ReviewScreen
-        documentType={documentType}
+        documentType={documentType ?? "passport"}
         documentSrc={documentPhoto ?? blankPhoto}
         selfieSrc={selfiePhoto ?? blankPhoto}
         checks={checks}
@@ -146,6 +153,33 @@ function JourneyFlow({ device }: { device: Device }) {
   }
 
   return <main />;
+}
+
+const phoneHeartbeatMs = 10_000;
+
+function usePhoneHeartbeat(device: Device, step: string) {
+  useEffect(() => {
+    if (device !== "phone" || step === "idle") {
+      return;
+    }
+    void sendHeartbeat(step);
+    const timer = window.setInterval(() => {
+      void sendHeartbeat(step);
+    }, phoneHeartbeatMs);
+    return () => window.clearInterval(timer);
+  }, [device, step]);
+}
+
+async function sendHeartbeat(step: string) {
+  try {
+    await fetch("/api/session/heartbeat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ step }),
+    });
+  } catch {
+    return;
+  }
 }
 
 async function startDesktopSession(setHandoff: (code: HandoffCode) => void) {
