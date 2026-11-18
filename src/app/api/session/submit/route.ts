@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { logRequest } from "@/lib/analytics/requestLog";
 import { createMemoryStore } from "@/lib/store/memoryStore";
@@ -45,14 +46,25 @@ async function recordResult(sessionId: string) {
   if (!isRecord(existing)) {
     return;
   }
+  const rejected = existing.fail === "reject";
   await store.set(
     `session:${sessionId}`,
-    { ...existing, step: "complete" },
+    {
+      ...existing,
+      step: rejected ? "error" : "complete",
+      ...(rejected
+        ? { outcome: "rejected", reference: supportReference() }
+        : {}),
+    },
     sessionTtlSeconds,
   );
   if (typeof existing.handoffToken === "string") {
     await store.getDel(`handoff:${existing.handoffToken}`);
   }
+}
+
+function supportReference() {
+  return randomBytes(4).toString("hex").toUpperCase();
 }
 
 function originAllowed(request: Request) {

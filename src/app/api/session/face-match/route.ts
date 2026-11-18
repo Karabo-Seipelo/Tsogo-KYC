@@ -26,13 +26,38 @@ async function saveFaceMatch(request: Request, log: { step: string | null }) {
   }
   log.step = typeof existing.step === "string" ? existing.step : null;
 
+  const missed = matchMiss(existing);
   await store.set(
     `session:${sessionId}`,
-    { ...existing, match: true },
+    spentMatch(existing, !missed),
     sessionTtlSeconds,
   );
 
-  return NextResponse.json({ match: true, confidence: 0.99 });
+  return NextResponse.json({
+    match: !missed,
+    confidence: missed ? 0.42 : 0.99,
+  });
+}
+
+function matchMiss(existing: Record<string, unknown>) {
+  if (existing.fail === "match:always") {
+    return true;
+  }
+  if (existing.fail === "match") {
+    const tries =
+      typeof existing.failTries === "number" ? existing.failTries : 0;
+    return tries < 1;
+  }
+  return false;
+}
+
+function spentMatch(existing: Record<string, unknown>, matched: boolean) {
+  const next: Record<string, unknown> = { ...existing, match: matched };
+  if (existing.fail === "match") {
+    delete next.fail;
+    delete next.failTries;
+  }
+  return next;
 }
 
 function originAllowed(request: Request) {

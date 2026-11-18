@@ -42,6 +42,8 @@ test("R-02.6 a new session reports its step and an open handoff", async () => {
     lastSeen: null,
     checks: [],
     handoffExpired: false,
+    expired: false,
+    expiresAt: "2026-01-01T00:15:00.000Z",
   });
   expect(JSON.stringify(body)).not.toContain(id);
 
@@ -76,7 +78,61 @@ test("R-02.6 status returns the stored step and checks", async () => {
     lastSeen: "2026-01-01T00:00:00.000Z",
     checks,
     handoffExpired: false,
+    expired: false,
+    expiresAt: null,
   });
+});
+
+test("R-06.4 status stays open until the 15-minute window ends", async () => {
+  const id = await startedSession();
+  vi.advanceTimersByTime(15 * 60 * 1000 - 1);
+
+  const response = await GET(statusRequest(id));
+  const body: unknown = await response.json();
+
+  expect(response.status).toBe(200);
+  expect(body).toMatchObject({
+    expired: false,
+    expiresAt: "2026-01-01T00:15:00.000Z",
+  });
+});
+
+test("R-06.4 status reports the session expired after 15 minutes", async () => {
+  const id = await startedSession();
+  vi.advanceTimersByTime(15 * 60 * 1000);
+
+  const response = await GET(statusRequest(id));
+  expect(response.status).toBe(200);
+  const body: unknown = await response.json();
+
+  expect(body).toMatchObject({ step: "idle", expired: true });
+  expect(JSON.stringify(body)).not.toContain(id);
+});
+
+test("R-06.3 ?ttl=1 stays open until one minute ends", async () => {
+  const id = await startedSession("http://localhost:3000/api/session?ttl=1");
+  vi.advanceTimersByTime(60 * 1000 - 1);
+
+  const response = await GET(statusRequest(id));
+  const body: unknown = await response.json();
+
+  expect(response.status).toBe(200);
+  expect(body).toMatchObject({
+    expired: false,
+    expiresAt: "2026-01-01T00:01:00.000Z",
+  });
+});
+
+test("R-06.3 ?ttl=1 reports the session expired after one minute", async () => {
+  const id = await startedSession("http://localhost:3000/api/session?ttl=1");
+  vi.advanceTimersByTime(60 * 1000);
+
+  const response = await GET(statusRequest(id));
+  expect(response.status).toBe(200);
+  const body: unknown = await response.json();
+
+  expect(body).toMatchObject({ step: "idle", expired: true });
+  expect(JSON.stringify(body)).not.toContain(id);
 });
 
 function statusRequest(session?: string) {
@@ -85,6 +141,18 @@ function statusRequest(session?: string) {
     headers.set("cookie", `session=${session}`);
   }
   return new Request("http://localhost:3000/api/session/status", { headers });
+}
+
+async function startedSession(url = "http://localhost:3000/api/session") {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+  const created = await POST(
+    new Request(url, {
+      method: "POST",
+      headers: { host: "localhost:3000", origin: "http://localhost:3000" },
+    }),
+  );
+  return sessionId(created);
 }
 
 function sessionId(response: Response) {

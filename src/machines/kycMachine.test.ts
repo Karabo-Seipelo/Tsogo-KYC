@@ -168,6 +168,16 @@ test("AC-01.5 the second NO_MATCH returns to selfieCapture", () => {
   expect(actor.getSnapshot().context.matchAttempts).toBe(2);
 });
 
+test("AC-04.7 RETAKE document from the selfie returns to the document", () => {
+  const actor = journey([...toFaceMatch, { type: "NO_MATCH" }]);
+  expect(actor.getSnapshot().value).toBe("selfieCapture");
+
+  actor.send({ type: "RETAKE", target: "document" });
+
+  expect(actor.getSnapshot().value).toBe("documentUpload");
+  expect(actor.getSnapshot().context.matchAttempts).toBe(1);
+});
+
 test("AC-01.5 the third NO_MATCH goes to error with maxAttempts", () => {
   const actor = journey([
     ...toFaceMatch,

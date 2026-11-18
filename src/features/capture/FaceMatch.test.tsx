@@ -32,6 +32,41 @@ test("AC-04.6 a match offers continue", () => {
   ).toBeDefined();
 });
 
+test("AC-04.7 no match shows the reason, the attempt, and both actions", () => {
+  const onRetake = vi.fn();
+  const onDifferentDocument = vi.fn();
+  render(
+    <ContentProvider content={content}>
+      <FaceMatch
+        phase="noMatch"
+        documentSrc="https://photos.example/document.jpg"
+        selfieSrc="https://photos.example/selfie.jpg"
+        attempt={2}
+        onContinue={vi.fn()}
+        onRetake={onRetake}
+        onDifferentDocument={onDifferentDocument}
+      />
+    </ContentProvider>,
+  );
+
+  expect(
+    screen.getByRole("heading", { name: content.faceMatch.noMatch.title }),
+  ).toBe(document.activeElement);
+  expect(screen.getByText(content.faceMatch.noMatch.intro)).toBeDefined();
+  for (const tip of content.faceMatch.noMatch.tips) {
+    expect(screen.getByText(tip)).toBeDefined();
+  }
+  expect(screen.getByText("Attempt 2 of 3")).toBeDefined();
+  screen
+    .getByRole("button", { name: content.faceMatch.noMatch.retake })
+    .click();
+  screen
+    .getByRole("button", { name: content.faceMatch.noMatch.differentDocument })
+    .click();
+  expect(onRetake).toHaveBeenCalledOnce();
+  expect(onDifferentDocument).toHaveBeenCalledOnce();
+});
+
 function renderMatch(phase: "comparing" | "matched") {
   render(
     <ContentProvider content={content}>

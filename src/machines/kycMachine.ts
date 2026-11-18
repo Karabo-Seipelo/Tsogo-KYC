@@ -110,6 +110,10 @@ export const kycMachine = setup({
     selfieCapture: {
       on: {
         SELFIE_CAPTURED: { target: "livenessCheck" },
+        RETAKE: {
+          guard: "retakeDocument",
+          target: "documentUpload",
+        },
         SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },

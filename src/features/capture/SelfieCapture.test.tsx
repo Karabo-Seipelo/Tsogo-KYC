@@ -64,6 +64,27 @@ test("AC-04.2 taking a selfie resizes it and shows a loading state while it uplo
   expect(await thumbnail.text()).toBe("resized-jpeg");
 });
 
+test("AC-04.8 a denied front camera shows the camera steps and an upload", async () => {
+  vi.stubGlobal("navigator", {
+    mediaDevices: {
+      getUserMedia: vi.fn(async () => {
+        throw new DOMException("denied", "NotAllowedError");
+      }),
+    },
+  });
+  renderSelfie();
+
+  const heading = await screen.findByRole("heading", {
+    name: content.errors.CAMERA_DENIED.title,
+  });
+  expect(heading).toBe(document.activeElement);
+  for (const step of content.errors.CAMERA_DENIED.steps) {
+    expect(screen.getByText(step)).toBeDefined();
+  }
+  expect(screen.getByText(content.errors.CAMERA_DENIED.fallback)).toBeDefined();
+  expect(screen.queryByText(content.selfie.instruction)).toBeNull();
+});
+
 function renderSelfie(onDone: (thumbnail: Blob) => void = () => undefined) {
   render(
     <ContentProvider content={content}>

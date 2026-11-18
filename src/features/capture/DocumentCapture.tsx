@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useContent } from "@/lib/content/useContent";
+import { CameraBlocked } from "./DocumentFailed";
 import { useCamera } from "./useCamera";
 
 type Props = {
@@ -15,7 +16,7 @@ export function DocumentCapture({ side, total, checking, onCapture }: Props) {
   const { t } = useContent();
   const video = useRef<HTMLVideoElement>(null);
   const started = useRef(false);
-  const { start, stream } = useCamera();
+  const { start, stream, error } = useCamera();
 
   useEffect(() => {
     if (started.current) {
@@ -30,6 +31,18 @@ export function DocumentCapture({ side, total, checking, onCapture }: Props) {
       video.current.srcObject = stream;
     }
   }, [stream]);
+
+  if (!checking && error) {
+    return (
+      <CameraBlocked
+        error={error}
+        onRetry={() => {
+          void start();
+        }}
+        onUpload={(file) => onCapture(file)}
+      />
+    );
+  }
 
   return (
     <main className="min-h-dvh bg-white text-neutral-950">

@@ -9,6 +9,11 @@ export type SessionStatus = {
   phoneConnected: boolean;
   lastSeen: string | null;
   handoffExpired: boolean;
+  expired: boolean;
+  expiresAt: string | null;
+  ttl: 1 | null;
+  outcome: string | null;
+  reference: string | null;
 };
 
 export function useStatusPoll() {
@@ -66,6 +71,11 @@ function sessionStatusFrom(body: unknown): SessionStatus | null {
     phoneConnected: body.phoneConnected === true,
     lastSeen: typeof body.lastSeen === "string" ? body.lastSeen : null,
     handoffExpired: body.handoffExpired === true,
+    expired: body.expired === true,
+    expiresAt: typeof body.expiresAt === "string" ? body.expiresAt : null,
+    ttl: body.ttl === 1 ? 1 : null,
+    outcome: typeof body.outcome === "string" ? body.outcome : null,
+    reference: typeof body.reference === "string" ? body.reference : null,
   };
 }
 

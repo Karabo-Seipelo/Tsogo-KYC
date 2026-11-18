@@ -8,13 +8,14 @@ import { SelfieCapture } from "./SelfieCapture";
 const blankPhoto =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-type Phase = "capture" | "liveness" | "comparing" | "matched";
+type Phase = "capture" | "liveness" | "comparing" | "matched" | "noMatch";
 
 type SelfieEvent =
   | { type: "SELFIE_CAPTURED" }
   | { type: "LIVENESS_PASSED" }
   | { type: "MATCHED" }
-  | { type: "NO_MATCH" };
+  | { type: "NO_MATCH" }
+  | { type: "RETAKE"; target: "document" };
 
 type Props = {
   documentSrc?: string | null;
@@ -25,6 +26,8 @@ type Props = {
 export function SelfieJourney({ documentSrc, send, onSelfie }: Props) {
   const [phase, setPhase] = useState<Phase>("capture");
   const [selfieSrc, setSelfieSrc] = useState(blankPhoto);
+  const [attempt, setAttempt] = useState(1);
+  const failures = useRef(0);
   const sendRef = useRef(send);
 
   useEffect(() => {
@@ -46,8 +49,10 @@ export function SelfieJourney({ documentSrc, send, onSelfie }: Props) {
           setPhase("matched");
           return;
         }
+        failures.current += 1;
+        setAttempt(failures.current);
         sendRef.current({ type: "NO_MATCH" });
-        setPhase("capture");
+        setPhase("noMatch");
       })
       .catch(() => undefined);
     return () => {
@@ -78,13 +83,16 @@ export function SelfieJourney({ documentSrc, send, onSelfie }: Props) {
     );
   }
 
-  if (phase === "comparing" || phase === "matched") {
+  if (phase === "comparing" || phase === "matched" || phase === "noMatch") {
     return (
       <FaceMatch
         phase={phase}
         documentSrc={documentSrc || blankPhoto}
         selfieSrc={selfieSrc}
+        attempt={attempt}
         onContinue={() => send({ type: "MATCHED" })}
+        onRetake={() => setPhase("capture")}
+        onDifferentDocument={() => send({ type: "RETAKE", target: "document" })}
       />
     );
   }

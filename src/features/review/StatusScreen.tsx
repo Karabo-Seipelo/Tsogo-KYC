@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useContent } from "@/lib/content/useContent";
 import { progressFor } from "@/machines/progress";
 import { kycStates, type KycState } from "@/machines/kycMachine.types";
+import { ManualReview } from "./ManualReview";
 
 const rowIds = [
   "phoneConnected",
@@ -39,6 +40,8 @@ type Props = {
   phoneConnected: boolean;
   onShowQr: () => void;
   onReview: () => void;
+  outcome?: string | null;
+  reference?: string | null;
 };
 
 export function StatusScreen({
@@ -46,6 +49,8 @@ export function StatusScreen({
   phoneConnected,
   onShowQr,
   onReview,
+  outcome = null,
+  reference = null,
 }: Props) {
   const { content, t } = useContent();
   const heading = useRef<HTMLHeadingElement>(null);
@@ -62,6 +67,10 @@ export function StatusScreen({
       onReview();
     }
   }, [step, onReview]);
+
+  if (outcome === "manualReview" && reference) {
+    return <ManualReview reference={reference} />;
+  }
 
   if (!phoneConnected) {
     return (

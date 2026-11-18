@@ -71,6 +71,26 @@ test("a failed face match sends NO_MATCH and returns to the selfie", async () =>
   expect(send).toHaveBeenCalledWith({ type: "NO_MATCH" });
   expect(send).not.toHaveBeenCalledWith({ type: "MATCHED" });
   expect(
+    screen.getByRole("heading", { name: content.faceMatch.noMatch.title }),
+  ).toBe(document.activeElement);
+  expect(screen.getByText(content.faceMatch.noMatch.intro)).toBeDefined();
+  expect(
+    screen.getByText(t("common.attempt", { attempt: 1, max: 3 })),
+  ).toBeDefined();
+  act(() => {
+    screen
+      .getByRole("button", {
+        name: content.faceMatch.noMatch.differentDocument,
+      })
+      .click();
+  });
+  expect(send).toHaveBeenCalledWith({ type: "RETAKE", target: "document" });
+  act(() => {
+    screen
+      .getByRole("button", { name: content.faceMatch.noMatch.retake })
+      .click();
+  });
+  expect(
     screen.getByRole("button", { name: content.selfie.cta }),
   ).toBeDefined();
 });

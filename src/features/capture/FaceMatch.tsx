@@ -2,21 +2,28 @@
 
 import { useEffect, useRef } from "react";
 import { useContent } from "@/lib/content/useContent";
+import { MAX_ATTEMPTS } from "@/machines/kycMachine";
 
 type Props = {
-  phase: "comparing" | "matched";
+  phase: "comparing" | "matched" | "noMatch";
   documentSrc: string;
   selfieSrc: string;
+  attempt?: number;
   onContinue: () => void;
+  onRetake?: () => void;
+  onDifferentDocument?: () => void;
 };
 
 export function FaceMatch({
   phase,
   documentSrc,
   selfieSrc,
+  attempt = 1,
   onContinue,
+  onRetake,
+  onDifferentDocument,
 }: Props) {
-  const { t } = useContent();
+  const { content, t } = useContent();
   const heading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -33,7 +40,9 @@ export function FaceMatch({
         >
           {phase === "matched"
             ? t("faceMatch.matched.title")
-            : t("faceMatch.title")}
+            : phase === "noMatch"
+              ? t("faceMatch.noMatch.title")
+              : t("faceMatch.title")}
         </h1>
         {phase === "comparing" ? (
           <>
@@ -46,7 +55,8 @@ export function FaceMatch({
               <Thumbnail src={selfieSrc} label={t("faceMatch.selfie")} />
             </div>
           </>
-        ) : (
+        ) : null}
+        {phase === "matched" ? (
           <>
             <p className="text-base leading-6">{t("faceMatch.matched.body")}</p>
             <button
@@ -57,7 +67,38 @@ export function FaceMatch({
               {t("common.actions.continue")}
             </button>
           </>
-        )}
+        ) : null}
+        {phase === "noMatch" ? (
+          <>
+            <p className="text-base leading-6">
+              {content.faceMatch.noMatch.intro}
+            </p>
+            <ul className="list-disc pl-5">
+              {content.faceMatch.noMatch.tips.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+            <p className="text-sm font-medium">
+              {t("common.attempt", { attempt, max: MAX_ATTEMPTS })}
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                className="bg-neutral-950 px-4 py-3 text-white"
+                onClick={onRetake}
+              >
+                {t("faceMatch.noMatch.retake")}
+              </button>
+              <button
+                type="button"
+                className="border border-neutral-950 px-4 py-3"
+                onClick={onDifferentDocument}
+              >
+                {t("faceMatch.noMatch.differentDocument")}
+              </button>
+            </div>
+          </>
+        ) : null}
       </div>
     </main>
   );

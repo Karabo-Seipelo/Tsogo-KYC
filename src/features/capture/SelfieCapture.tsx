@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useContent } from "@/lib/content/useContent";
 import { resizeImage } from "@/lib/image/resizeImage";
+import { CameraBlocked } from "./DocumentFailed";
 import { useCamera } from "./useCamera";
 
 type Props = {
@@ -14,7 +15,7 @@ export function SelfieCapture({ onDone }: Props) {
   const video = useRef<HTMLVideoElement>(null);
   const started = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
-  const { start, stream } = useCamera();
+  const { start, stream, error } = useCamera();
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -35,10 +36,9 @@ export function SelfieCapture({ onDone }: Props) {
     }
   }, [stream]);
 
-  async function takeSelfie() {
+  async function uploadFrame(frame: Blob) {
     setUploading(true);
     try {
-      const frame = await captureFrame(video.current);
       const image = await resizeImage(frame, 1600, 0.8);
       const thumbnail = await resizeImage(frame, 320, 0.7);
       const form = new FormData();
@@ -56,6 +56,24 @@ export function SelfieCapture({ onDone }: Props) {
     } catch {
       setUploading(false);
     }
+  }
+
+  async function takeSelfie() {
+    await uploadFrame(await captureFrame(video.current));
+  }
+
+  if (error && !uploading) {
+    return (
+      <CameraBlocked
+        error={error}
+        onRetry={() => {
+          void start("user");
+        }}
+        onUpload={(file) => {
+          void uploadFrame(file);
+        }}
+      />
+    );
   }
 
   return (

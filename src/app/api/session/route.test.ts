@@ -109,7 +109,87 @@ test("POST /api/session stores the session for 15 minutes and the handoff for 10
   });
 
   vi.advanceTimersByTime(5 * 60 * 1000);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    step: "idle",
+  });
+
+  vi.advanceTimersByTime(1000);
   await expect(store.get(`session:${id}`)).resolves.toBeNull();
+});
+
+test("R-06.6 a fail switch is stored on the session and kept out of the response", async () => {
+  const response = await POST(
+    request("http://localhost:3000/api/session?fail=document", {
+      host: "localhost:3000",
+      origin: "http://localhost:3000",
+    }),
+  );
+  const body: unknown = await response.json();
+  const id = sessionCookie(response).value;
+
+  expect(response.status).toBe(200);
+  expect(body).not.toHaveProperty("fail");
+  await expect(createMemoryStore().get(`session:${id}`)).resolves.toMatchObject(
+    {
+      step: "idle",
+      fail: "document",
+    },
+  );
+});
+
+test("R-06.6 each recognised fail switch is stored as given", async () => {
+  for (const fail of [
+    "upload",
+    "upload:always",
+    "document:always",
+    "match",
+    "match:always",
+    "reject",
+  ]) {
+    const response = await POST(
+      request(`http://localhost:3000/api/session?fail=${fail}`, {
+        host: "localhost:3000",
+        origin: "http://localhost:3000",
+      }),
+    );
+    const id = sessionCookie(response).value;
+
+    await expect(
+      createMemoryStore().get(`session:${id}`),
+    ).resolves.toMatchObject({ fail });
+  }
+});
+
+test("R-06.6 ttl=1 is stored with the fail switch", async () => {
+  const response = await POST(
+    request("http://localhost:3000/api/session?fail=reject&ttl=1", {
+      host: "localhost:3000",
+      origin: "http://localhost:3000",
+    }),
+  );
+  const id = sessionCookie(response).value;
+
+  await expect(createMemoryStore().get(`session:${id}`)).resolves.toMatchObject(
+    {
+      fail: "reject",
+      ttl: 1,
+    },
+  );
+});
+
+test("R-06.6 an unknown switch is not stored", async () => {
+  const response = await POST(
+    request("http://localhost:3000/api/session?fail=nope&ttl=5", {
+      host: "localhost:3000",
+      origin: "http://localhost:3000",
+    }),
+  );
+  const stored = await createMemoryStore().get(
+    `session:${sessionCookie(response).value}`,
+  );
+
+  expect(stored).not.toHaveProperty("fail");
+  expect(stored).not.toHaveProperty("ttl");
 });
 
 function request(url: string, headers: Record<string, string>) {

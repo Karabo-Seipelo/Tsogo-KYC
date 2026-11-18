@@ -51,9 +51,46 @@ test("R-03.5 a passing upload returns the checks and stores only the thumbnail",
   expect(JSON.stringify(stored)).not.toContain("full-size-photo");
 });
 
-async function sessionId() {
+test("AC-03.6 ?fail=document fails the first check and the retake passes", async () => {
+  const id = await sessionId("http://localhost:3000/api/session?fail=document");
+
+  const first = await POST(upload(id));
+  const failed = (await first.json()) as {
+    passed: boolean;
+    checks: { id: string; passed: boolean }[];
+  };
+
+  expect(first.status).toBe(200);
+  expect(failed.passed).toBe(false);
+  expect(failed.checks.find((check) => check.id === "blurry")?.passed).toBe(
+    false,
+  );
+
+  const second = await POST(upload(id));
+  expect(second.status).toBe(200);
+  expect(await second.json()).toMatchObject({ passed: true });
+});
+
+test("AC-03.8 ?fail=upload fails three times and the next send succeeds", async () => {
+  const id = await sessionId("http://localhost:3000/api/session?fail=upload");
+  const store = createMemoryStore();
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await POST(upload(id));
+    expect(response.status).toBe(503);
+  }
+  expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
+    "thumb-bytes",
+  );
+
+  const recovered = await POST(upload(id));
+  expect(recovered.status).toBe(200);
+  expect(await recovered.json()).toMatchObject({ passed: true });
+});
+
+async function sessionId(url = "http://localhost:3000/api/session") {
   const response = await createSession(
-    new Request("http://localhost:3000/api/session", {
+    new Request(url, {
       method: "POST",
       headers: { host: "localhost:3000", origin: "http://localhost:3000" },
     }),

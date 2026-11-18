@@ -11,6 +11,7 @@ export function useKycMachine() {
   return {
     state: snapshot.value,
     send,
+    reason: snapshot.context.reason,
     stepNumber: progressFor(snapshot.value)?.current ?? null,
   };
 }
