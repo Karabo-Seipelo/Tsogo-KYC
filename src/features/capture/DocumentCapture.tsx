@@ -8,7 +8,7 @@ type Props = {
   side: number;
   total: number;
   checking: boolean;
-  onCapture: () => void;
+  onCapture: (file?: File) => void;
 };
 
 export function DocumentCapture({ side, total, checking, onCapture }: Props) {
@@ -63,7 +63,7 @@ export function DocumentCapture({ side, total, checking, onCapture }: Props) {
           <button
             type="button"
             className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
-            onClick={onCapture}
+            onClick={() => onCapture()}
           >
             {t("document.capture.takePhoto")}
           </button>
@@ -75,8 +75,9 @@ export function DocumentCapture({ side, total, checking, onCapture }: Props) {
             type="file"
             accept="image/*"
             onChange={(event) => {
-              if (event.currentTarget.files?.[0]) {
-                onCapture();
+              const file = event.currentTarget.files?.[0];
+              if (file) {
+                onCapture(file);
               }
             }}
           />

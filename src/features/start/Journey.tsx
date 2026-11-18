@@ -16,13 +16,19 @@ export function Journey() {
     );
   }
 
-  if (state === "documentUpload") {
-    return <DocumentJourney />;
+  if (state === "documentUpload" || state === "documentValidation") {
+    return <DocumentJourney send={send} />;
   }
 
   if (state === "idle") {
     return (
-      <StartScreen onStart={() => send({ type: "START", device: "desktop" })} />
+      <StartScreen
+        onStart={() => {
+          void fetch("/api/session", { method: "POST" }).finally(() => {
+            send({ type: "START", device: "desktop" });
+          });
+        }}
+      />
     );
   }
 

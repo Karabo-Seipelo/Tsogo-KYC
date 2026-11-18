@@ -2,17 +2,63 @@
 
 import { useState } from "react";
 import { useContent } from "@/lib/content/useContent";
+import { resizeImage } from "@/lib/image/resizeImage";
 import { DocumentCapture } from "./DocumentCapture";
 import { DocumentPassed } from "./DocumentPassed";
 import { DocumentType, type DocumentChoice } from "./DocumentType";
 
 type Phase = "type" | "capture" | "checking" | "passed";
 
-export function DocumentJourney() {
+type DocumentEvent =
+  | { type: "DOC_CAPTURED" }
+  | { type: "DOC_VALID" }
+  | { type: "DOC_INVALID" }
+  | { type: "UPLOAD_FAILED" };
+
+type Props = {
+  send: (event: DocumentEvent) => void;
+};
+
+export function DocumentJourney({ send }: Props) {
   const { content } = useContent();
   const [choice, setChoice] = useState<DocumentChoice | null>(null);
   const [phase, setPhase] = useState<Phase>("type");
   const [side, setSide] = useState(1);
+
+  async function submit(file?: File) {
+    if (!choice) {
+      return;
+    }
+    if (side < choice.sides) {
+      setSide(side + 1);
+      return;
+    }
+
+    setPhase("checking");
+    try {
+      const response = await fetch("/api/session/document", {
+        method: "POST",
+        body: await documentForm(file, side),
+      });
+      if (!response.ok) {
+        send({ type: "UPLOAD_FAILED" });
+        setPhase("capture");
+        return;
+      }
+      const body = (await response.json()) as { passed?: boolean };
+      send({ type: "DOC_CAPTURED" });
+      if (body.passed) {
+        setPhase("passed");
+        return;
+      }
+      send({ type: "DOC_INVALID" });
+      setSide(1);
+      setPhase("capture");
+    } catch {
+      send({ type: "UPLOAD_FAILED" });
+      setPhase("capture");
+    }
+  }
 
   if (!choice || phase === "type") {
     return (
@@ -47,7 +93,7 @@ export function DocumentJourney() {
             passed: true,
           },
         ]}
-        onContinue={() => undefined}
+        onContinue={() => send({ type: "DOC_VALID" })}
         onRetake={() => {
           setSide(1);
           setPhase("capture");
@@ -61,14 +107,20 @@ export function DocumentJourney() {
       side={side}
       total={choice.sides}
       checking={phase === "checking"}
-      onCapture={() => {
-        if (side < choice.sides) {
-          setSide(side + 1);
-          return;
-        }
-        setPhase("checking");
-        window.setTimeout(() => setPhase("passed"), 600);
+      onCapture={(file) => {
+        void submit(file);
       }}
     />
   );
+}
+
+async function documentForm(file: File | undefined, side: number) {
+  const source = file ?? new Blob(["photo"], { type: "image/jpeg" });
+  const image = file ? await resizeImage(file, 1600, 0.8) : source;
+  const thumbnail = file ? await resizeImage(file, 320, 0.7) : source;
+  const form = new FormData();
+  form.set("side", side === 1 ? "front" : "back");
+  form.set("image", image, "image.jpg");
+  form.set("thumbnail", thumbnail, "thumb.jpg");
+  return form;
 }
