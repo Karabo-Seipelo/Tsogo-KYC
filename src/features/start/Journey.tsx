@@ -9,6 +9,7 @@ import { ProcessingScreen } from "@/features/review/ProcessingScreen";
 import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
 import { HelpProvider } from "@/features/help/HelpDialog";
 import { SaveExitProvider } from "@/features/save-exit/SaveExit";
+import type { Device } from "@/machines/kycMachine.types";
 import { useKycMachine } from "@/machines/useKycMachine";
 import {
   HandoffScreen,
@@ -21,17 +22,21 @@ import { StartScreen } from "./StartScreen";
 const blankPhoto =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-export function Journey() {
+type Props = {
+  device?: Device;
+};
+
+export function Journey({ device = "desktop" }: Props) {
   return (
     <SaveExitProvider>
       <HelpProvider>
-        <JourneyFlow />
+        <JourneyFlow device={device} />
       </HelpProvider>
     </SaveExitProvider>
   );
 }
 
-function JourneyFlow() {
+function JourneyFlow({ device }: { device: Device }) {
   const { state, send } = useKycMachine();
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
@@ -128,6 +133,10 @@ function JourneyFlow() {
     return (
       <StartScreen
         onStart={() => {
+          if (device === "phone") {
+            send({ type: "START", device: "phone" });
+            return;
+          }
           void startDesktopSession(setHandoff).finally(() => {
             send({ type: "START", device: "desktop" });
           });
