@@ -41,13 +41,15 @@ The technical brief describes the player's journey. The business also needs to *
 ## Design notes
 
 - The audit trail is stored as a list on the session (`audit`) through `SessionStore`, so it works locally and on Vercel and expires with the session. Funnel events go to the logs only; storing or counting them is `production` (PB-9).
+- P1 appends each transition to an in-memory list the tests read: `{ at, from, to, event, outcome? }`. P2's `SessionStore` keeps that same list on the session. The subscriber stays the only writer.
 - The audit entry is written in one place: the machine's transition hook (`actor.subscribe`) on the device that owns the step, plus the server's own state changes.
 - In production, events would go to the BI pipeline (e.g. a warehouse via an event collector), and the audit trail to durable, access-controlled storage.
 
 ## Tasks
 
-- [ ] Structured logger + `track()` helper with the typed event union (R-08.1, R-08.5)
-- [ ] Audit append on every transition
-- [ ] E9 manual-review screen + `manualReview` session outcome
-- [ ] Mirror the outcome on D4
-- [ ] `production` Funnel counters + `/insights` page (PB-9)
+- [x] T-08.1 `track()` and the typed event union from the funnel table; a recorded event has those props and no personal data → R-08.1, AC-08.1 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/events.ts`, `src/lib/analytics/track.ts`, `src/lib/analytics/track.test.ts` · gate: tests reviewed
+- [x] T-08.2 One subscriber appends every transition, in order, to an in-memory list → R-08.2, AC-08.2 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/audit.ts`, `src/lib/analytics/audit.test.ts` · gate: tests reviewed
+- [ ] T-08.3 (P2) One structured log line per API request → R-08.5, AC-08.6 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/requestLog.ts`
+- [ ] T-08.4 (P4) E9 manual-review screen and the `manualReview` outcome → AC-08.3
+- [ ] T-08.5 (P3) Desktop shows the same manual-review outcome → AC-08.4
+- [ ] T-08.6 `production` Funnel counters and `/insights` (PB-9)
