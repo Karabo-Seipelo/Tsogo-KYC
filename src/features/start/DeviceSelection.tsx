@@ -7,9 +7,10 @@ type Choice = "phone" | "thisDevice";
 
 type Props = {
   onChooseThisDevice: () => void;
+  onChoosePhone?: () => void;
 };
 
-export function DeviceSelection({ onChooseThisDevice }: Props) {
+export function DeviceSelection({ onChooseThisDevice, onChoosePhone }: Props) {
   const { t } = useContent();
   const phone = useRef<HTMLInputElement>(null);
   const [choice, setChoice] = useState<Choice>("phone");
@@ -52,6 +53,9 @@ export function DeviceSelection({ onChooseThisDevice }: Props) {
           onClick={() => {
             if (choice === "thisDevice") {
               onChooseThisDevice();
+            }
+            if (choice === "phone") {
+              onChoosePhone?.();
             }
           }}
         >
