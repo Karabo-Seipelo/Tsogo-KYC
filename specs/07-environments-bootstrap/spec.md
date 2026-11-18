@@ -65,7 +65,7 @@ P0.5 · Checks:
 
 Later phases, not built in P0 or P0.5:
 
-- [ ] `dev:phone` script (cloudflared) → AC-07.8 (P3)
+- [ ] T-07.13 (P3) `pnpm dev:phone` prints an HTTPS tunnel URL. Scanning that QR from a phone completes the handoff and opens the camera → AC-07.8 · verify: manual · files: `package.json`
 - [ ] `production` `docker-compose.yml`, `Dockerfile`, `docker/nginx.conf` (PB-3)
 - [ ] Vercel project, environment variables per environment, Upstash databases (preview + production)
 - [ ] Domain `tsogo.karaboseipelo.com` + DNS
