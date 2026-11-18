@@ -59,8 +59,8 @@ P0 is the local scaffold. `dev:phone` is P3. The banner, `noindex`, Vercel and t
 P0.5 · Checks:
 
 - [ ] T-07.9 CI workflow with the six checks → R-07.9, AC-07.9 · verify: push the branch and see a green run; then a deliberately failing commit shows red · files: `.github/workflows/ci.yml`, `package.json` (`engines`, `packageManager`)
-- [ ] T-07.10 husky + lint-staged: pre-commit (staged lint and format, typecheck, checksum) and pre-push (tests) → R-07.10, AC-07.10 · verify: a staged lint error is rejected; `git push` with a failing test is rejected · files: `package.json` (`prepare`, `lint-staged`), `.husky/pre-commit`, `.husky/pre-push`
-- [ ] T-07.11 commitlint commit-msg hook → R-07.10, AC-07.11 · verify: `chore:missing space` is rejected, `chore(07): add commitlint` is accepted · files: `commitlint.config.mjs`, `.husky/commit-msg`, `package.json`
+- [x] T-07.10 husky + lint-staged: pre-commit (staged lint and format, typecheck, checksum) and pre-push (tests) → R-07.10, AC-07.10 · verify: a staged lint error is rejected; `git push` with a failing test is rejected · files: `package.json` (`prepare`, `lint-staged`), `.husky/pre-commit`, `.husky/pre-push`
+- [x] T-07.11 commitlint commit-msg hook → R-07.10, AC-07.11 · verify: `chore:missing space` is rejected, `chore(07): add commitlint` is accepted · files: `commitlint.config.mjs`, `.husky/commit-msg`, `package.json`
 - [ ] T-07.12 Checkpoint → AC-07.9 – AC-07.11 · verify: all three hooks fire on a throwaway commit; CI is green on the branch · files: none
 
 Later phases, not built in P0 or P0.5:
