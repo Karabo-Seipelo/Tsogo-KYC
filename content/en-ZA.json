@@ -1,0 +1,369 @@
+{
+  "meta": {
+    "locale": "en-ZA",
+    "version": "2026-11-17",
+    "source": "Extracted from the Figma wireframes (D1–D7, D3b, M1–M7, E1–E9).",
+    "notes": [
+      "Icons (✓, ✕, ⏱, !) are UI, not copy, so they're not in this file.",
+      "Values in {braces} are placeholders filled in by the app.",
+      "Not in the wireframes yet, drafted from the specs: document.checking, faceMatch.comparing, processing.slow, document.capture.sideLabel, errors.CAMERA_NOT_FOUND, errors.HANDOFF_USED, document.result.failed.reasons (glare, cropped, expired).",
+      "Not in the wireframes yet, drafted from spec 02 (R-02.9 – R-02.12): help.*, saveExit.*, privacy.*."
+    ]
+  },
+  "common": {
+    "demoBanner": {
+      "long": "DEMO — this is a test site. Please don't upload a real ID document.",
+      "short": "DEMO — please don't use a real ID"
+    },
+    "header": {
+      "title": "Verify your identity",
+      "titleShort": "Verify identity",
+      "help": "Help",
+      "saveAndExit": "Save & exit",
+      "back": "Back"
+    },
+    "actions": {
+      "continue": "Continue",
+      "back": "Back",
+      "tryAgain": "Try again",
+      "retakePhoto": "Retake photo",
+      "uploadInstead": "Upload instead",
+      "uploadPhotoInstead": "Upload a photo instead"
+    },
+    "progress": {
+      "label": "Step {current} of {total} · {name}",
+      "steps": {
+        "document": "Your document",
+        "selfie": "Selfie",
+        "liveness": "Liveness & face match",
+        "review": "Review"
+      }
+    },
+    "status": {
+      "done": "Done",
+      "inProgress": "In progress",
+      "waiting": "Waiting",
+      "passed": "Passed"
+    },
+    "attempt": "Attempt {attempt} of {max}"
+  },
+  "start": {
+    "title": "Verify your identity",
+    "intro": "We're required by law (FICA) to confirm who you are before you can deposit or play. It also keeps your account secure.",
+    "estimate": "Takes about {min}–{max} minutes",
+    "requirementsTitle": "You'll need",
+    "requirements": [
+      "A valid passport, national ID or driver's licence",
+      "A device with a camera — your phone works best",
+      "Good lighting and a plain background"
+    ],
+    "privacy": "Your information is sent securely and only used to verify your identity. Full-size photos are never stored.",
+    "privacyLink": "Read our privacy policy",
+    "cta": "Start verification"
+  },
+  "device": {
+    "title": "How would you like to continue?",
+    "intro": "You'll take a photo of your document and a selfie.",
+    "options": {
+      "phone": {
+        "title": "Use my phone",
+        "description": "Recommended — sharper document photos. Scan a QR code to switch."
+      },
+      "thisDevice": {
+        "title": "Continue on this computer",
+        "description": "Use your webcam, or upload photos you already have."
+      }
+    }
+  },
+  "handoff": {
+    "title": "Scan with your phone",
+    "steps": [
+      "Open your phone's camera",
+      "Point it at the QR code",
+      "Tap the link and follow the steps"
+    ],
+    "waiting": "Waiting for your phone…",
+    "connected": "Phone connected",
+    "expiresIn": "Code expires in {time}",
+    "refresh": "Get a new code",
+    "fallback": "Can't scan? Continue on this computer instead",
+    "qrAlt": "QR code to continue on your phone",
+    "expired": {
+      "title": "This code has expired",
+      "body": "For your security, QR codes only work for {minutes} minutes. Get a new one to carry on — you won't lose your place.",
+      "cta": "Get a new code",
+      "fallback": "Continue on this computer instead"
+    }
+  },
+  "status": {
+    "title": "Continue on your phone",
+    "intro": "Keep this window open — it updates as you go.",
+    "steps": {
+      "phoneConnected": "Phone connected",
+      "documentCaptured": "Document photo taken",
+      "documentChecked": "Document checked",
+      "selfie": "Selfie",
+      "liveness": "Liveness check",
+      "faceMatch": "Face match"
+    },
+    "lostConnection": "Lost your phone connection? Show the QR code again",
+    "disconnected": {
+      "label": "Phone disconnected",
+      "reconnecting": "Reconnecting…",
+      "body": "We'll pick up where you left off. Your photos so far are saved.",
+      "cta": "Show the QR code again"
+    }
+  },
+  "document": {
+    "select": {
+      "title": "Which document will you use?",
+      "intro": "Make sure it's valid and not expired.",
+      "options": {
+        "passport": {
+          "title": "Passport",
+          "description": "Photo page only"
+        },
+        "nationalId": {
+          "title": "National ID",
+          "description": "Smart ID card — front and back"
+        },
+        "driversLicence": {
+          "title": "Driver's licence",
+          "description": "Card — front and back"
+        }
+      }
+    },
+    "capture": {
+      "title": "Photo of document",
+      "instruction": "Fit the photo page inside the frame. Avoid glare and keep all four corners visible.",
+      "sideLabel": "Side {side} of {total}",
+      "takePhoto": "Take photo",
+      "uploadInstead": "Upload a photo instead",
+      "cameraAlt": "Live camera view with a document outline"
+    },
+    "checking": "Checking your document…",
+    "result": {
+      "title": "Checking document",
+      "passed": {
+        "title": "Your document looks good",
+        "checks": {
+          "corners": "All four corners visible",
+          "readable": "Text is readable",
+          "notExpired": "Document hasn't expired"
+        }
+      },
+      "failed": {
+        "title": "We couldn't read your document",
+        "reasons": {
+          "blurry": {
+            "intro": "Part of the photo is blurry. Try again with:",
+            "tips": [
+              "More light and no glare",
+              "The document flat on a dark surface",
+              "Your phone held steady"
+            ]
+          },
+          "glare": {
+            "intro": "There's glare on the document. Try again with:",
+            "tips": [
+              "Light from the side, not above",
+              "The flash turned off",
+              "The document tilted slightly"
+            ]
+          },
+          "cropped": {
+            "intro": "Part of the document is cut off. Try again with:",
+            "tips": [
+              "All four corners inside the frame",
+              "Your phone a little further away"
+            ]
+          },
+          "expired": {
+            "intro": "This document looks expired. Please use a valid document.",
+            "tips": [
+              "Check the expiry date",
+              "Try a different document"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "selfie": {
+    "title": "Take a selfie",
+    "instruction": "Remove glasses and hats. Look straight at the camera in good light.",
+    "cta": "Take selfie",
+    "cameraAlt": "Live front camera view with a face guide"
+  },
+  "liveness": {
+    "title": "Liveness check",
+    "prompts": {
+      "turnLeft": "Slowly turn your head to the left",
+      "turnRight": "Slowly turn your head to the right",
+      "blink": "Blink twice"
+    },
+    "progress": "Prompt {current} of {total}",
+    "help": "Having trouble?"
+  },
+  "faceMatch": {
+    "title": "Matching",
+    "comparing": "Comparing photos…",
+    "documentPhoto": "Document photo",
+    "selfie": "Selfie",
+    "matched": {
+      "title": "It's a match",
+      "body": "Your selfie matches the photo on your document."
+    },
+    "noMatch": {
+      "title": "We couldn't match your selfie",
+      "intro": "This can happen in low light or if part of your face was covered. Try again with:",
+      "tips": [
+        "Your face fully in the oval",
+        "Even light on your face, no hats or glasses"
+      ],
+      "retake": "Retake selfie",
+      "differentDocument": "Use a different document"
+    }
+  },
+  "phoneDone": {
+    "headerTitle": "All done",
+    "title": "All done on your phone",
+    "body": "Go back to your computer to review and submit. You can close this tab."
+  },
+  "review": {
+    "title": "Review and submit",
+    "intro": "Check everything looks right before you submit.",
+    "rows": {
+      "document": "Document",
+      "documentCheck": "Document check",
+      "liveness": "Liveness check",
+      "faceMatch": "Face match"
+    },
+    "retake": "Retake",
+    "confirm": "I confirm these are my own documents and the photos are of me.",
+    "confirmRequired": "Tick the box to confirm before you submit.",
+    "submit": "Submit for verification"
+  },
+  "processing": {
+    "title": "Verifying your details",
+    "body": "This usually takes under a minute. You can leave this page — we'll email you when it's done.",
+    "slow": "This is taking longer than usual. You can leave this page — we'll email you when it's done."
+  },
+  "complete": {
+    "title": "You're verified",
+    "body": "Thanks — you're all set. You can now deposit and play.",
+    "cta": "Continue to my account"
+  },
+  "manualReview": {
+    "title": "We'll review this manually",
+    "body": "We couldn't verify you automatically, so someone from our team will check your documents. This usually takes up to {hours} hours. We'll email you when it's done.",
+    "reference": "Your reference: {reference}",
+    "cta": "Back to my account"
+  },
+  "errors": {
+    "CAMERA_DENIED": {
+      "title": "We can't use your camera",
+      "intro": "Camera access is turned off for this site. To take photos here:",
+      "steps": [
+        "Tap the lock icon in your browser's address bar",
+        "Set Camera to Allow",
+        "Come back and tap Try again"
+      ],
+      "cta": "Try again",
+      "fallback": "Upload a photo instead"
+    },
+    "CAMERA_NOT_FOUND": {
+      "title": "We can't find a camera",
+      "intro": "This device doesn't seem to have a camera we can use. You can upload a photo instead, or continue on your phone.",
+      "cta": "Upload a photo instead"
+    },
+    "UPLOAD_FAILED": {
+      "message": "Upload didn't finish. Your photo is saved — you don't need to retake it.",
+      "hint": "Check your connection, then try again.",
+      "cta": "Try again",
+      "secondary": "Retake photo"
+    },
+    "OFFLINE": {
+      "banner": "You're offline. We'll carry on when you're back.",
+      "body": "You can still take your photo. It'll upload automatically when you reconnect."
+    },
+    "HANDOFF_USED": {
+      "title": "This link has already been used",
+      "body": "For your security, each QR code works once. Go back to your computer and get a new code."
+    },
+    "SESSION_TIMEOUT_WARNING": {
+      "title": "Are you still there?",
+      "body": "For your security, this session will end in {time} because there's been no activity.",
+      "end": "End session",
+      "stay": "I'm still here"
+    },
+    "SESSION_EXPIRED": {
+      "title": "Your session has expired",
+      "body": "To keep your information safe, we ended your session after {minutes} minutes of inactivity. Nothing was submitted. Starting again takes about {min}–{max} minutes.",
+      "cta": "Start again"
+    },
+    "VERIFICATION_REJECTED": {
+      "title": "We couldn't verify your identity",
+      "body": "Your document and selfie didn't pass our checks, so we can't complete verification right now.",
+      "nextStepsTitle": "What you can do",
+      "nextSteps": [
+        "Try again with a different document",
+        "Contact support and quote reference {reference}"
+      ],
+      "contactSupport": "Contact support",
+      "tryAgain": "Try again"
+    }
+  },
+  "help": {
+    "title": "Help",
+    "close": "Close",
+    "faq": [
+      {
+        "q": "Why do I need to verify?",
+        "a": "South African law (FICA) requires us to confirm who you are before you can deposit. It also protects your account."
+      },
+      {
+        "q": "Which documents can I use?",
+        "a": "A valid South African ID book or smart ID card, a passport, or a driver's licence. It must not be expired."
+      },
+      {
+        "q": "What happens to my photos?",
+        "a": "They're only used to check your identity. Full-size photos are never stored, and everything is deleted when your session ends."
+      }
+    ],
+    "privacyLink": "Read the privacy notice",
+    "support": "Still stuck? Contact support and we'll help you finish."
+  },
+  "saveExit": {
+    "confirmTitle": "Save and exit?",
+    "confirmBody": "We'll keep your progress for {minutes} minutes. Come back in this browser to carry on.",
+    "confirm": "Save and exit",
+    "cancel": "Keep going",
+    "savedTitle": "Your progress is saved",
+    "savedBody": "Come back within {minutes} minutes in this browser and you'll pick up where you left off. After that, you'll need to start again.",
+    "return": "Return to Tsogo"
+  },
+  "privacy": {
+    "title": "Privacy notice",
+    "demo": "This is a demo. Please don't use a real ID document.",
+    "sections": [
+      {
+        "heading": "What we collect",
+        "body": "Photos of your ID document and a selfie, and the results of the checks we run on them."
+      },
+      {
+        "heading": "What we keep",
+        "body": "Full-size photos are never stored. Small preview images are kept only until your session ends, then deleted."
+      },
+      {
+        "heading": "Why",
+        "body": "Only to verify your identity, as FICA requires. Nothing is used for marketing."
+      },
+      {
+        "heading": "Your rights",
+        "body": "Under POPIA you can ask what we hold about you and have it corrected or deleted."
+      }
+    ],
+    "back": "Back to verification"
+  }
+}
