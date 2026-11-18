@@ -17,20 +17,20 @@ Requirements, ACs and tasks tagged `production` are designed but not built for t
 
 The workflow is gated: **specify → plan → tasks → implement**, and each step is reviewed before the next starts. When behaviour changes, the spec changes first.
 
-| # | Spec | Status |
-|---|---|---|
-| 00 | [Product brief](00-product-brief.md) | Draft |
-| 00 | [Constitution](00-constitution.md) | Draft |
-| — | [Plan](PLAN.md) | Draft |
-| 01 | [Journey state machine](01-journey-state-machine/spec.md) | Draft · backlog: PB-4, PB-10 |
-| 02 | [Start, session & QR handoff](02-session-and-qr-handoff/spec.md) | Draft · backlog: PB-3, PB-5, PB-6 |
-| 03 | [Document capture & validation](03-document-capture-validation/spec.md) | Draft |
-| 04 | [Selfie, liveness & face match](04-selfie-liveness-face-match/spec.md) | Draft |
-| 05 | [Review, submit & status](05-review-submit-status/spec.md) | Draft |
-| 06 | [Resilience (cross-cutting)](06-resilience/spec.md) | Draft · backlog: PB-7 |
-| 07 | [Environments & bootstrap](07-environments-bootstrap/spec.md) | Draft · backlog: PB-3, PB-8 |
-| 08 | [Funnel events, audit trail & manual review](08-insights-audit-manual-review/spec.md) | Draft · backlog: PB-9 |
-| 09 | [Content layer](09-content-layer/spec.md) | Draft · backlog: PB-1, PB-2 |
+| #   | Spec                                                                                  | Status                               |
+| --- | ------------------------------------------------------------------------------------- | ------------------------------------ |
+| 00  | [Product brief](00-product-brief.md)                                                  | Approved                             |
+| 00  | [Constitution](00-constitution.md)                                                    | Approved                             |
+| —   | [Plan](PLAN.md)                                                                       | Approved                             |
+| 01  | [Journey state machine](01-journey-state-machine/spec.md)                             | Approved · backlog: PB-4, PB-10      |
+| 02  | [Start, session & QR handoff](02-session-and-qr-handoff/spec.md)                      | Approved · backlog: PB-3, PB-5, PB-6 |
+| 03  | [Document capture & validation](03-document-capture-validation/spec.md)               | Approved                             |
+| 04  | [Selfie, liveness & face match](04-selfie-liveness-face-match/spec.md)                | Approved                             |
+| 05  | [Review, submit & status](05-review-submit-status/spec.md)                            | Approved                             |
+| 06  | [Resilience (cross-cutting)](06-resilience/spec.md)                                   | Approved · backlog: PB-7             |
+| 07  | [Environments & bootstrap](07-environments-bootstrap/spec.md)                         | Approved · backlog: PB-3, PB-8       |
+| 08  | [Funnel events, audit trail & manual review](08-insights-audit-manual-review/spec.md) | Approved · backlog: PB-9             |
+| 09  | [Content layer](09-content-layer/spec.md)                                             | Approved · backlog: PB-1, PB-2       |
 
 ## Traceability: business goal → requirement → spec → screen → test
 
