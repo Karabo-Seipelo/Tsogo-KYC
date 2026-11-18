@@ -8,6 +8,7 @@ import { CompleteScreen } from "@/features/review/CompleteScreen";
 import { ProcessingScreen } from "@/features/review/ProcessingScreen";
 import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
 import { HelpProvider } from "@/features/help/HelpDialog";
+import { SaveExitProvider } from "@/features/save-exit/SaveExit";
 import { useKycMachine } from "@/machines/useKycMachine";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
@@ -17,9 +18,11 @@ const blankPhoto =
 
 export function Journey() {
   return (
-    <HelpProvider>
-      <JourneyFlow />
-    </HelpProvider>
+    <SaveExitProvider>
+      <HelpProvider>
+        <JourneyFlow />
+      </HelpProvider>
+    </SaveExitProvider>
   );
 }
 

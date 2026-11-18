@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { SaveExitButton } from "@/features/save-exit/SaveExit";
 import { useContent } from "@/lib/content/useContent";
 
 const HelpContext = createContext<(trigger: HTMLElement | null) => void>(
@@ -37,14 +38,17 @@ export function HelpProvider({ children }: Props) {
         <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white">
           <div className="mx-auto flex w-full max-w-xl items-center justify-between gap-4 px-6 py-4">
             <p className="text-sm font-semibold">{t("common.header.title")}</p>
-            <button
-              ref={helpButton}
-              type="button"
-              className="border border-neutral-950 px-3 py-2 text-sm"
-              onClick={() => openHelp(helpButton.current)}
-            >
-              {t("common.header.help")}
-            </button>
+            <div className="flex items-center gap-2">
+              <SaveExitButton />
+              <button
+                ref={helpButton}
+                type="button"
+                className="border border-neutral-950 px-3 py-2 text-sm"
+                onClick={() => openHelp(helpButton.current)}
+              >
+                {t("common.header.help")}
+              </button>
+            </div>
           </div>
         </header>
         {children}
