@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { DocumentKind } from "@/features/capture/DocumentType";
 import { DocumentJourney } from "@/features/capture/DocumentJourney";
 import { SelfieJourney } from "@/features/capture/SelfieJourney";
@@ -18,6 +18,12 @@ import {
 } from "@/features/handoff/QrExpired";
 import { PhoneDone } from "@/features/review/PhoneDone";
 import { OfflineBanner } from "@/features/resilience/OfflineBanner";
+import { SessionExpired } from "@/features/resilience/SessionExpired";
+import {
+  TimeoutWarning,
+  shouldWarn,
+} from "@/features/resilience/TimeoutWarning";
+import { useStatusPoll } from "@/features/handoff/useStatusPoll";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
 
@@ -40,25 +46,78 @@ export function Journey({ device = "desktop" }: Props) {
 }
 
 function JourneyFlow({ device }: { device: Device }) {
-  const { state, send } = useKycMachine();
+  const { state, send, reason } = useKycMachine();
   usePhoneHeartbeat(device, state);
+  const status = useStatusPoll();
+  const [now, setNow] = useState(() => Date.now());
+  const [heldExpiresAt, setHeldExpiresAt] = useState<string | null>(null);
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
   const [documentType, setDocumentType] = useState<DocumentKind | null>(null);
   const [checks, setChecks] = useState<ReviewCheck[]>([]);
   const [handoff, setHandoff] = useState<HandoffCode | null>(null);
+  const deadline = laterDeadline(status?.expiresAt ?? null, heldExpiresAt);
+  const remaining =
+    deadline === null ? Number.POSITIVE_INFINITY : deadline - now;
+  const heldRemaining =
+    heldExpiresAt === null ? 0 : Date.parse(heldExpiresAt) - now;
 
-  if (state === "deviceSelection") {
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!status?.expired || heldRemaining > 0) {
+      return;
+    }
+    if (state === "idle" || state === "complete" || state === "error") {
+      return;
+    }
+    send({ type: "SESSION_EXPIRED" });
+  }, [heldRemaining, send, state, status?.expired]);
+
+  function restart() {
+    void refreshSession().finally(() => {
+      setDocumentPhoto((current) => {
+        if (current) {
+          URL.revokeObjectURL(current);
+        }
+        return null;
+      });
+      setSelfiePhoto((current) => {
+        if (current) {
+          URL.revokeObjectURL(current);
+        }
+        return null;
+      });
+      setChecks([]);
+      setDocumentType(null);
+      setHandoff(null);
+      setHeldExpiresAt(null);
+      send({ type: "RESTART" });
+    });
+  }
+
+  if (state === "error" && reason === "sessionExpired") {
     return (
+      <SessionExpired
+        minutes={status?.ttl === 1 ? 1 : 15}
+        onRestart={restart}
+      />
+    );
+  }
+
+  let screen: ReactNode;
+  if (state === "deviceSelection") {
+    screen = (
       <DeviceSelection
         onChooseThisDevice={() => send({ type: "CHOOSE_THIS_DEVICE" })}
         onChoosePhone={() => send({ type: "CHOOSE_PHONE" })}
       />
     );
-  }
-
-  if (state === "qrHandoff" && handoff) {
-    return (
+  } else if (state === "qrHandoff" && handoff) {
+    screen = (
       <HandoffScreen
         token={handoff.token}
         expiresAt={handoff.expiresAt}
@@ -68,10 +127,8 @@ function JourneyFlow({ device }: { device: Device }) {
         onReview={() => send({ type: "HANDBACK" })}
       />
     );
-  }
-
-  if (state === "documentUpload" || state === "documentValidation") {
-    return (
+  } else if (state === "documentUpload" || state === "documentValidation") {
+    screen = (
       <DocumentJourney
         send={send}
         onThumbnail={(thumbnail) => {
@@ -86,14 +143,12 @@ function JourneyFlow({ device }: { device: Device }) {
         onChecks={setChecks}
       />
     );
-  }
-
-  if (
+  } else if (
     state === "selfieCapture" ||
     state === "livenessCheck" ||
     state === "faceMatch"
   ) {
-    return (
+    screen = (
       <SelfieJourney
         documentSrc={documentPhoto}
         send={send}
@@ -107,14 +162,10 @@ function JourneyFlow({ device }: { device: Device }) {
         }}
       />
     );
-  }
-
-  if (state === "review" && device === "phone") {
-    return <PhoneDone />;
-  }
-
-  if (state === "review") {
-    return (
+  } else if (state === "review" && device === "phone") {
+    screen = <PhoneDone />;
+  } else if (state === "review") {
+    screen = (
       <ReviewScreen
         documentType={documentType ?? "passport"}
         documentSrc={documentPhoto ?? blankPhoto}
@@ -128,18 +179,12 @@ function JourneyFlow({ device }: { device: Device }) {
         }}
       />
     );
-  }
-
-  if (state === "processing") {
-    return <ProcessingScreen onComplete={() => send({ type: "VERIFIED" })} />;
-  }
-
-  if (state === "complete") {
-    return <CompleteScreen />;
-  }
-
-  if (state === "idle") {
-    return (
+  } else if (state === "processing") {
+    screen = <ProcessingScreen onComplete={() => send({ type: "VERIFIED" })} />;
+  } else if (state === "complete") {
+    screen = <CompleteScreen />;
+  } else if (state === "idle") {
+    screen = (
       <StartScreen
         onStart={() => {
           if (device === "phone") {
@@ -152,9 +197,32 @@ function JourneyFlow({ device }: { device: Device }) {
         }}
       />
     );
+  } else {
+    screen = <main />;
   }
 
-  return <main />;
+  return (
+    <>
+      {screen}
+      {shouldWarn(remaining, status?.ttl ?? null) ? (
+        <TimeoutWarning
+          remainingMs={remaining}
+          onStay={() => {
+            void staySession().then((expiresAt) => {
+              if (expiresAt) {
+                setHeldExpiresAt(expiresAt);
+              }
+            });
+          }}
+          onEnd={() => {
+            setHeldExpiresAt(null);
+            void endSession();
+            send({ type: "SESSION_EXPIRED" });
+          }}
+        />
+      ) : null}
+    </>
+  );
 }
 
 const phoneHeartbeatMs = 10_000;
@@ -214,6 +282,56 @@ async function startDesktopSession(setHandoff: (code: HandoffCode) => void) {
   } catch {
     return;
   }
+}
+
+async function refreshSession() {
+  try {
+    await fetch(`/api/session${switchQuery()}`, { method: "POST" });
+  } catch {
+    return;
+  }
+}
+
+async function staySession() {
+  try {
+    const response = await fetch("/api/session/stay", { method: "POST" });
+    if (!response.ok) {
+      return null;
+    }
+    const body: unknown = await response.json();
+    if (isRecord(body) && typeof body.expiresAt === "string") {
+      return body.expiresAt;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+async function endSession() {
+  try {
+    await fetch("/api/session/stay", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ end: true }),
+    });
+  } catch {
+    return;
+  }
+}
+
+function laterDeadline(server: string | null, held: string | null) {
+  const times = [server, held]
+    .map((value) => (value === null ? Number.NaN : Date.parse(value)))
+    .filter((value) => !Number.isNaN(value));
+  if (times.length === 0) {
+    return null;
+  }
+  return Math.max(...times);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
 async function submitReview(send: (event: { type: "SUBMIT" }) => void) {
