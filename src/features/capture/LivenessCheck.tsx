@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useOpenHelp } from "@/features/help/HelpDialog";
 import { useContent } from "@/lib/content/useContent";
 
 export const livenessPromptMs = 12_000;
@@ -14,12 +15,12 @@ type Props = {
 };
 
 export function LivenessCheck({ onPassed }: Props) {
-  const { content, t } = useContent();
+  const { t } = useContent();
+  const openHelp = useOpenHelp();
   const heading = useRef<HTMLHeadingElement>(null);
   const onPassedRef = useRef(onPassed);
   const [order] = useState(() => shuffle(promptIds));
   const [index, setIndex] = useState(0);
-  const [helpOpen, setHelpOpen] = useState(false);
   const prompt = order[index] ?? "blink";
 
   useEffect(() => {
@@ -62,37 +63,10 @@ export function LivenessCheck({ onPassed }: Props) {
         <button
           type="button"
           className="w-fit text-sm underline"
-          onClick={() => setHelpOpen(true)}
+          onClick={(event) => openHelp(event.currentTarget)}
         >
           {t("liveness.help")}
         </button>
-        {helpOpen ? (
-          <dialog
-            open
-            aria-labelledby="liveness-help-title"
-            className="w-full max-w-xl border border-neutral-950 bg-white p-6 text-neutral-950"
-          >
-            <h2 id="liveness-help-title" className="text-xl font-semibold">
-              {t("help.title")}
-            </h2>
-            <div className="mt-4 flex flex-col gap-4">
-              {content.help.faq.map((item) => (
-                <section key={item.q} className="flex flex-col gap-1">
-                  <h3 className="text-base font-semibold">{item.q}</h3>
-                  <p className="text-base leading-6">{item.a}</p>
-                </section>
-              ))}
-            </div>
-            <p className="mt-4 text-base leading-6">{t("help.support")}</p>
-            <button
-              type="button"
-              className="mt-6 border border-neutral-950 px-4 py-3"
-              onClick={() => setHelpOpen(false)}
-            >
-              {t("help.close")}
-            </button>
-          </dialog>
-        ) : null}
       </div>
     </main>
   );

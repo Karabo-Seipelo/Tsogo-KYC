@@ -4,6 +4,7 @@ import bundled from "../../../content/en-ZA.json";
 import { ContentProvider } from "../../lib/content/ContentProvider";
 import { contentSchema } from "../../lib/content/schema";
 import { createT } from "../../lib/content/t";
+import { HelpProvider } from "../help/HelpDialog";
 import { LivenessCheck, livenessPromptMs } from "./LivenessCheck";
 
 const content = contentSchema.parse(bundled);
@@ -69,7 +70,9 @@ test("AC-04.4 a prompt stays up for at least 10 seconds and help opens", async (
 function renderLiveness(onPassed: () => void) {
   render(
     <ContentProvider content={content}>
-      <LivenessCheck onPassed={onPassed} />
+      <HelpProvider>
+        <LivenessCheck onPassed={onPassed} />
+      </HelpProvider>
     </ContentProvider>,
   );
 }

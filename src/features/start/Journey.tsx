@@ -7,6 +7,7 @@ import { SelfieJourney } from "@/features/capture/SelfieJourney";
 import { CompleteScreen } from "@/features/review/CompleteScreen";
 import { ProcessingScreen } from "@/features/review/ProcessingScreen";
 import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
+import { HelpProvider } from "@/features/help/HelpDialog";
 import { useKycMachine } from "@/machines/useKycMachine";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
@@ -15,6 +16,14 @@ const blankPhoto =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 export function Journey() {
+  return (
+    <HelpProvider>
+      <JourneyFlow />
+    </HelpProvider>
+  );
+}
+
+function JourneyFlow() {
   const { state, send } = useKycMachine();
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
