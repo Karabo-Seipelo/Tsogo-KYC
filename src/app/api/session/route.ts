@@ -14,7 +14,11 @@ export async function POST(request: Request) {
   const sessionId = randomUUID();
   const handoffToken = randomBytes(16).toString("hex");
   const store = createMemoryStore();
-  await store.set(`session:${sessionId}`, { step: "idle" }, sessionTtlSeconds);
+  await store.set(
+    `session:${sessionId}`,
+    { step: "idle", handoffToken },
+    sessionTtlSeconds,
+  );
   await store.set(`handoff:${handoffToken}`, { sessionId }, handoffTtlSeconds);
 
   const response = NextResponse.json({
