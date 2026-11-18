@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
 import { Screen } from "@/components/ui/Screen";
 import { screenTitle } from "@/components/ui/styles";
 import type { DocumentKind } from "@/features/capture/DocumentType";
@@ -49,7 +50,7 @@ export function ReviewScreen({
       width="wide"
       action={
         <Button
-          className="w-full md:w-fit"
+          className="w-full"
           disabled={!confirmed}
           aria-describedby={confirmed ? undefined : confirmReasonId}
           onClick={onSubmit}
@@ -58,6 +59,7 @@ export function ReviewScreen({
         </Button>
       }
     >
+      <JourneyProgress step="review" />
       <h1 ref={heading} tabIndex={-1} className={screenTitle}>
         {t("review.title")}
       </h1>

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
 import { Screen } from "@/components/ui/Screen";
 import { screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
@@ -38,17 +39,17 @@ export function FaceMatch({
     <Screen
       action={
         phase === "matched" ? (
-          <Button className="w-full md:w-fit" onClick={onContinue}>
+          <Button className="w-full" onClick={onContinue}>
             {t("common.actions.continue")}
           </Button>
         ) : phase === "noMatch" ? (
-          <div className="flex flex-col gap-3 md:flex-row">
-            <Button className="w-full md:w-fit" onClick={onRetake}>
+          <div className="flex flex-col gap-3">
+            <Button className="w-full" onClick={onRetake}>
               {t("faceMatch.noMatch.retake")}
             </Button>
             <Button
               variant="secondary"
-              className="w-full md:w-fit"
+              className="w-full"
               onClick={onDifferentDocument}
             >
               {t("faceMatch.noMatch.differentDocument")}
@@ -57,6 +58,7 @@ export function FaceMatch({
         ) : null
       }
     >
+      <JourneyProgress step="liveness" />
       <h1 ref={heading} tabIndex={-1} className={screenTitle}>
         {phase === "matched"
           ? t("faceMatch.matched.title")
@@ -78,6 +80,10 @@ export function FaceMatch({
       ) : null}
       {phase === "noMatch" ? (
         <>
+          <div className="flex gap-4">
+            <Thumbnail src={documentSrc} label={t("faceMatch.documentPhoto")} />
+            <Thumbnail src={selfieSrc} label={t("faceMatch.selfie")} />
+          </div>
           <Alert tone="danger" title={content.faceMatch.noMatch.intro}>
             <ul className="flex flex-col gap-1">
               {content.faceMatch.noMatch.tips.map((tip) => (

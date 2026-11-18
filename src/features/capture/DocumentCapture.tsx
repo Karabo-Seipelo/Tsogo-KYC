@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
 import { Screen } from "@/components/ui/Screen";
 import {
   classes,
@@ -55,31 +56,8 @@ export function DocumentCapture({ side, total, checking, onCapture }: Props) {
     total > 1 ? t("document.capture.sideLabel", { side, total }) : null;
 
   return (
-    <Screen
-      action={
-        checking ? null : (
-          <div className="flex justify-center">
-            <button
-              type="button"
-              className={classes(
-                "inline-flex size-18 items-center justify-center rounded-full bg-ink",
-                "hover:opacity-[92%] active:opacity-[84%]",
-                focusRing,
-                stateMotion,
-              )}
-              aria-label={t("document.capture.takePhoto")}
-              onClick={() => onCapture()}
-            >
-              <span className="sr-only">{t("document.capture.takePhoto")}</span>
-              <span
-                aria-hidden="true"
-                className="size-14 rounded-full border-4 border-on-ink"
-              />
-            </button>
-          </div>
-        )
-      }
-    >
+    <Screen>
+      <JourneyProgress step="document" />
       <h1 className={screenTitle}>{t("document.capture.title")}</h1>
       <p className="text-base leading-6">{t("document.capture.instruction")}</p>
       {checking ? (
@@ -100,6 +78,27 @@ export function DocumentCapture({ side, total, checking, onCapture }: Props) {
               {sideLabel}
             </span>
           ) : null}
+        </div>
+      )}
+      {checking ? null : (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            className={classes(
+              "flex flex-col items-center gap-2 text-sm text-ink",
+              focusRing,
+              stateMotion,
+            )}
+            onClick={() => onCapture()}
+          >
+            <span
+              aria-hidden="true"
+              className="inline-flex size-18 items-center justify-center rounded-full bg-ink hover:opacity-[92%] active:opacity-[84%]"
+            >
+              <span className="size-14 rounded-full border-4 border-on-ink" />
+            </span>
+            {t("document.capture.takePhoto")}
+          </button>
         </div>
       )}
       <UploadInstead
@@ -133,10 +132,10 @@ function UploadInstead({
   onUpload: (file: File) => void;
 }) {
   return (
-    <label className="text-sm text-gold-strong underline">
+    <label className="flex min-h-11 w-full cursor-pointer items-center justify-center rounded-md border border-line-strong bg-surface px-4 text-base text-ink">
       {label}
       <input
-        className="mt-2 block text-ink"
+        className="sr-only"
         type="file"
         accept="image/*"
         onChange={(event) => {

@@ -24,7 +24,7 @@ export function StartScreen({ onStart }: Props) {
   return (
     <Screen
       action={
-        <Button className="w-full md:w-fit" onClick={onStart}>
+        <Button className="w-full" onClick={onStart}>
           {t("start.cta")}
         </Button>
       }

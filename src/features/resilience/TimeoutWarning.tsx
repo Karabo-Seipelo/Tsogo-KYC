@@ -103,7 +103,7 @@ export function TimeoutWarning({ remainingMs, onStay, onEnd }: Props) {
             time: countdownLabel(remainingMs),
           })}
         </p>
-        <div className="flex flex-wrap justify-end gap-3">
+        <div className="flex flex-row-reverse flex-wrap justify-start gap-3">
           <Button onClick={onStay}>
             {t("errors.SESSION_TIMEOUT_WARNING.stay")}
           </Button>

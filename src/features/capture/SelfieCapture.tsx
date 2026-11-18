@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
 import { Screen } from "@/components/ui/Screen";
 import {
   classes,
@@ -84,33 +85,8 @@ export function SelfieCapture({ onDone }: Props) {
   }
 
   return (
-    <Screen
-      action={
-        uploading ? null : (
-          <div className="flex justify-center md:justify-start">
-            <button
-              type="button"
-              className={classes(
-                "inline-flex size-18 items-center justify-center rounded-full bg-ink",
-                "hover:opacity-[92%] active:opacity-[84%]",
-                focusRing,
-                stateMotion,
-              )}
-              aria-label={t("selfie.cta")}
-              onClick={() => {
-                void takeSelfie();
-              }}
-            >
-              <span className="sr-only">{t("selfie.cta")}</span>
-              <span
-                aria-hidden="true"
-                className="size-14 rounded-full border-4 border-on-ink"
-              />
-            </button>
-          </div>
-        )
-      }
-    >
+    <Screen>
+      <JourneyProgress step="selfie" />
       <h1 ref={heading} tabIndex={-1} className={screenTitle}>
         {t("selfie.title")}
       </h1>
@@ -135,6 +111,43 @@ export function SelfieCapture({ onDone }: Props) {
           className="pointer-events-none absolute top-[16%] right-[18%] bottom-[16%] left-[18%] rounded-[50%] border-2 border-dashed border-on-ink"
         />
       </div>
+      {uploading ? null : (
+        <div className="flex flex-col items-center gap-4">
+          <button
+            type="button"
+            className={classes(
+              "flex flex-col items-center gap-2 text-sm text-ink",
+              focusRing,
+              stateMotion,
+            )}
+            onClick={() => {
+              void takeSelfie();
+            }}
+          >
+            <span
+              aria-hidden="true"
+              className="inline-flex size-18 items-center justify-center rounded-full bg-ink hover:opacity-[92%] active:opacity-[84%]"
+            >
+              <span className="size-14 rounded-full border-4 border-on-ink" />
+            </span>
+            {t("selfie.cta")}
+          </button>
+          <label className="flex min-h-11 w-full cursor-pointer items-center justify-center rounded-md border border-line-strong bg-surface px-4 text-base text-ink">
+            {t("common.actions.uploadPhotoInstead")}
+            <input
+              className="sr-only"
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                if (file) {
+                  void uploadFrame(file);
+                }
+              }}
+            />
+          </label>
+        </div>
+      )}
     </Screen>
   );
 }

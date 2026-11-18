@@ -22,9 +22,8 @@ export function ManualReview({ reference }: Props) {
 
   return (
     <Screen
-      action={
-        <Button className="w-full md:w-fit">{t("manualReview.cta")}</Button>
-      }
+      align="center"
+      action={<Button className="w-full">{t("manualReview.cta")}</Button>}
     >
       <ResultMark tone="info" />
       <h1 ref={heading} tabIndex={-1} className={screenTitle}>
@@ -33,7 +32,7 @@ export function ManualReview({ reference }: Props) {
       <p className="text-base leading-6">
         {t("manualReview.body", { hours: manualReviewHours })}
       </p>
-      <p className="rounded-lg bg-canvas px-4 py-3 text-base leading-6">
+      <p className="w-full rounded-lg bg-canvas px-4 py-3 text-left text-base leading-6">
         {t("manualReview.reference", { reference })}
       </p>
     </Screen>
@@ -56,13 +55,20 @@ function ResultMark({ tone }: { tone: "info" | "success" }) {
           />
         ) : (
           <>
-            <path
-              d="M8 4.5 V9"
+            <circle
+              cx="8"
+              cy="8"
+              r="5.25"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
             />
-            <circle cx="8" cy="11.5" r="0.8" fill="currentColor" />
+            <path
+              d="M8 4.8 V8.2 L10.2 9.4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
           </>
         )}
       </svg>

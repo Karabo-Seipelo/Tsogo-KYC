@@ -14,7 +14,7 @@ export function PhoneDone() {
   }, []);
 
   return (
-    <Screen>
+    <Screen align="center">
       <span
         aria-hidden="true"
         className="grid size-12 place-items-center rounded-full bg-success-soft text-success"

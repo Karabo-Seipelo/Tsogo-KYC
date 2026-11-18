@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
 import { Screen } from "@/components/ui/Screen";
 import { classes, screenTitle } from "@/components/ui/styles";
 import { useOpenHelp } from "@/features/help/HelpDialog";
@@ -49,6 +50,7 @@ export function LivenessCheck({ onPassed }: Props) {
 
   return (
     <Screen>
+      <JourneyProgress step="liveness" />
       <h1 ref={heading} tabIndex={-1} className={screenTitle}>
         {t("liveness.title")}
       </h1>
@@ -67,17 +69,17 @@ export function LivenessCheck({ onPassed }: Props) {
             key={id}
             className={classes(
               "size-2 rounded-full",
-              dot === index ? "bg-ink" : "bg-line",
+              dot === index ? "bg-gold-strong" : "bg-line",
             )}
           />
         ))}
       </div>
-      <p aria-live="polite" className="text-base leading-6">
+      <p aria-live="polite" className="text-title font-semibold">
         {t(`liveness.prompts.${prompt}`)}
       </p>
       <Button
-        variant="text"
-        className="w-fit px-0"
+        variant="secondary"
+        className="w-full"
         onClick={(event) => openHelp(event.currentTarget)}
       >
         {t("liveness.help")}

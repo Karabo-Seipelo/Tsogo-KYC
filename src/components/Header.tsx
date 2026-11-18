@@ -26,6 +26,9 @@ export function Header({ onHelp, onSaveExit }: Props) {
           <span className="hidden md:inline">{t("common.header.title")}</span>
         </p>
         <div className="flex items-center gap-2">
+          <button type="button" className={textButton} onClick={onHelp}>
+            {t("common.header.help")}
+          </button>
           {onSaveExit ? (
             <button
               type="button"
@@ -39,9 +42,6 @@ export function Header({ onHelp, onSaveExit }: Props) {
               {t("common.header.saveAndExit")}
             </button>
           ) : null}
-          <button type="button" className={textButton} onClick={onHelp}>
-            {t("common.header.help")}
-          </button>
         </div>
       </div>
     </header>

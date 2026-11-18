@@ -27,7 +27,7 @@ export function DeviceSelection({ onChooseThisDevice, onChoosePhone }: Props) {
     <Screen
       action={
         <Button
-          className="w-full md:w-fit"
+          className="w-full"
           onClick={() => {
             if (choice === "thisDevice") {
               onChooseThisDevice();
@@ -41,6 +41,7 @@ export function DeviceSelection({ onChooseThisDevice, onChoosePhone }: Props) {
         </Button>
       }
     >
+      <span aria-hidden="true" className="h-1 w-12 bg-gold" />
       <h1 id="device-title" className={screenTitle}>
         {t("device.title")}
       </h1>

@@ -16,7 +16,8 @@ export function CompleteScreen() {
 
   return (
     <Screen
-      action={<Button className="w-full md:w-fit">{t("complete.cta")}</Button>}
+      align="center"
+      action={<Button className="w-full">{t("complete.cta")}</Button>}
     >
       <span
         aria-hidden="true"

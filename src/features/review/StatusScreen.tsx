@@ -80,7 +80,7 @@ export function StatusScreen({
     return (
       <Screen
         action={
-          <Button className="w-full md:w-fit" onClick={onShowQr}>
+          <Button className="w-full" onClick={onShowQr}>
             {t("status.disconnected.cta")}
           </Button>
         }
@@ -127,10 +127,15 @@ export function StatusScreen({
                 {labelFor(content, row.id)}
               </span>
             </span>
-            <span>{statusLabel(t, row.state)}</span>
+            <span className={statusTone(row.state)}>
+              {statusLabel(t, row.state)}
+            </span>
           </li>
         ))}
       </ul>
+      <Button variant="text" className="w-fit px-0" onClick={onShowQr}>
+        {t("status.lostConnection")}
+      </Button>
     </Screen>
   );
 }
@@ -165,6 +170,16 @@ function labelFor(
   id: RowId,
 ) {
   return content.status.steps[id];
+}
+
+function statusTone(state: RowState) {
+  if (state === "done") {
+    return "text-success";
+  }
+  if (state === "inProgress") {
+    return "font-semibold text-info";
+  }
+  return "text-ink-muted";
 }
 
 function statusLabel(t: ReturnType<typeof useContent>["t"], state: RowState) {

@@ -95,6 +95,7 @@ export function HandoffScreen({
     <QrHandoff
       token={code.token}
       host={host}
+      expiresAt={code.expiresAt}
       onContinueHere={onContinueHere}
       phoneConnected={connected}
     />
