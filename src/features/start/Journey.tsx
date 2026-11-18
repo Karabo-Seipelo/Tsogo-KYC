@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { DocumentKind } from "@/features/capture/DocumentType";
 import { DocumentJourney } from "@/features/capture/DocumentJourney";
 import { SelfieJourney } from "@/features/capture/SelfieJourney";
+import { CompleteScreen } from "@/features/review/CompleteScreen";
+import { ProcessingScreen } from "@/features/review/ProcessingScreen";
 import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
 import { useKycMachine } from "@/machines/useKycMachine";
 import { DeviceSelection } from "./DeviceSelection";
@@ -76,9 +78,19 @@ export function Journey() {
         livenessPassed
         matched
         onRetake={(target) => send({ type: "RETAKE", target })}
-        onSubmit={() => undefined}
+        onSubmit={() => {
+          void submitReview(send);
+        }}
       />
     );
+  }
+
+  if (state === "processing") {
+    return <ProcessingScreen onComplete={() => send({ type: "VERIFIED" })} />;
+  }
+
+  if (state === "complete") {
+    return <CompleteScreen />;
   }
 
   if (state === "idle") {
@@ -94,4 +106,16 @@ export function Journey() {
   }
 
   return <main />;
+}
+
+async function submitReview(send: (event: { type: "SUBMIT" }) => void) {
+  try {
+    const response = await fetch("/api/session/submit", { method: "POST" });
+    if (!response.ok) {
+      return;
+    }
+    send({ type: "SUBMIT" });
+  } catch {
+    return;
+  }
 }
