@@ -10,6 +10,7 @@ import { createT, type ContentKey } from "./t";
 // Source: https://react.dev/reference/react/createContext#provider
 
 type ContentContextValue = {
+  content: Content;
   t: (key: ContentKey, values?: Record<string, string | number>) => string;
 };
 
@@ -22,7 +23,7 @@ type Props = {
 
 export function ContentProvider({ content, children }: Props) {
   return (
-    <ContentContext.Provider value={{ t: createT(content) }}>
+    <ContentContext.Provider value={{ content, t: createT(content) }}>
       {children}
     </ContentContext.Provider>
   );
