@@ -109,6 +109,11 @@ test("POST /api/session stores the session for 15 minutes and the handoff for 10
   });
 
   vi.advanceTimersByTime(5 * 60 * 1000);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    step: "idle",
+  });
+
+  vi.advanceTimersByTime(1000);
   await expect(store.get(`session:${id}`)).resolves.toBeNull();
 });
 

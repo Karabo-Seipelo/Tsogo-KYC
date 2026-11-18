@@ -8,6 +8,7 @@ type SessionRecord = {
   lastSeen?: string | null;
   checks?: unknown[];
   handoffToken?: string;
+  expiresAt?: string;
 };
 
 export async function GET(request: Request) {
@@ -33,13 +34,27 @@ async function readStatus(request: Request, log: { step: string | null }) {
       : null;
 
   log.step = session.step;
+  const expiry = sessionExpiry(session);
   return NextResponse.json({
     step: session.step,
     phoneConnected: connectedWithin(session.lastSeen, 30_000),
     lastSeen: session.lastSeen ?? null,
     checks: Array.isArray(session.checks) ? session.checks : [],
     handoffExpired: handoff === null,
+    expired: expiry.expired,
+    expiresAt: expiry.expiresAt,
   });
+}
+
+function sessionExpiry(session: SessionRecord) {
+  if (typeof session.expiresAt !== "string") {
+    return { expired: false, expiresAt: null };
+  }
+  const deadline = Date.parse(session.expiresAt);
+  return {
+    expired: !Number.isNaN(deadline) && Date.now() >= deadline,
+    expiresAt: session.expiresAt,
+  };
 }
 
 function connectedWithin(

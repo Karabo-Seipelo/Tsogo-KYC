@@ -39,11 +39,18 @@ async function createSession(request: Request, log: { step: string | null }) {
 
   const sessionId = randomUUID();
   const handoffToken = randomBytes(16).toString("hex");
+  const switches = sessionSwitches(request);
+  const windowSeconds = switches.ttl === 1 ? 60 : sessionTtlSeconds;
   const store = createMemoryStore();
   await store.set(
     `session:${sessionId}`,
-    { step: "idle", handoffToken, ...sessionSwitches(request) },
-    sessionTtlSeconds,
+    {
+      step: "idle",
+      handoffToken,
+      expiresAt: new Date(Date.now() + windowSeconds * 1000).toISOString(),
+      ...switches,
+    },
+    windowSeconds + 1,
   );
   await store.set(`handoff:${handoffToken}`, { sessionId }, handoffTtlSeconds);
 
