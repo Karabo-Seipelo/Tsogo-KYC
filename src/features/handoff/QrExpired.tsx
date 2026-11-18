@@ -79,6 +79,8 @@ export function HandoffScreen({
       <StatusScreen
         step={status?.step ?? "qrHandoff"}
         phoneConnected={connected}
+        outcome={status?.outcome}
+        reference={status?.reference}
         onShowQr={() => setQrAgain(true)}
         onReview={onReview}
       />

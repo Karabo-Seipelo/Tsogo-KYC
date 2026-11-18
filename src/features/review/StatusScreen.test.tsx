@@ -4,10 +4,13 @@ import { afterEach, expect, test, vi } from "vitest";
 import bundled from "../../../content/en-ZA.json";
 import { ContentProvider } from "../../lib/content/ContentProvider";
 import { contentSchema } from "../../lib/content/schema";
+import { createT } from "../../lib/content/t";
 import { statusPollMs, useStatusPoll } from "../handoff/useStatusPoll";
+import { manualReviewHours } from "./ManualReview";
 import { StatusScreen } from "./StatusScreen";
 
 const content = contentSchema.parse(bundled);
+const t = createT(content);
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -83,6 +86,52 @@ test("AC-02.7 a lost phone shows the QR action and returns when the phone is bac
   expect(screen.getByText(content.status.steps.phoneConnected)).toBeDefined();
 });
 
+test("AC-08.4 a manual review outcome shows within one poll", async () => {
+  vi.useFakeTimers();
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(statusBody("documentUpload", true))
+    .mockResolvedValue(
+      statusBody("documentUpload", true, {
+        outcome: "manualReview",
+        reference: "AB12",
+      }),
+    );
+  vi.stubGlobal("fetch", fetchMock);
+
+  render(
+    <ContentProvider content={content}>
+      <PolledStatus onReview={vi.fn()} />
+    </ContentProvider>,
+  );
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
+  expect(
+    screen.getByRole("heading", { name: content.status.title }),
+  ).toBeDefined();
+  expect(screen.queryByText(content.manualReview.title)).toBeNull();
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(statusPollMs);
+  });
+  expect(
+    screen.getByRole("heading", { name: content.manualReview.title }),
+  ).toBe(document.activeElement);
+  expect(
+    screen.getByText(t("manualReview.body", { hours: manualReviewHours })),
+  ).toBeDefined();
+  expect(
+    screen.getByText(t("manualReview.reference", { reference: "AB12" })),
+  ).toBeDefined();
+  expect(
+    screen.getByRole("button", { name: content.manualReview.cta }),
+  ).toBeDefined();
+  expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+});
+
 test("AC-05.3 a review step asks the desktop to open review", () => {
   const onReview = vi.fn();
   renderScreen({ step: "review", phoneConnected: true, onReview });
@@ -98,6 +147,8 @@ function PolledStatus({ onReview }: { onReview: () => void }) {
     <StatusScreen
       step={status.step}
       phoneConnected={status.phoneConnected}
+      outcome={status.outcome}
+      reference={status.reference}
       onShowQr={() => undefined}
       onReview={onReview}
     />
@@ -131,7 +182,11 @@ function liveText() {
   return screen.getByRole("status").textContent ?? "";
 }
 
-function statusBody(step: string, phoneConnected: boolean) {
+function statusBody(
+  step: string,
+  phoneConnected: boolean,
+  extra: { outcome?: string; reference?: string } = {},
+) {
   return Promise.resolve({
     ok: true,
     json: () =>
@@ -141,6 +196,7 @@ function statusBody(step: string, phoneConnected: boolean) {
         lastSeen: "2026-11-18T12:00:00.000Z",
         checks: [],
         handoffExpired: false,
+        ...extra,
       }),
   });
 }

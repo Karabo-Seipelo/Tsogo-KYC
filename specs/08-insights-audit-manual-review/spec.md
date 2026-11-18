@@ -51,5 +51,5 @@ The technical brief describes the player's journey. The business also needs to *
 - [x] T-08.2 One subscriber appends every transition, in order, to an in-memory list → R-08.2, AC-08.2 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/audit.ts`, `src/lib/analytics/audit.test.ts` · gate: tests reviewed
 - [x] T-08.3 (P2) One structured log line per API request → R-08.5, AC-08.6 · verify: `pnpm test src/lib/analytics` · files: `src/lib/analytics/requestLog.ts`
 - [x] T-08.4 (P4) E9 manual-review screen and the `manualReview` outcome → AC-08.3 · verify: `pnpm test src/features/review` · files: `src/features/review/ManualReview.tsx`, `src/features/review/ManualReview.test.tsx`
-- [ ] T-08.5 Desktop shows the same manual-review outcome within one poll → AC-08.4 · verify: `pnpm test src/features/review` · files: `src/features/review/StatusScreen.tsx`, `src/features/review/StatusScreen.test.tsx`
+- [x] T-08.5 Desktop shows the same manual-review outcome within one poll → AC-08.4 · verify: `pnpm test src/features/review` · files: `src/features/review/StatusScreen.tsx`, `src/features/review/StatusScreen.test.tsx`
 - [ ] T-08.6 `production` Funnel counters and `/insights` (PB-9)
