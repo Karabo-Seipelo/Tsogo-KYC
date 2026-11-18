@@ -19,9 +19,10 @@ type SelfieEvent =
 type Props = {
   documentSrc?: string | null;
   send: (event: SelfieEvent) => void;
+  onSelfie?: (src: string) => void;
 };
 
-export function SelfieJourney({ documentSrc, send }: Props) {
+export function SelfieJourney({ documentSrc, send, onSelfie }: Props) {
   const [phase, setPhase] = useState<Phase>("capture");
   const [selfieSrc, setSelfieSrc] = useState(blankPhoto);
   const sendRef = useRef(send);
@@ -91,7 +92,9 @@ export function SelfieJourney({ documentSrc, send }: Props) {
   return (
     <SelfieCapture
       onDone={(thumbnail) => {
-        setSelfieSrc(URL.createObjectURL(thumbnail));
+        const src = URL.createObjectURL(thumbnail);
+        setSelfieSrc(src);
+        onSelfie?.(src);
         send({ type: "SELFIE_CAPTURED" });
         setPhase("liveness");
       }}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useContent } from "@/lib/content/useContent";
+import type { Content } from "@/lib/content/schema";
 import { resizeImage } from "@/lib/image/resizeImage";
 import { DocumentCapture } from "./DocumentCapture";
 import { DocumentPassed } from "./DocumentPassed";
@@ -15,12 +16,25 @@ type DocumentEvent =
   | { type: "DOC_INVALID" }
   | { type: "UPLOAD_FAILED" };
 
+type PassedCheck = {
+  id: string;
+  label: string;
+  passed: boolean;
+};
+
 type Props = {
   send: (event: DocumentEvent) => void;
   onThumbnail?: (thumbnail: Blob) => void;
+  onDocumentType?: (type: DocumentChoice["type"]) => void;
+  onChecks?: (checks: PassedCheck[]) => void;
 };
 
-export function DocumentJourney({ send, onThumbnail }: Props) {
+export function DocumentJourney({
+  send,
+  onThumbnail,
+  onDocumentType,
+  onChecks,
+}: Props) {
   const { content } = useContent();
   const [choice, setChoice] = useState<DocumentChoice | null>(null);
   const [phase, setPhase] = useState<Phase>("type");
@@ -51,6 +65,7 @@ export function DocumentJourney({ send, onThumbnail }: Props) {
       const body = (await response.json()) as { passed?: boolean };
       send({ type: "DOC_CAPTURED" });
       if (body.passed) {
+        onChecks?.(documentChecks(content));
         setPhase("passed");
         return;
       }
@@ -71,6 +86,7 @@ export function DocumentJourney({ send, onThumbnail }: Props) {
           setChoice(next);
           setSide(1);
           setPhase("capture");
+          onDocumentType?.(next.type);
         }}
       />
     );
@@ -79,23 +95,7 @@ export function DocumentJourney({ send, onThumbnail }: Props) {
   if (phase === "passed") {
     return (
       <DocumentPassed
-        checks={[
-          {
-            id: "corners",
-            label: content.document.result.passed.checks.corners,
-            passed: true,
-          },
-          {
-            id: "readable",
-            label: content.document.result.passed.checks.readable,
-            passed: true,
-          },
-          {
-            id: "notExpired",
-            label: content.document.result.passed.checks.notExpired,
-            passed: true,
-          },
-        ]}
+        checks={documentChecks(content)}
         onContinue={() => send({ type: "DOC_VALID" })}
         onRetake={() => {
           setSide(1);
@@ -115,6 +115,26 @@ export function DocumentJourney({ send, onThumbnail }: Props) {
       }}
     />
   );
+}
+
+function documentChecks(content: Content): PassedCheck[] {
+  return [
+    {
+      id: "corners",
+      label: content.document.result.passed.checks.corners,
+      passed: true,
+    },
+    {
+      id: "readable",
+      label: content.document.result.passed.checks.readable,
+      passed: true,
+    },
+    {
+      id: "notExpired",
+      label: content.document.result.passed.checks.notExpired,
+      passed: true,
+    },
+  ];
 }
 
 async function documentForm(file: File | undefined, side: number) {
