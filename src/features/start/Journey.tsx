@@ -35,8 +35,12 @@ export function Journey() {
     );
   }
 
-  if (state === "selfieCapture") {
-    return <SelfieJourney documentSrc={documentPhoto} />;
+  if (
+    state === "selfieCapture" ||
+    state === "livenessCheck" ||
+    state === "faceMatch"
+  ) {
+    return <SelfieJourney documentSrc={documentPhoto} send={send} />;
   }
 
   if (state === "idle") {

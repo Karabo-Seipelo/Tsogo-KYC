@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaceMatch } from "./FaceMatch";
 import { LivenessCheck } from "./LivenessCheck";
 import { SelfieCapture } from "./SelfieCapture";
@@ -10,13 +10,25 @@ const blankPhoto =
 
 type Phase = "capture" | "liveness" | "comparing" | "matched";
 
+type SelfieEvent =
+  | { type: "SELFIE_CAPTURED" }
+  | { type: "LIVENESS_PASSED" }
+  | { type: "MATCHED" }
+  | { type: "NO_MATCH" };
+
 type Props = {
   documentSrc?: string | null;
+  send: (event: SelfieEvent) => void;
 };
 
-export function SelfieJourney({ documentSrc }: Props) {
+export function SelfieJourney({ documentSrc, send }: Props) {
   const [phase, setPhase] = useState<Phase>("capture");
   const [selfieSrc, setSelfieSrc] = useState(blankPhoto);
+  const sendRef = useRef(send);
+
+  useEffect(() => {
+    sendRef.current = send;
+  }, [send]);
 
   useEffect(() => {
     if (phase !== "comparing") {
@@ -31,7 +43,10 @@ export function SelfieJourney({ documentSrc }: Props) {
         const body = (await response.json()) as { match?: boolean };
         if (body.match) {
           setPhase("matched");
+          return;
         }
+        sendRef.current({ type: "NO_MATCH" });
+        setPhase("capture");
       })
       .catch(() => undefined);
     return () => {
@@ -39,8 +54,27 @@ export function SelfieJourney({ documentSrc }: Props) {
     };
   }, [phase]);
 
+  async function finishLiveness() {
+    try {
+      const response = await fetch("/api/session/liveness", { method: "POST" });
+      if (!response.ok) {
+        return;
+      }
+      send({ type: "LIVENESS_PASSED" });
+      setPhase("comparing");
+    } catch {
+      return;
+    }
+  }
+
   if (phase === "liveness") {
-    return <LivenessCheck onPassed={() => setPhase("comparing")} />;
+    return (
+      <LivenessCheck
+        onPassed={() => {
+          void finishLiveness();
+        }}
+      />
+    );
   }
 
   if (phase === "comparing" || phase === "matched") {
@@ -49,7 +83,7 @@ export function SelfieJourney({ documentSrc }: Props) {
         phase={phase}
         documentSrc={documentSrc || blankPhoto}
         selfieSrc={selfieSrc}
-        onContinue={() => undefined}
+        onContinue={() => send({ type: "MATCHED" })}
       />
     );
   }
@@ -58,6 +92,7 @@ export function SelfieJourney({ documentSrc }: Props) {
     <SelfieCapture
       onDone={(thumbnail) => {
         setSelfieSrc(URL.createObjectURL(thumbnail));
+        send({ type: "SELFIE_CAPTURED" });
         setPhase("liveness");
       }}
     />
