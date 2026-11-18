@@ -1,0 +1,58 @@
+---
+description: Spec-driven workflow and boundaries for every task in this repo
+alwaysApply: true
+---
+
+# Spec-driven development
+
+This repo is built spec-first. The specs are the source of intent; code is checked against their acceptance criteria (ACs).
+
+## Before a task
+
+1. Read `specs/00-constitution.md`: §9 (boundaries) and §10 (commands, structure, code style, git) are binding.
+2. Read `specs/PLAN.md` to confirm the task belongs to the current phase.
+3. Read only the spec for the task (`specs/NN-*/spec.md`), not the whole folder. Skip every requirement, AC and task tagged `production`: those are designed, not built.
+4. If the task is ambiguous or the spec doesn't cover it, stop and ask. Don't fill gaps with assumptions.
+
+## Which skill to use
+
+| Task | Skills |
+|---|---|
+| Logic task (machine, content/t(), session store, API handlers) | test-driven-development + incremental-implementation (stop after the failing tests) |
+| UI task (screens, dialogs, focus, responsive) | frontend-ui-engineering + incremental-implementation |
+| Any framework or library decision (Next.js 16, XState v5, TanStack Query, Upstash) | source-driven-development, using the official docs listed in `docs/TECH-STACK.md` §1 |
+| Something broken | debugging-and-error-recovery |
+| Security review before handover | security-and-hardening |
+
+No other skills apply in this repo. Skills and checklists are pinned dependencies (`docs/TECH-STACK.md` §3): don't edit them. If a skill conflicts with specs/00-constitution.md or this rule, the constitution wins: flag the conflict, don't choose.
+
+Known overrides, so you don't have to work them out:
+
+- **Accessibility:** WCAG 2.2 AA (constitution §4), not the 2.1 in `frontend-ui-engineering`.
+- **State:** no global client store (no Zustand or Redux). Journey state lives in the XState machine, server state in TanStack Query (§2).
+- **Commits and branches:** constitution §10. `git-workflow-and-versioning` isn't installed; ignore references to it.
+- **No feature flags.** Items tagged `production` aren't built, so there's nothing to hide behind a flag (overrides `incremental-implementation` Rule 3).
+- **Commands:** use `pnpm` (§10), not the `npm` examples in the skills.
+- **New tools** (Playwright, axe-core, etc.) are new dependencies: ask first (§9).
+- **Definition of Done** (`.cursor/references/definition-of-done.md`): for the demo, observability means the request logs and `track()` in spec 08, not metrics, traces or a rollback plan (PB-14), and decisions are recorded in the specs, not ADRs. Ignore references to skills that aren't installed.
+
+## During a task
+
+- **Logic tasks are test-first** (machine, content/`t()`, session store, API handlers): write the failing tests for the task's ACs, run them, show they fail because the code is missing, then **stop and wait for approval** before writing the code. Approved tests are frozen.
+- Do one task (`T-NN.n`) at a time; touch only the files it lists unless you say why.
+- Follow §9 Always / Ask first / Never. "Ask first" means stop and ask before doing it.
+- If the code needs behaviour the spec doesn't describe, propose the spec change first.
+
+## Finishing a task
+
+Run `pnpm typecheck && pnpm lint && pnpm test`, then end with:
+
+```
+Task: T-NN.n
+ACs met: AC-NN.x, …
+ACs not yet met: AC-NN.y (reason) | none
+Out of scope (production): AC-NN.z | none
+Tests: approved | pending review | n/a (UI task)
+Verified by: <command or manual check>
+Spec changes needed: <list> | none
+```
