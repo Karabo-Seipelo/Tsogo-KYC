@@ -17,6 +17,7 @@ import {
   type HandoffCode,
 } from "@/features/handoff/QrExpired";
 import { PhoneDone } from "@/features/review/PhoneDone";
+import { OfflineBanner } from "@/features/resilience/OfflineBanner";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
 
@@ -31,6 +32,7 @@ export function Journey({ device = "desktop" }: Props) {
   return (
     <SaveExitProvider>
       <HelpProvider>
+        {device === "phone" ? <OfflineBanner /> : null}
         <JourneyFlow device={device} />
       </HelpProvider>
     </SaveExitProvider>
