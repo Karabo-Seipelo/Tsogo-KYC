@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
+import { Screen } from "@/components/ui/Screen";
+import {
+  classes,
+  focusRing,
+  screenTitle,
+  stateMotion,
+} from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 import { resizeImage } from "@/lib/image/resizeImage";
 import { CameraBlocked } from "./DocumentFailed";
@@ -77,49 +85,70 @@ export function SelfieCapture({ onDone }: Props) {
   }
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {t("selfie.title")}
-        </h1>
-        {uploading ? (
-          <p role="status" aria-busy="true">
-            {t("selfie.instruction")}
-          </p>
-        ) : (
-          <p className="text-base leading-6">{t("selfie.instruction")}</p>
-        )}
-        <div className="relative border-2 border-neutral-950 p-3">
-          <video
-            ref={video}
-            className="aspect-[3/4] w-full -scale-x-100 bg-neutral-100 object-cover"
-            autoPlay
-            muted
-            playsInline
-            aria-label={t("selfie.cameraAlt")}
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute top-[16%] right-[18%] bottom-[16%] left-[18%] rounded-[50%] border-2 border-neutral-950"
-          />
-        </div>
-        {uploading ? null : (
+    <Screen>
+      <JourneyProgress step="selfie" />
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t("selfie.title")}
+      </h1>
+      {uploading ? (
+        <p role="status" aria-busy="true">
+          {t("selfie.instruction")}
+        </p>
+      ) : (
+        <p className="text-base leading-6">{t("selfie.instruction")}</p>
+      )}
+      <div className="relative overflow-hidden rounded-lg border border-ink bg-ink">
+        <video
+          ref={video}
+          className="aspect-[3/4] w-full -scale-x-100 bg-ink object-cover"
+          autoPlay
+          muted
+          playsInline
+          aria-label={t("selfie.cameraAlt")}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-[16%] right-[18%] bottom-[16%] left-[18%] rounded-[50%] border-2 border-dashed border-on-ink"
+        />
+      </div>
+      {uploading ? null : (
+        <div className="flex flex-col items-center gap-4">
           <button
             type="button"
-            className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
+            className={classes(
+              "flex flex-col items-center gap-2 text-sm text-ink",
+              focusRing,
+              stateMotion,
+            )}
             onClick={() => {
               void takeSelfie();
             }}
           >
+            <span
+              aria-hidden="true"
+              className="inline-flex size-18 items-center justify-center rounded-full bg-ink hover:opacity-[92%] active:opacity-[84%]"
+            >
+              <span className="size-14 rounded-full border-4 border-on-ink" />
+            </span>
             {t("selfie.cta")}
           </button>
-        )}
-      </div>
-    </main>
+          <label className="flex min-h-11 w-full cursor-pointer items-center justify-center rounded-md border border-line-strong bg-surface px-4 text-base text-ink">
+            {t("common.actions.uploadPhotoInstead")}
+            <input
+              className="sr-only"
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                if (file) {
+                  void uploadFrame(file);
+                }
+              }}
+            />
+          </label>
+        </div>
+      )}
+    </Screen>
   );
 }
 

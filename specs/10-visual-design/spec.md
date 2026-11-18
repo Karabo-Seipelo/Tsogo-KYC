@@ -2,7 +2,7 @@
 
 **Covers:** the look of the journey: design principles, design tokens, components and their states, and the high-fidelity screens.
 **Serves:** BR-2 (a calm, trustworthy flow is one people finish), BR-9 (the brand is configuration, like the copy).
-**Screens:** all. High-fidelity references: D1, D3, M2, E3, D5 (Figma, page "6 · Visual design").
+**Screens:** all. Thirteen high-fidelity reference screens and every component are on Figma page "6 · Visual design"; [`handoff.md`](handoff.md) maps them to code and to the screens that reuse their patterns.
 
 ## Context
 
@@ -22,7 +22,6 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
 
 - R-10.1 All visual values come from design tokens defined once in `src/app/globals.css` with Tailwind v4 `@theme`, and mirrored as Figma variables with the same names. Components never use raw colour values, pixel font sizes or arbitrary radii.
 - R-10.2 **Colour tokens.** Contrast ratios are on the token they're used with.
-
   | Token | Value | Use | Contrast |
   |---|---|---|---|
   | `ink` | `#323437` | Body text, primary button fill, dark surfaces | 12.49 : 1 on white |
@@ -39,12 +38,11 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
   | `danger` / `danger-soft` | `#B3261E` / `#FBEAE9` | Errors, failed checks | 6.54 : 1 on white |
   | `warning` / `warning-soft` | `#9A5B00` / `#FBF1E3` | Timeouts, retries | 5.43 : 1 on white |
   | `info` / `info-soft` | `#2457A6` / `#EAF0FA` | Neutral notices | 7.03 : 1 on white |
-
 - R-10.3 **Type.** Montserrat for everything (Google Fonts via `next/font`, self-hosted, `display: swap`). Scale: `display` 32/40 semibold (desktop h1), `title` 24/32 semibold (mobile h1, desktop h2), `heading` 18/26 semibold, `body` 16/24 regular, `small` 14/20 regular, `caption` 12/16 medium. Body text is never below 16 px on the phone.
 - R-10.4 **Space, radius, elevation, motion.** Spacing on a 4 px base (4, 8, 12, 16, 24, 32, 48, 64). Radius: `sm` 6 (chips), `md` 10 (buttons, inputs), `lg` 16 (cards, dialogs), `full` (pills, avatars). One elevation for cards (`0 1px 2px rgb(50 52 55 / 0.06), 0 4px 16px rgb(50 52 55 / 0.06)`) and one for dialogs. Motion 150 ms for state changes, 250 ms for panels, ease-out; all of it off under `prefers-reduced-motion`.
 - R-10.5 **Components**, each with every state it can be in:
   - Button: primary (`ink` fill), secondary (`surface` + `line-strong` border), text link (`gold-strong`); default, hover, focus-visible, pressed, disabled, loading.
-  - OptionCard (device choice, document type): default, hover, selected (`ink` 2 px border **and** a check icon), focus-visible.
+  - OptionCard (device choice, document type): default, hover, selected (`ink` 2 px border **and** a filled radio), focus-visible.
   - Progress: "Step n of 4 · name" plus four segments (`gold-strong` filled, `line` empty).
   - Alert / inline status: success, warning, danger, info; icon + title + text + optional action.
   - Checklist row (D4, M3a/M3b, review): icon + label + status text.
@@ -63,7 +61,7 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
 - **AC-10.3** GIVEN keyboard navigation THEN every interactive element shows the `gold-strong` focus ring.
 - **AC-10.4** GIVEN `prefers-reduced-motion: reduce` THEN no transitions or animations run.
 - **AC-10.5** GIVEN widths of 390, 768 and 1440 px THEN no screen overflows horizontally and the primary action is visible without horizontal scrolling.
-- **AC-10.6** GIVEN the five reference screens THEN the built screens match their Figma layouts, tokens and states.
+- **AC-10.6** GIVEN the thirteen reference screens THEN the built screens match their Figma layouts, tokens and states.
 
 ## Design notes
 
@@ -74,9 +72,9 @@ The palette is **inspired by** the client's public colour scheme (charcoal, mute
 
 ## Tasks
 
-- [ ] T-10.1 Tokens in `globals.css` (`@theme`) and Montserrat via `next/font` → R-10.1 – R-10.4 · verify: `pnpm build`; token values match this spec · files: `src/app/globals.css`, `src/app/layout.tsx`
-- [ ] T-10.2 Contrast test over the token pairs **(tests first)** → AC-10.2 · verify: `pnpm test src/styles` · files: `src/styles/contrast.test.ts` · gate: tests reviewed
-- [ ] T-10.3 Lint rule against raw colours → AC-10.1 · verify: `pnpm lint` flags a raw hex in a test fixture · files: `eslint.config.mjs`
-- [ ] T-10.4 Restyle the shared components with all states → R-10.5, AC-10.3, AC-10.4 · verify: `pnpm test src/components` · files: `src/components/ui/*`
-- [ ] T-10.5 Apply layouts and check the five reference screens against Figma → R-10.6, AC-10.5, AC-10.6 · verify: manual at 390 / 768 / 1440 px; screenshots in the PR · files: screen components
+- [x] T-10.1 Tokens in `globals.css` (`@theme`) and Montserrat via `next/font` → R-10.1 – R-10.4 · verify: `pnpm build`; token values match this spec · files: `src/app/globals.css`, `src/app/layout.tsx`
+- [x] T-10.2 Contrast test over the token pairs **(tests first)** → AC-10.2 · verify: `pnpm test src/styles` · files: `src/styles/contrast.test.ts` · gate: tests reviewed
+- [x] T-10.3 Lint rule against raw colours → AC-10.1 · verify: `pnpm lint` flags a raw hex in a test fixture · files: `eslint.config.mjs`
+- [x] T-10.4 Restyle the shared components with all states → R-10.5, AC-10.3, AC-10.4 · verify: `pnpm test src/components` · files: `src/components/ui/*`
+- [x] T-10.5 Apply layouts to every screen using the patterns in `handoff.md`, and check the thirteen reference screens against `docs/design/hifi/` → R-10.6, AC-10.5, AC-10.6 · verify: manual at 390 / 768 / 1440 px; screenshots in the PR · files: screen components
 - [ ] T-10.6 `production` Dark and brand themes (PB-15)

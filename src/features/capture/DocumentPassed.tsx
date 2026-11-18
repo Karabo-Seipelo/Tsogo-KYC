@@ -1,5 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
+import { Screen } from "@/components/ui/Screen";
+import { screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 
 type Check = {
@@ -18,36 +22,28 @@ export function DocumentPassed({ checks, onContinue, onRetake }: Props) {
   const { t } = useContent();
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {t("document.result.passed.title")}
-        </h1>
-        <ul className="flex flex-col gap-2">
-          {checks.map((check) => (
-            <li key={check.id}>
-              <span aria-hidden="true">✓ </span>
-              {check.label}
-            </li>
-          ))}
-        </ul>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            className="bg-neutral-950 px-4 py-3 text-white"
-            onClick={onContinue}
-          >
+    <Screen
+      action={
+        <div className="flex flex-col gap-3">
+          <Button className="w-full" onClick={onContinue}>
             {t("common.actions.continue")}
-          </button>
-          <button
-            type="button"
-            className="border border-neutral-950 px-4 py-3"
-            onClick={onRetake}
-          >
+          </Button>
+          <Button variant="secondary" className="w-full" onClick={onRetake}>
             {t("common.actions.retakePhoto")}
-          </button>
+          </Button>
         </div>
-      </div>
-    </main>
+      }
+    >
+      <JourneyProgress step="document" />
+      <h1 className={screenTitle}>{t("document.result.passed.title")}</h1>
+      <ul className="flex flex-col gap-2">
+        {checks.map((check) => (
+          <li key={check.id}>
+            <span aria-hidden="true">✓ </span>
+            {check.label}
+          </li>
+        ))}
+      </ul>
+    </Screen>
   );
 }

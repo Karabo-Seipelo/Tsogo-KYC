@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/Button";
+import { focusRing, panelMotion } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 
 const announceEverySeconds = 30;
@@ -80,19 +82,19 @@ export function TimeoutWarning({ remainingMs, onStay, onEnd }: Props) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-30 flex items-center justify-center bg-neutral-950/40 p-4">
+    <div className="fixed inset-0 z-30 flex items-end justify-center bg-ink/48 p-4 sm:items-center">
       <div
         ref={panel}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="timeout-title"
-        className="flex w-full max-w-xl flex-col gap-4 border-2 border-neutral-950 bg-white p-6 text-neutral-950"
+        className={`flex w-full max-w-xl flex-col gap-4 rounded-lg bg-surface p-6 text-ink shadow-dialog ${panelMotion}`}
       >
         <h2
           id="timeout-title"
           ref={heading}
           tabIndex={-1}
-          className="text-xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4"
+          className={`text-heading font-semibold ${focusRing}`}
         >
           {t("errors.SESSION_TIMEOUT_WARNING.title")}
         </h2>
@@ -101,21 +103,13 @@ export function TimeoutWarning({ remainingMs, onStay, onEnd }: Props) {
             time: countdownLabel(remainingMs),
           })}
         </p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            className="bg-neutral-950 px-4 py-3 text-white"
-            onClick={onStay}
-          >
+        <div className="flex flex-row-reverse flex-wrap justify-start gap-3">
+          <Button onClick={onStay}>
             {t("errors.SESSION_TIMEOUT_WARNING.stay")}
-          </button>
-          <button
-            type="button"
-            className="border border-neutral-950 px-4 py-3"
-            onClick={onEnd}
-          >
+          </Button>
+          <Button variant="secondary" onClick={onEnd}>
             {t("errors.SESSION_TIMEOUT_WARNING.end")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

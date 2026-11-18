@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import bundled from "../../../../content/en-ZA.json";
+import { Screen } from "@/components/ui/Screen";
+import { screenTitle } from "@/components/ui/styles";
 import { HelpProvider } from "@/features/help/HelpDialog";
 import { ContentProvider } from "@/lib/content/ContentProvider";
 import { contentSchema } from "@/lib/content/schema";
@@ -80,18 +82,12 @@ function Notice({
   }, []);
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {t(titleKey)}
-        </h1>
-        <p className="text-base leading-6">{t(bodyKey)}</p>
-      </div>
-    </main>
+    <Screen>
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t(titleKey)}
+      </h1>
+      <p className="text-base leading-6">{t(bodyKey)}</p>
+    </Screen>
   );
 }
 

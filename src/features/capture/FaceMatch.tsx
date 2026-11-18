@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
+import { Screen } from "@/components/ui/Screen";
+import { screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 import { MAX_ATTEMPTS } from "@/machines/kycMachine";
 
@@ -31,76 +36,67 @@ export function FaceMatch({
   }, [phase]);
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {phase === "matched"
-            ? t("faceMatch.matched.title")
-            : phase === "noMatch"
-              ? t("faceMatch.noMatch.title")
-              : t("faceMatch.title")}
-        </h1>
-        {phase === "comparing" ? (
-          <>
-            <p role="status">{t("faceMatch.comparing")}</p>
-            <div className="flex gap-4">
-              <Thumbnail
-                src={documentSrc}
-                label={t("faceMatch.documentPhoto")}
-              />
-              <Thumbnail src={selfieSrc} label={t("faceMatch.selfie")} />
-            </div>
-          </>
-        ) : null}
-        {phase === "matched" ? (
-          <>
-            <p className="text-base leading-6">{t("faceMatch.matched.body")}</p>
-            <button
-              type="button"
-              className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
-              onClick={onContinue}
+    <Screen
+      action={
+        phase === "matched" ? (
+          <Button className="w-full" onClick={onContinue}>
+            {t("common.actions.continue")}
+          </Button>
+        ) : phase === "noMatch" ? (
+          <div className="flex flex-col gap-3">
+            <Button className="w-full" onClick={onRetake}>
+              {t("faceMatch.noMatch.retake")}
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={onDifferentDocument}
             >
-              {t("common.actions.continue")}
-            </button>
-          </>
-        ) : null}
-        {phase === "noMatch" ? (
-          <>
-            <p className="text-base leading-6">
-              {content.faceMatch.noMatch.intro}
-            </p>
-            <ul className="list-disc pl-5">
+              {t("faceMatch.noMatch.differentDocument")}
+            </Button>
+          </div>
+        ) : null
+      }
+    >
+      <JourneyProgress step="liveness" />
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {phase === "matched"
+          ? t("faceMatch.matched.title")
+          : phase === "noMatch"
+            ? t("faceMatch.noMatch.title")
+            : t("faceMatch.title")}
+      </h1>
+      {phase === "comparing" ? (
+        <>
+          <p role="status">{t("faceMatch.comparing")}</p>
+          <div className="flex gap-4">
+            <Thumbnail src={documentSrc} label={t("faceMatch.documentPhoto")} />
+            <Thumbnail src={selfieSrc} label={t("faceMatch.selfie")} />
+          </div>
+        </>
+      ) : null}
+      {phase === "matched" ? (
+        <Alert tone="success" title={t("faceMatch.matched.body")} />
+      ) : null}
+      {phase === "noMatch" ? (
+        <>
+          <div className="flex gap-4">
+            <Thumbnail src={documentSrc} label={t("faceMatch.documentPhoto")} />
+            <Thumbnail src={selfieSrc} label={t("faceMatch.selfie")} />
+          </div>
+          <Alert tone="danger" title={content.faceMatch.noMatch.intro}>
+            <ul className="flex flex-col gap-1">
               {content.faceMatch.noMatch.tips.map((tip) => (
                 <li key={tip}>{tip}</li>
               ))}
             </ul>
-            <p className="text-sm font-medium">
-              {t("common.attempt", { attempt, max: MAX_ATTEMPTS })}
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                className="bg-neutral-950 px-4 py-3 text-white"
-                onClick={onRetake}
-              >
-                {t("faceMatch.noMatch.retake")}
-              </button>
-              <button
-                type="button"
-                className="border border-neutral-950 px-4 py-3"
-                onClick={onDifferentDocument}
-              >
-                {t("faceMatch.noMatch.differentDocument")}
-              </button>
-            </div>
-          </>
-        ) : null}
-      </div>
-    </main>
+          </Alert>
+          <p className="text-sm font-medium">
+            {t("common.attempt", { attempt, max: MAX_ATTEMPTS })}
+          </p>
+        </>
+      ) : null}
+    </Screen>
   );
 }
 
@@ -112,7 +108,7 @@ function Thumbnail({ src, label }: { src: string; label: string }) {
       <img
         src={src}
         alt={label}
-        className="aspect-square w-full border border-neutral-950 object-cover"
+        className="aspect-square w-full rounded-md border border-line-strong object-cover"
       />
       <figcaption className="text-sm">{label}</figcaption>
     </figure>

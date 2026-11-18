@@ -1,0 +1,22 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": ["src/components/ui/Alert.tsx"],
+        "createdAt": "2026-11-18T18:30:11.931Z",
+        "reason": "Handoff HF/Alert specifies a 4px left border in the tone colour"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": ["src/components/ui/components.test.tsx"],
+        "createdAt": "2026-11-18T18:30:15.159Z",
+        "reason": "Test asserts the 4px left border specified for HF/Alert"
+      }
+    ]
+  }
+}

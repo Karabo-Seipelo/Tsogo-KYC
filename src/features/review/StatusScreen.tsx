@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/Button";
+import { Progress } from "@/components/ui/Progress";
+import { Screen } from "@/components/ui/Screen";
+import { screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 import { progressFor } from "@/machines/progress";
 import { kycStates, type KycState } from "@/machines/kycMachine.types";
@@ -74,72 +78,65 @@ export function StatusScreen({
 
   if (!phoneConnected) {
     return (
-      <main className="min-h-dvh bg-white text-neutral-950">
-        <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-          <h1
-            ref={heading}
-            tabIndex={-1}
-            className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
-            {t("status.disconnected.label")}
-          </h1>
-          <p className="text-base leading-6">{t("status.disconnected.body")}</p>
-          <p role="status" aria-live="polite" className="text-base leading-6">
-            {t("status.disconnected.reconnecting")}
-          </p>
-          <button
-            type="button"
-            className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
-            onClick={onShowQr}
-          >
+      <Screen
+        action={
+          <Button className="w-full" onClick={onShowQr}>
             {t("status.disconnected.cta")}
-          </button>
-        </div>
-      </main>
+          </Button>
+        }
+      >
+        <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+          {t("status.disconnected.label")}
+        </h1>
+        <p className="text-base leading-6">{t("status.disconnected.body")}</p>
+        <p role="status" aria-live="polite" className="text-base leading-6">
+          {t("status.disconnected.reconnecting")}
+        </p>
+      </Screen>
     );
   }
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {t("status.title")}
-        </h1>
-        <p className="text-base leading-6">{t("status.intro")}</p>
-        {progress ? (
-          <p className="text-sm font-medium">
-            {t("common.progress.label", {
-              current: progress.current,
-              total: progress.total,
-              name: t(stepNameKey(progress.step)),
-            })}
-          </p>
-        ) : null}
-        <p role="status" aria-live="polite" className="sr-only">
-          {current
-            ? `${labelFor(content, current.id)} ${t("common.status.inProgress")}`
-            : t("status.intro")}
-        </p>
-        <ul className="flex flex-col gap-3">
-          {rows.map((row) => (
-            <li
-              key={row.id}
-              className="flex items-center justify-between gap-4"
-            >
-              <span className="flex items-center gap-3">
-                <span aria-hidden="true">{icons[row.state]}</span>
-                <span>{labelFor(content, row.id)}</span>
+    <Screen>
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t("status.title")}
+      </h1>
+      <p className="text-base leading-6">{t("status.intro")}</p>
+      {progress ? (
+        <Progress
+          current={progress.current}
+          total={progress.total}
+          name={t(stepNameKey(progress.step))}
+        />
+      ) : null}
+      <p role="status" aria-live="polite" className="sr-only">
+        {current
+          ? `${labelFor(content, current.id)} ${t("common.status.inProgress")}`
+          : t("status.intro")}
+      </p>
+      <ul className="flex flex-col gap-3">
+        {rows.map((row) => (
+          <li key={row.id} className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-3">
+              <span aria-hidden="true">{icons[row.state]}</span>
+              <span
+                className={
+                  row.state === "waiting" ? "text-ink-muted" : undefined
+                }
+              >
+                {labelFor(content, row.id)}
               </span>
-              <span>{statusLabel(t, row.state)}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </main>
+            </span>
+            <span className={statusTone(row.state)}>
+              {statusLabel(t, row.state)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <Button variant="text" className="w-fit px-0" onClick={onShowQr}>
+        {t("status.lostConnection")}
+      </Button>
+    </Screen>
   );
 }
 
@@ -173,6 +170,16 @@ function labelFor(
   id: RowId,
 ) {
   return content.status.steps[id];
+}
+
+function statusTone(state: RowState) {
+  if (state === "done") {
+    return "text-success";
+  }
+  if (state === "inProgress") {
+    return "font-semibold text-info";
+  }
+  return "text-ink-muted";
 }
 
 function statusLabel(t: ReturnType<typeof useContent>["t"], state: RowState) {

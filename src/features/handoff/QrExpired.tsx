@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Screen } from "@/components/ui/Screen";
+import { screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 import { QrHandoff } from "./QrHandoff";
 import { useStatusPoll } from "./useStatusPoll";
@@ -91,6 +95,7 @@ export function HandoffScreen({
     <QrHandoff
       token={code.token}
       host={host}
+      expiresAt={code.expiresAt}
       onContinueHere={onContinueHere}
       phoneConnected={connected}
     />
@@ -130,37 +135,37 @@ export function QrExpired({ onContinueHere, onIssued }: ExpiredProps) {
   }
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {t("handoff.expired.title")}
-        </h1>
-        <p className="text-base leading-6">
-          {t("handoff.expired.body", { minutes: handoffWindowMinutes })}
-        </p>
-        <button
-          type="button"
-          className="w-full bg-neutral-950 px-4 py-3 text-white sm:w-fit"
-          disabled={pending}
-          onClick={() => {
-            void refresh();
-          }}
-        >
-          {t("handoff.expired.cta")}
-        </button>
-        <button
-          type="button"
-          className="w-full border border-neutral-950 px-4 py-3 sm:w-fit"
-          onClick={onContinueHere}
-        >
-          {t("handoff.expired.fallback")}
-        </button>
-      </div>
-    </main>
+    <Screen
+      width="wide"
+      action={
+        <div className="flex flex-col gap-3 md:flex-row">
+          <Button
+            className="w-full md:w-fit"
+            disabled={pending}
+            onClick={() => {
+              void refresh();
+            }}
+          >
+            {t("handoff.expired.cta")}
+          </Button>
+          <Button
+            variant="secondary"
+            className="w-full md:w-fit"
+            onClick={onContinueHere}
+          >
+            {t("handoff.expired.fallback")}
+          </Button>
+        </div>
+      }
+    >
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t("handoff.expired.title")}
+      </h1>
+      <Alert
+        tone="warning"
+        title={t("handoff.expired.body", { minutes: handoffWindowMinutes })}
+      />
+    </Screen>
   );
 }
 

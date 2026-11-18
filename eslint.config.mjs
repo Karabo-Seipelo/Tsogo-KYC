@@ -55,6 +55,67 @@ const noHardcodedCopy = {
   },
 };
 
+const paletteUtilities = [
+  "bg",
+  "text",
+  "border(?:-[trblxy])?",
+  "outline",
+  "ring(?:-offset)?",
+  "fill",
+  "stroke",
+  "accent",
+  "caret",
+  "divide",
+  "from",
+  "via",
+  "to",
+  "decoration",
+  "shadow",
+  "placeholder",
+].join("|");
+
+const paletteColours =
+  "slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|black|white";
+
+const rawColourPatterns = [
+  ["hex", /#[0-9A-Fa-f]{3,8}\b/g],
+  ["rgb", /\brgba?\s*\(/g],
+  [
+    "palette",
+    new RegExp(
+      `(?:^|[^A-Za-z0-9-])(?:[A-Za-z0-9-]+:)*(?:${paletteUtilities})-(?:${paletteColours})(?:-\\d{2,3})?(?:/\\d{1,3})?(?![A-Za-z0-9-])`,
+      "g",
+    ),
+  ],
+];
+
+const noRawColour = {
+  meta: {
+    type: "problem",
+    schema: [],
+    messages: {
+      hex: "Use a design token instead of a raw hex colour.",
+      rgb: "Use a design token instead of an rgb() colour.",
+      palette: "Use a design token instead of a Tailwind palette colour.",
+    },
+  },
+  create(context) {
+    return {
+      Program() {
+        const source = context.sourceCode.getText();
+        for (const [messageId, pattern] of rawColourPatterns) {
+          for (const match of source.matchAll(pattern)) {
+            context.report({
+              loc: context.sourceCode.getLocFromIndex(match.index ?? 0),
+              messageId,
+            });
+          }
+        }
+      },
+    };
+  },
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -68,11 +129,20 @@ const eslintConfig = defineConfig([
     ".private/**",
   ]),
   {
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: {
+      kyc: {
+        rules: {
+          "no-hardcoded-copy": noHardcodedCopy,
+          "no-raw-colour": noRawColour,
+        },
+      },
+    },
+    rules: { "kyc/no-raw-colour": "error" },
+  },
+  {
     files: ["src/**/*.tsx"],
     ignores: ["**/*.test.tsx"],
-    plugins: {
-      kyc: { rules: { "no-hardcoded-copy": noHardcodedCopy } },
-    },
     rules: { "kyc/no-hardcoded-copy": "error" },
   },
 ]);
