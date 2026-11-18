@@ -45,9 +45,6 @@
 
 ## Tasks
 
-<<<<<<< Updated upstream
-- [ ] `.env.example`, `scripts/bootstrap.mjs`, `dev:phone` script (cloudflared)
-=======
 P0 is the local scaffold. `dev:phone` is P3. The banner, `noindex`, Vercel and the domain are P5.
 
 - [x] T-07.1 Scaffold Next.js (App Router, TypeScript strict, Tailwind, `src/`, alias `@/*`) into this repo without replacing `README.md`, `content/` or `.cursor/`. Home page is an empty `<main>` → P0 scaffold · verify: `git diff -- README.md content` is empty · files: `package.json`, `tsconfig.json`, `next.config.ts`, `src/app/layout.tsx`, `src/app/page.tsx`
@@ -69,7 +66,6 @@ P0.5 · Checks:
 Later phases, not built in P0 or P0.5:
 
 - [ ] `dev:phone` script (cloudflared) → AC-07.8 (P3)
->>>>>>> Stashed changes
 - [ ] `production` `docker-compose.yml`, `Dockerfile`, `docker/nginx.conf` (PB-3)
 - [ ] Vercel project, environment variables per environment, Upstash databases (preview + production)
 - [ ] Domain `tsogo.karaboseipelo.com` + DNS

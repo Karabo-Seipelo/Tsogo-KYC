@@ -42,14 +42,11 @@ One line per package, with the spec that needs it. A new package is added here w
 | `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` | Tests | All | dev |
 | `eslint`, `eslint-config-next`, `@typescript-eslint/*` | Linting, incl. the hard-coded-string check (AC-09.1) | All | dev |
 | `prettier` | Formatting | All | dev |
-<<<<<<< Updated upstream
-=======
 | `@tailwindcss/postcss`, `postcss` | Tailwind v4's Next.js setup: the official PostCSS plugin | All | dev |
 | `husky` | Installs the git hooks on `pnpm install` | 07 (P0.5) | dev |
 | `lint-staged` | Runs ESLint and Prettier on staged files only, in pre-commit | 07 (P0.5) | dev |
 | `@commitlint/cli`, `@commitlint/config-conventional` | Checks commit messages follow Conventional Commits, in commit-msg | 07 (P0.5) | dev |
 | `@vitejs/plugin-react`, `@testing-library/dom` | Vitest + Testing Library setup from the Next.js guide. `@/` paths use Vitest 5's `resolve.tsconfigPaths` | All | dev |
->>>>>>> Stashed changes
 
 Versions come from `pnpm-lock.yaml`; this table records *why* each package is here.
 
