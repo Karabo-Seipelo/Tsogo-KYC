@@ -47,3 +47,21 @@ test("AC-02.3 the QR URL has the handoff token and the desktop host, and no sess
   );
   expect(onContinueHere).toHaveBeenCalledOnce();
 });
+
+test("AC-02.4 Phone connected is announced when the phone has joined", () => {
+  render(
+    <ContentProvider content={content}>
+      <QrHandoff
+        token="a1b2c3d4e5f67890"
+        host="preview.example"
+        onContinueHere={vi.fn()}
+        phoneConnected
+      />
+    </ContentProvider>,
+  );
+
+  const announced = screen.getByRole("status");
+  expect(announced.textContent).toBe(content.handoff.connected);
+  expect(announced.getAttribute("aria-live")).toBe("polite");
+  expect(screen.queryByText(content.handoff.waiting)).toBeNull();
+});

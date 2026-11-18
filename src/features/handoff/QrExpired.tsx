@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useContent } from "@/lib/content/useContent";
 import { QrHandoff } from "./QrHandoff";
+import { useStatusPoll } from "./useStatusPoll";
 
 export const handoffWindowMinutes = 10;
 
@@ -28,6 +29,7 @@ export function HandoffScreen({
 }: ScreenProps) {
   const [override, setOverride] = useState<HandoffCode | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  const status = useStatusPoll();
   const code = override ?? { token, expiresAt };
   const remaining = Date.parse(code.expiresAt) - now;
   const expired = Number.isNaN(remaining) || remaining <= 0;
@@ -54,7 +56,12 @@ export function HandoffScreen({
   }
 
   return (
-    <QrHandoff token={code.token} host={host} onContinueHere={onContinueHere} />
+    <QrHandoff
+      token={code.token}
+      host={host}
+      onContinueHere={onContinueHere}
+      phoneConnected={status?.phoneConnected === true}
+    />
   );
 }
 

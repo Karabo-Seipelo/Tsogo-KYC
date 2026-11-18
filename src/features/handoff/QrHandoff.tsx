@@ -8,9 +8,15 @@ type Props = {
   token: string;
   host: string;
   onContinueHere: () => void;
+  phoneConnected?: boolean;
 };
 
-export function QrHandoff({ token, host, onContinueHere }: Props) {
+export function QrHandoff({
+  token,
+  host,
+  onContinueHere,
+  phoneConnected = false,
+}: Props) {
   const { content, t } = useContent();
   const heading = useRef<HTMLHeadingElement>(null);
   const url = `https://${host}/m/${token}`;
@@ -44,7 +50,13 @@ export function QrHandoff({ token, host, onContinueHere }: Props) {
         <p id="handoff-url" className="sr-only">
           {url}
         </p>
-        <p className="text-base leading-6">{t("handoff.waiting")}</p>
+        {phoneConnected ? (
+          <p role="status" aria-live="polite" className="text-base leading-6">
+            {t("handoff.connected")}
+          </p>
+        ) : (
+          <p className="text-base leading-6">{t("handoff.waiting")}</p>
+        )}
         <button
           type="button"
           className="w-full border border-neutral-950 px-4 py-3 sm:w-fit"
