@@ -1,4 +1,8 @@
 import { Montserrat } from "next/font/google";
+import bundled from "../../content/en-ZA.json";
+import { DemoBanner } from "@/components/DemoBanner";
+import { ContentProvider } from "@/lib/content/ContentProvider";
+import { contentSchema } from "@/lib/content/schema";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -7,12 +11,25 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
+const content = contentSchema.parse(bundled);
+
 type Props = { children: React.ReactNode };
 
+// The root layout wraps every route, including /privacy, the saved page and
+// segment error pages. Source: https://nextjs.org/docs/app/api-reference/file-conventions/layout
 export default function RootLayout({ children }: Props) {
   return (
     <html lang="en-ZA" className={montserrat.variable}>
-      <body className="bg-canvas text-ink">{children}</body>
+      <body className="bg-canvas text-ink">
+        <ContentProvider content={content}>
+          {demoBannerEnabled() ? <DemoBanner /> : null}
+          {children}
+        </ContentProvider>
+      </body>
     </html>
   );
+}
+
+export function demoBannerEnabled(mode = process.env.DEMO_MODE) {
+  return mode === undefined || mode === "true";
 }
