@@ -30,6 +30,7 @@ Every dependency, including the agent's skills and checklists, is recorded in [`
 - Every failure tells the user what happened and gives a next action. No dead ends.
 - Copy is plain and specific: the time estimate, what's needed, why something failed.
 - Layouts are designed at 390 px and 1440 px and must not break at 768 px.
+- **Visual values come from design tokens only** (spec 10): no raw colours, font sizes or radii in components. The brand is configuration, like the copy.
 - Shown to the user as 4 steps on every path: document → selfie → liveness & face match → review. Device choice and QR handoff are setup and carry no step counter (spec 01, R-01.7).
 - **No hard-coded user-facing strings**, including `aria-label`s and live-region messages. All copy comes through `useContent()` / `t()` (spec 09).
 

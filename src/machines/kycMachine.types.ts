@@ -26,6 +26,7 @@ export type KycEvent =
   | { type: "CHOOSE_PHONE" }
   | { type: "CHOOSE_THIS_DEVICE" }
   | { type: "PHONE_CONNECTED" }
+  | { type: "HANDBACK" }
   | { type: "DOC_CAPTURED" }
   | { type: "DOC_VALID" }
   | { type: "DOC_INVALID" }

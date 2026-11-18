@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { DocumentKind } from "@/features/capture/DocumentType";
 import { DocumentJourney } from "@/features/capture/DocumentJourney";
 import { SelfieJourney } from "@/features/capture/SelfieJourney";
@@ -9,34 +9,61 @@ import { ProcessingScreen } from "@/features/review/ProcessingScreen";
 import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
 import { HelpProvider } from "@/features/help/HelpDialog";
 import { SaveExitProvider } from "@/features/save-exit/SaveExit";
+import type { Device } from "@/machines/kycMachine.types";
 import { useKycMachine } from "@/machines/useKycMachine";
+import {
+  HandoffScreen,
+  handoffCodeFrom,
+  type HandoffCode,
+} from "@/features/handoff/QrExpired";
+import { PhoneDone } from "@/features/review/PhoneDone";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
 
 const blankPhoto =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-export function Journey() {
+type Props = {
+  device?: Device;
+};
+
+export function Journey({ device = "desktop" }: Props) {
   return (
     <SaveExitProvider>
       <HelpProvider>
-        <JourneyFlow />
+        <JourneyFlow device={device} />
       </HelpProvider>
     </SaveExitProvider>
   );
 }
 
-function JourneyFlow() {
+function JourneyFlow({ device }: { device: Device }) {
   const { state, send } = useKycMachine();
+  usePhoneHeartbeat(device, state);
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
   const [documentType, setDocumentType] = useState<DocumentKind | null>(null);
   const [checks, setChecks] = useState<ReviewCheck[]>([]);
+  const [handoff, setHandoff] = useState<HandoffCode | null>(null);
 
   if (state === "deviceSelection") {
     return (
       <DeviceSelection
         onChooseThisDevice={() => send({ type: "CHOOSE_THIS_DEVICE" })}
+        onChoosePhone={() => send({ type: "CHOOSE_PHONE" })}
+      />
+    );
+  }
+
+  if (state === "qrHandoff" && handoff) {
+    return (
+      <HandoffScreen
+        token={handoff.token}
+        expiresAt={handoff.expiresAt}
+        host={window.location.host}
+        onContinueHere={() => send({ type: "CHOOSE_THIS_DEVICE" })}
+        onIssued={setHandoff}
+        onReview={() => send({ type: "HANDBACK" })}
       />
     );
   }
@@ -80,10 +107,14 @@ function JourneyFlow() {
     );
   }
 
-  if (state === "review" && documentType) {
+  if (state === "review" && device === "phone") {
+    return <PhoneDone />;
+  }
+
+  if (state === "review") {
     return (
       <ReviewScreen
-        documentType={documentType}
+        documentType={documentType ?? "passport"}
         documentSrc={documentPhoto ?? blankPhoto}
         selfieSrc={selfiePhoto ?? blankPhoto}
         checks={checks}
@@ -109,7 +140,11 @@ function JourneyFlow() {
     return (
       <StartScreen
         onStart={() => {
-          void fetch("/api/session", { method: "POST" }).finally(() => {
+          if (device === "phone") {
+            send({ type: "START", device: "phone" });
+            return;
+          }
+          void startDesktopSession(setHandoff).finally(() => {
             send({ type: "START", device: "desktop" });
           });
         }}
@@ -118,6 +153,48 @@ function JourneyFlow() {
   }
 
   return <main />;
+}
+
+const phoneHeartbeatMs = 10_000;
+
+function usePhoneHeartbeat(device: Device, step: string) {
+  useEffect(() => {
+    if (device !== "phone" || step === "idle") {
+      return;
+    }
+    void sendHeartbeat(step);
+    const timer = window.setInterval(() => {
+      void sendHeartbeat(step);
+    }, phoneHeartbeatMs);
+    return () => window.clearInterval(timer);
+  }, [device, step]);
+}
+
+async function sendHeartbeat(step: string) {
+  try {
+    await fetch("/api/session/heartbeat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ step }),
+    });
+  } catch {
+    return;
+  }
+}
+
+async function startDesktopSession(setHandoff: (code: HandoffCode) => void) {
+  try {
+    const response = await fetch("/api/session", { method: "POST" });
+    if (!response.ok) {
+      return;
+    }
+    const code = handoffCodeFrom(await response.json());
+    if (code) {
+      setHandoff(code);
+    }
+  } catch {
+    return;
+  }
 }
 
 async function submitReview(send: (event: { type: "SUBMIT" }) => void) {

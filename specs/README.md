@@ -31,6 +31,7 @@ The workflow is gated: **specify → plan → tasks → implement**, and each st
 | 07  | [Environments & bootstrap](07-environments-bootstrap/spec.md)                         | Approved · backlog: PB-3, PB-8       |
 | 08  | [Funnel events, audit trail & manual review](08-insights-audit-manual-review/spec.md) | Approved · backlog: PB-9             |
 | 09  | [Content layer](09-content-layer/spec.md)                                             | Approved · backlog: PB-1, PB-2       |
+| 10  | [Visual design](10-visual-design/spec.md)                                             | Approved · backlog: PB-15 |
 
 ## Traceability: business goal → requirement → spec → screen → test
 
@@ -87,4 +88,5 @@ Screen codes refer to `docs/wireframes.pdf`: **D** = desktop, **M** = mobile, **
 |---|---|
 | Responsive (desktop, tablet, mobile) | Constitution §3; every spec's UI criteria |
 | Keyboard navigation, ARIA labels, clear validation/error messaging | Constitution §4; every spec's a11y criteria |
+| Visual design: tokens, contrast, focus, reduced motion, layouts (not in the brief) | 10 | AC-10.1 – AC-10.6 |
 | Help, Save & exit and privacy notice (not in the brief; shown in the wireframes' header and D1) | 02, AC-02.9 – AC-02.12 |
