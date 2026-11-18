@@ -6,6 +6,25 @@ import { createMemoryStore } from "@/lib/store/memoryStore";
 
 const sessionTtlSeconds = 15 * 60;
 const handoffTtlSeconds = 10 * 60;
+const failSwitches = new Set([
+  "upload",
+  "upload:always",
+  "document",
+  "document:always",
+  "match",
+  "match:always",
+  "reject",
+]);
+
+function sessionSwitches(request: Request) {
+  const params = new URL(request.url).searchParams;
+  const fail = params.get("fail");
+  const ttl = params.get("ttl");
+  return {
+    ...(fail !== null && failSwitches.has(fail) ? { fail } : {}),
+    ...(ttl === "1" ? { ttl: 1 } : {}),
+  };
+}
 
 export async function POST(request: Request) {
   const log = { step: null as string | null, errorCode: null as string | null };
@@ -23,7 +42,7 @@ async function createSession(request: Request, log: { step: string | null }) {
   const store = createMemoryStore();
   await store.set(
     `session:${sessionId}`,
-    { step: "idle", handoffToken },
+    { step: "idle", handoffToken, ...sessionSwitches(request) },
     sessionTtlSeconds,
   );
   await store.set(`handoff:${handoffToken}`, { sessionId }, handoffTtlSeconds);
