@@ -5,6 +5,7 @@ import type { DocumentKind } from "@/features/capture/DocumentType";
 import { DocumentJourney } from "@/features/capture/DocumentJourney";
 import { SelfieJourney } from "@/features/capture/SelfieJourney";
 import { CompleteScreen } from "@/features/review/CompleteScreen";
+import { ManualReview } from "@/features/review/ManualReview";
 import { ProcessingScreen } from "@/features/review/ProcessingScreen";
 import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
 import { HelpProvider } from "@/features/help/HelpDialog";
@@ -52,6 +53,7 @@ function JourneyFlow({ device }: { device: Device }) {
   const status = useStatusPoll();
   const [now, setNow] = useState(() => Date.now());
   const [heldExpiresAt, setHeldExpiresAt] = useState<string | null>(null);
+  const [manualReference, setManualReference] = useState<string | null>(null);
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
   const [documentType, setDocumentType] = useState<DocumentKind | null>(null);
@@ -84,6 +86,21 @@ function JourneyFlow({ device }: { device: Device }) {
     }
     send({ type: "REJECTED" });
   }, [send, state, status?.outcome]);
+
+  useEffect(() => {
+    if (reason !== "maxAttempts") {
+      return;
+    }
+    let cancelled = false;
+    void markManualReview().then((reference) => {
+      if (!cancelled && reference) {
+        setManualReference(reference);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [reason]);
 
   function restart() {
     void refreshSession().finally(() => {
@@ -118,6 +135,10 @@ function JourneyFlow({ device }: { device: Device }) {
 
   if (state === "error" && status?.outcome === "rejected" && status.reference) {
     return <Rejected reference={status.reference} onRetry={restart} />;
+  }
+
+  if (state === "error" && reason === "maxAttempts" && manualReference) {
+    return <ManualReview reference={manualReference} />;
   }
 
   let screen: ReactNode;
@@ -294,6 +315,24 @@ async function startDesktopSession(setHandoff: (code: HandoffCode) => void) {
   } catch {
     return;
   }
+}
+
+async function markManualReview() {
+  try {
+    const response = await fetch("/api/session/manual-review", {
+      method: "POST",
+    });
+    if (!response.ok) {
+      return null;
+    }
+    const body: unknown = await response.json();
+    if (isRecord(body) && typeof body.reference === "string") {
+      return body.reference;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 async function refreshSession() {

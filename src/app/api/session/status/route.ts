@@ -47,7 +47,9 @@ async function readStatus(request: Request, log: { step: string | null }) {
     expired: expiry.expired,
     expiresAt: expiry.expiresAt,
     ...(session.ttl === 1 ? { ttl: 1 } : {}),
-    ...(session.outcome === "rejected" ? { outcome: "rejected" } : {}),
+    ...(session.outcome === "rejected" || session.outcome === "manualReview"
+      ? { outcome: session.outcome }
+      : {}),
     ...(typeof session.reference === "string"
       ? { reference: session.reference }
       : {}),
