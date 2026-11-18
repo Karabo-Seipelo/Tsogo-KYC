@@ -7,6 +7,16 @@ alwaysApply: true
 
 This repo is built spec-first. The specs are the source of intent; code is checked against their acceptance criteria (ACs).
 
+## Starting a phase
+
+When asked to start a PLAN phase:
+
+1. Read its row in `specs/PLAN.md` and the specs it lists.
+2. Propose `T-NN.n` tasks covering the phase (the specs' Tasks plus the PLAN row),  in the PLAN task format. Stop for approval.
+3. Once appro ed, write them into each spec's Tasks section (later-phase tasks labelled, e.g. "(P3)"), and tick them `[x]` as they're done.
+4. Finish at the phase checkpoint with the self-check.
+
+
 ## Before a task
 
 1. Read `specs/00-constitution.md`: §9 (boundaries) and §10 (commands, structure, code style, git) are binding.
