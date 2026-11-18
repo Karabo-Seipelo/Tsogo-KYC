@@ -14,7 +14,7 @@ Versions are taken from `pnpm-lock.yaml` at scaffold time (PLAN, P0) and updated
 | React | UI | 19.3.0 | https://react.dev |
 | TypeScript (`strict`) | Language | 5.9.3 | https://www.typescriptlang.org/docs/ |
 | Zod | Content schema and the type inferred from it | 4.6.7 | https://zod.dev |
-| XState (`@xstate/react` at T-01.5) | Journey state machine | xstate 5.33.4 | https://stately.ai/docs |
+| XState + `@xstate/react` | Journey state machine | xstate 5.33.4, @xstate/react 6.1.0 | https://stately.ai/docs |
 | TanStack Query | Server state, polling, mutations | 5.x | https://tanstack.com/query/latest |
 | Tailwind CSS | Styling | tailwindcss 4.3.3 | https://tailwindcss.com/docs |
 | Vitest + Testing Library | Unit and component tests | vitest 5.1.0, @testing-library/react 16.3.3 | https://vitest.dev · https://testing-library.com/docs/react-testing-library/intro/ |
