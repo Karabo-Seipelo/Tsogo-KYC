@@ -1,3 +1,6 @@
+export const screenTitle =
+  "text-title font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-strong md:text-display";
+
 export const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-strong";
 

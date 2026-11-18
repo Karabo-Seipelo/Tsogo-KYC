@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Screen } from "@/components/ui/Screen";
+import { screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 
 export const statusPollMs = 2_000;
@@ -58,19 +60,13 @@ export function ProcessingScreen({ onComplete }: Props) {
   }, []);
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {t("processing.title")}
-        </h1>
-        <p role="status" className="text-base leading-6">
-          {slow ? t("processing.slow") : t("processing.body")}
-        </p>
-      </div>
-    </main>
+    <Screen>
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t("processing.title")}
+      </h1>
+      <p role="status" className="text-base leading-6">
+        {slow ? t("processing.slow") : t("processing.body")}
+      </p>
+    </Screen>
   );
 }

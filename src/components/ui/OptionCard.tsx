@@ -1,5 +1,6 @@
 "use client";
 
+import type { Ref } from "react";
 import { classes, stateMotion } from "./styles";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
   onChange: () => void;
   title: string;
   description?: string;
+  inputRef?: Ref<HTMLInputElement>;
 };
 
 export function OptionCard({
@@ -18,6 +20,7 @@ export function OptionCard({
   onChange,
   title,
   description,
+  inputRef,
 }: Props) {
   return (
     <label
@@ -29,6 +32,7 @@ export function OptionCard({
       )}
     >
       <input
+        ref={inputRef}
         className="sr-only"
         type="radio"
         name={name}

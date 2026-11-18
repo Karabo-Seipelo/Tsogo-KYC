@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { Screen } from "@/components/ui/Screen";
+import { focusRing, screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 
 export const saveWindowMinutes = 15;
@@ -45,6 +47,10 @@ export function SaveExitProvider({ children }: Props) {
       ) : null}
     </SaveExitContext.Provider>
   );
+}
+
+export function useSaveExit() {
+  return useContext(SaveExitContext);
 }
 
 export function SaveExitButton() {
@@ -170,22 +176,19 @@ function SavedPage() {
   }, []);
 
   return (
-    <main className="min-h-dvh bg-white text-neutral-950">
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-10">
-        <h1
-          ref={heading}
-          tabIndex={-1}
-          className="text-3xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          {t("saveExit.savedTitle")}
-        </h1>
-        <p className="text-base leading-6">
-          {t("saveExit.savedBody", { minutes: saveWindowMinutes })}
-        </p>
-        <a className="w-fit text-sm underline" href="#">
-          {t("saveExit.return")}
-        </a>
-      </div>
-    </main>
+    <Screen>
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t("saveExit.savedTitle")}
+      </h1>
+      <p className="text-base leading-6">
+        {t("saveExit.savedBody", { minutes: saveWindowMinutes })}
+      </p>
+      <a
+        className={`w-fit text-sm text-gold-strong underline ${focusRing}`}
+        href="#"
+      >
+        {t("saveExit.return")}
+      </a>
+    </Screen>
   );
 }

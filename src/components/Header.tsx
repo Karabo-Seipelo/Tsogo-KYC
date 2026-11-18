@@ -5,7 +5,7 @@ import { classes, focusRing, stateMotion } from "@/components/ui/styles";
 
 type Props = {
   onHelp: () => void;
-  onSaveExit: () => void;
+  onSaveExit?: () => void;
 };
 
 const textButton = classes(
@@ -26,13 +26,15 @@ export function Header({ onHelp, onSaveExit }: Props) {
           <span className="hidden md:inline">{t("common.header.title")}</span>
         </p>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className={classes(textButton, "hidden md:inline-flex")}
-            onClick={onSaveExit}
-          >
-            {t("common.header.saveAndExit")}
-          </button>
+          {onSaveExit ? (
+            <button
+              type="button"
+              className={classes(textButton, "hidden md:inline-flex")}
+              onClick={onSaveExit}
+            >
+              {t("common.header.saveAndExit")}
+            </button>
+          ) : null}
           <button type="button" className={textButton} onClick={onHelp}>
             {t("common.header.help")}
           </button>

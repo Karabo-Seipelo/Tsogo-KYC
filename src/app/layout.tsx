@@ -12,7 +12,7 @@ type Props = { children: React.ReactNode };
 export default function RootLayout({ children }: Props) {
   return (
     <html lang="en-ZA" className={montserrat.variable}>
-      <body>{children}</body>
+      <body className="bg-canvas text-ink">{children}</body>
     </html>
   );
 }
