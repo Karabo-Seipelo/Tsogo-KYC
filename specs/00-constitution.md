@@ -14,7 +14,7 @@ The business requirements (BR-1 – BR-9) live in `00-product-brief.md`. Every s
 |---|---|
 | Framework | Next.js (App Router), React, TypeScript in `strict` mode. No `any` |
 | Journey state | XState v5, a single machine. The only place journey transitions are defined |
-| Server state | TanStack Query. Polling, mutations with retry |
+| Server state | Hand-written hooks. `useStatusPoll` polls every 2.5 s and pauses while the tab is hidden. Uploads are `fetch` calls, with retry in the capture journeys |
 | Global client store | None. Journey data lives in the machine's context |
 | Styling | Tailwind CSS |
 | Copy | Bundled JSON (`content/{locale}.json`) read through a `ContentSource` interface (JSON source only). The content API route and a CMS are in the production backlog; see spec 09 |

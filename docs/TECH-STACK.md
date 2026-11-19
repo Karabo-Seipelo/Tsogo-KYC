@@ -16,7 +16,6 @@ Versions are taken from `pnpm-lock.yaml` at scaffold time (PLAN, P0) and updated
 | Zod | Content schema and the type inferred from it | 4.6.7 | https://zod.dev |
 | XState + `@xstate/react` | Journey state machine | xstate 5.33.4, @xstate/react 6.1.0 | https://stately.ai/docs |
 | `qrcode.react` | QR code on D3 (ISC) | 4.2.0 | https://github.com/zpao/qrcode.react |
-| TanStack Query | Server state, polling, mutations | 5.x | https://tanstack.com/query/latest |
 | Tailwind CSS | Styling | tailwindcss 4.3.3 | https://tailwindcss.com/docs |
 | Vitest + Testing Library | Unit and component tests | vitest 5.1.0, @testing-library/react 16.3.3 | https://vitest.dev · https://testing-library.com/docs/react-testing-library/intro/ |
 | Upstash Redis (`@upstash/redis`) | Session store on Vercel | 1.41.0 | https://upstash.com/docs/redis |
@@ -36,7 +35,6 @@ One line per package, with the spec that needs it. A new package is added here w
 |---|---|---|---|
 | `next`, `react`, `react-dom` | Framework | All | runtime |
 | `xstate`, `@xstate/react` | Journey machine | 01 | runtime |
-| `@tanstack/react-query` | Server state and polling | 02–05 | runtime |
 | `@upstash/redis` | Redis-backed `SessionStore` | 02, 07 | runtime |
 | `qrcode.react` | QR code on D3 | 02 | runtime |
 | `zod` | Content schema and API boundary validation | 09, 02–05 | runtime |

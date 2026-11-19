@@ -85,7 +85,7 @@ sequenceDiagram
 - `SessionStore` interface: `get`, `set(ttl)`, `getDel`, `expire`. Memory adapter on `globalThis` (survives hot reload); Redis adapter via `@upstash/redis`. Keys are prefixed by environment.
 - Cookie flags per R-02.13; `Secure` is set from the request protocol, so plain-HTTP localhost still works. `SameSite=Lax` doesn't affect the QR flow: the phone has no cookie until it redeems the token with a same-origin `POST`, which passes the `Origin` check.
 - `qrcode.react` SVG with an accessible name ("QR code to continue on your phone") plus a text fallback ("Can't scan? Continue on this computer").
-- Polling via `useQuery({ refetchInterval: 2500, refetchIntervalInBackground: false })`.
+- Status polling is `useStatusPoll`: a `useEffect` calls `GET /api/session/status` every 2.5 s and skips the request while the tab is hidden. Uploads are plain `fetch` calls, with retry in the capture journeys. The machine never calls the API; the component `send()`s the result.
 
 ## Tasks
 

@@ -76,6 +76,7 @@ These are the assumptions the demo was built on. The open questions are in [`spe
 ## Trade-offs
 
 - One XState machine holds the journey. There is no second client store. Refreshing the page starts again. Resume after Save & exit is PB-5.
+- Status polling and uploads are small hand-written hooks: one endpoint, one interval, fewer dependencies. Components call them and `send()` the result, so the machine stays separate.
 - `pnpm dev` keeps the session in memory. Preview and production each use their own Upstash database. The audit trail stays on the session in memory and is not written to Redis.
 - Liveness shows the live camera and the prompts, then confirms each prompt on a timer. No face or movement is analysed.
 - The phone path is the recommended one. "Can't scan? Continue on this computer instead" continues document capture on this computer.

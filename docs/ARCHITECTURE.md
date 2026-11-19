@@ -4,7 +4,7 @@
 
 ## 1. Application structure
 
-![Application structure: desktop and phone browsers, each with a React UI, an XState journey machine and React Query, talk over HTTPS with httpOnly cookies to one Next.js app whose route handlers mock the KYC API behind a SessionStore interface (memory locally, Upstash Redis on Vercel).](images/architecture-structure.png)
+![Application structure: desktop and phone browsers, each with a React UI, an XState journey machine and hand-written status and upload hooks, talk over HTTPS with httpOnly cookies to one Next.js app whose route handlers mock the KYC API behind a SessionStore interface (memory locally, Upstash Redis on Vercel).](images/architecture-structure.png)
 
 - **One Next.js app** serves both the UI and the mock API. Route handlers sit behind a `SessionStore` interface, so the same code runs on a laptop (in memory) and on Vercel (Redis).
 - **Copy is data, not code:** every user-facing string, including aria text, comes from a bundled JSON file through a `ContentSource` interface. A CMS with the same shape can replace it later without component changes.
@@ -17,12 +17,12 @@ There are three kinds of state, deliberately kept apart:
 | Kind | Owner | Example |
 |---|---|---|
 | **Journey state** (where am I, what's allowed next) | XState machine | `documentValidation`, `docAttempts`, `cameraError` |
-| **Server state** (what the server knows) | React Query | session status, upload mutations |
+| **Server state** (what the server knows) | `useStatusPoll` and capture `fetch` calls | session status, document and selfie uploads |
 | **Shared cross-device truth** | Server (`SessionStore`) | `session.step`, `lastSeen`, check results |
 
 The machine uses the brief's states plus `qrHandoff`. Events drive every transition, and guards enforce retry limits (3 document attempts, 3 face-match attempts). Camera, upload, offline and timeout problems are **context flags inside states**, not extra states. That keeps the chart readable and avoids duplicating error states per capture step.
 
-API calls live outside the machine: components call React Query and `send()` the result as an event, so the machine stays synchronous and testable without network mocks. The UI shows **4 user-facing steps** over 12 machine states, the same on every path.
+API calls live outside the machine: components call these hooks and `send()` the result as an event, so the machine stays synchronous and testable without network mocks. The UI shows **4 user-facing steps** over 12 machine states, the same on every path.
 
 One subscriber on the machine records every transition to an **audit trail** and emits **funnel events** (step viewed / failed / retried, with reason codes and no personal data). They serve compliance (BR-1) and BI (BR-6) without touching state logic.
 
