@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { logRequest } from "@/lib/analytics/requestLog";
 import { requestOrigin } from "@/lib/http/requestHost";
+import { kycStates, type KycState } from "@/machines/kycMachine.types";
 import { createSessionStore } from "@/lib/store/redisStore";
+
+const finishedSteps = new Set<KycState>(["processing", "complete", "error"]);
 
 const sessionTtlSeconds = 15 * 60;
 
@@ -27,7 +30,7 @@ async function recordHeartbeat(request: Request, log: { step: string | null }) {
     return new NextResponse(null, { status: 401 });
   }
 
-  const reported = await reportedStep(request);
+  const reported = acceptedStep(existing.step, await reportedStep(request));
   await store.set(
     `session:${sessionId}`,
     {
@@ -58,6 +61,20 @@ function readSessionId(request: Request) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function acceptedStep(current: unknown, reported: string | null) {
+  if (
+    !isKycState(reported) ||
+    (isKycState(current) && finishedSteps.has(current))
+  ) {
+    return null;
+  }
+  return reported;
+}
+
+function isKycState(value: unknown): value is KycState {
+  return kycStates.some((state) => state === value);
 }
 
 async function reportedStep(request: Request) {

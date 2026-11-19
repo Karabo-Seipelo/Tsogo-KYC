@@ -20,7 +20,7 @@ test("AC-02.13 a mismatched Origin stores no selfie", async () => {
     step: "idle",
   });
   expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
-    passingThumbStored,
+    passingThumbnail,
   );
 });
 
@@ -76,7 +76,7 @@ test("R-04.3 a passing selfie stores the thumbnail only", async () => {
     step: "idle",
     handoffToken: expect.any(String),
     thumbnail: "document-thumb",
-    selfieThumbnail: passingThumbStored,
+    selfieThumbnail: passingThumbnail,
   });
   expect(JSON.stringify(stored)).not.toContain("full-size-photo");
 });
@@ -100,7 +100,7 @@ async function sessionId() {
 function selfie(
   session?: string,
   headers: Record<string, string> = {},
-  thumbnail = new Blob([passingThumb], { type: "image/jpeg" }),
+  thumbnail = jpeg(32),
 ) {
   const form = new FormData();
   form.set(
@@ -133,18 +133,18 @@ async function keepSelfie(
   );
 }
 
-const passingThumb = new Uint8Array(32);
-passingThumb[0] = 0xff;
-passingThumb[1] = 0xd8;
-passingThumb[2] = 0xff;
-const passingThumbStored = Buffer.from(passingThumb).toString("base64");
+const passingThumbnail = Buffer.from(jpegBytes(32)).toString("base64");
 
 function jpeg(bytes: number) {
-  const data = new Uint8Array(bytes);
+  return new Blob([jpegBytes(bytes)], { type: "image/jpeg" });
+}
+
+function jpegBytes(size: number) {
+  const data = new Uint8Array(size);
   data[0] = 0xff;
   data[1] = 0xd8;
   data[2] = 0xff;
-  return new Blob([data], { type: "image/jpeg" });
+  return data;
 }
 
 function record(value: unknown): Record<string, unknown> {

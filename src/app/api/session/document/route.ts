@@ -3,6 +3,7 @@ import { logRequest } from "@/lib/analytics/requestLog";
 import { createSessionStore } from "@/lib/store/redisStore";
 
 const sessionTtlSeconds = 15 * 60;
+const thumbnailLimit = 150 * 1024;
 
 const checks = [
   { id: "corners", label: "All four corners visible", passed: true },
@@ -35,10 +36,7 @@ async function saveDocument(request: Request, log: { step: string | null }) {
   const form = await request.formData();
   const side = form.get("side");
   const thumbnail = await readThumbnail(form.get("thumbnail"));
-  if (side !== "front" && side !== "back") {
-    return new NextResponse(null, { status: 400 });
-  }
-  if (thumbnail === null) {
+  if ((side !== "front" && side !== "back") || thumbnail === null) {
     return new NextResponse(null, { status: 400 });
   }
 
@@ -133,14 +131,12 @@ function readSessionId(request: Request) {
   return null;
 }
 
-const thumbnailLimit = 150 * 1024;
-
 async function readThumbnail(value: FormDataEntryValue | null) {
   const bytes = await thumbnailBytes(value);
   if (
     bytes === null ||
-    bytes.length > thumbnailLimit ||
     bytes.length < 3 ||
+    bytes.length > thumbnailLimit ||
     bytes[0] !== 0xff ||
     bytes[1] !== 0xd8 ||
     bytes[2] !== 0xff

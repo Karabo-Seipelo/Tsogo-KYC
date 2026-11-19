@@ -3,6 +3,7 @@ import { logRequest } from "@/lib/analytics/requestLog";
 import { createSessionStore } from "@/lib/store/redisStore";
 
 const sessionTtlSeconds = 15 * 60;
+const thumbnailLimit = 150 * 1024;
 
 export async function POST(request: Request) {
   const log = { step: null as string | null, errorCode: null as string | null };
@@ -64,14 +65,12 @@ function readSessionId(request: Request) {
   return null;
 }
 
-const thumbnailLimit = 150 * 1024;
-
 async function readThumbnail(value: FormDataEntryValue | null) {
   const bytes = await thumbnailBytes(value);
   if (
     bytes === null ||
-    bytes.length > thumbnailLimit ||
     bytes.length < 3 ||
+    bytes.length > thumbnailLimit ||
     bytes[0] !== 0xff ||
     bytes[1] !== 0xd8 ||
     bytes[2] !== 0xff

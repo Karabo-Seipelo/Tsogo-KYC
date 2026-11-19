@@ -26,7 +26,7 @@ test("AC-02.13 a mismatched Origin stores nothing", async () => {
     step: "idle",
   });
   expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
-    passingThumbStored,
+    passingThumbnail,
   );
 });
 
@@ -45,7 +45,7 @@ test("R-03.5 a passing upload returns the checks and stores only the thumbnail",
     step: "idle",
     handoffToken: expect.any(String),
     side: "front",
-    thumbnail: passingThumbStored,
+    thumbnail: passingThumbnail,
     checks,
   });
   expect(JSON.stringify(stored)).not.toContain("full-size-photo");
@@ -132,7 +132,7 @@ test("AC-03.8 ?fail=upload fails three times and the next send succeeds", async 
     expect(response.status).toBe(503);
   }
   expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
-    passingThumbStored,
+    passingThumbnail,
   );
 
   const recovered = await POST(upload(id));
@@ -168,18 +168,18 @@ async function keepThumbnail(
   );
 }
 
-const passingThumb = new Uint8Array(32);
-passingThumb[0] = 0xff;
-passingThumb[1] = 0xd8;
-passingThumb[2] = 0xff;
-const passingThumbStored = Buffer.from(passingThumb).toString("base64");
+const passingThumbnail = Buffer.from(jpegBytes(32)).toString("base64");
 
 function jpeg(bytes: number) {
-  const data = new Uint8Array(bytes);
+  return new Blob([jpegBytes(bytes)], { type: "image/jpeg" });
+}
+
+function jpegBytes(size: number) {
+  const data = new Uint8Array(size);
   data[0] = 0xff;
   data[1] = 0xd8;
   data[2] = 0xff;
-  return new Blob([data], { type: "image/jpeg" });
+  return data;
 }
 
 function record(value: unknown): Record<string, unknown> {
@@ -201,11 +201,7 @@ function upload(
     new Blob(["full-size-photo"], { type: "image/jpeg" }),
     "image.jpg",
   );
-  form.set(
-    "thumbnail",
-    parts.thumbnail ?? new Blob([passingThumb], { type: "image/jpeg" }),
-    "thumb.jpg",
-  );
+  form.set("thumbnail", parts.thumbnail ?? jpeg(32), "thumb.jpg");
   return new Request("http://localhost:3000/api/session/document", {
     method: "POST",
     headers: {
