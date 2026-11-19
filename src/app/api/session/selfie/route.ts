@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { logRequest } from "@/lib/analytics/requestLog";
+import { requestOrigin } from "@/lib/http/requestHost";
 import { createSessionStore } from "@/lib/store/redisStore";
 
 const sessionTtlSeconds = 15 * 60;
+const thumbnailLimit = 150 * 1024;
 
 export async function POST(request: Request) {
   const log = { step: null as string | null, errorCode: null as string | null };
@@ -27,7 +29,7 @@ async function saveSelfie(request: Request, log: { step: string | null }) {
   log.step = typeof existing.step === "string" ? existing.step : null;
 
   const form = await request.formData();
-  const selfieThumbnail = await readPart(form.get("thumbnail"));
+  const selfieThumbnail = await readThumbnail(form.get("thumbnail"));
   if (selfieThumbnail === null) {
     return new NextResponse(null, { status: 400 });
   }
@@ -42,12 +44,7 @@ async function saveSelfie(request: Request, log: { step: string | null }) {
 }
 
 function originAllowed(request: Request) {
-  const host =
-    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  const protocol =
-    request.headers.get("x-forwarded-proto") ??
-    new URL(request.url).protocol.replace(":", "");
-  return request.headers.get("origin") === `${protocol}://${host}`;
+  return request.headers.get("origin") === requestOrigin(request).origin;
 }
 
 function readSessionId(request: Request) {
@@ -64,12 +61,27 @@ function readSessionId(request: Request) {
   return null;
 }
 
-async function readPart(value: FormDataEntryValue | null) {
-  if (typeof value === "string") {
-    return value;
+async function readThumbnail(value: FormDataEntryValue | null) {
+  const bytes = await thumbnailBytes(value);
+  if (
+    bytes === null ||
+    bytes.length < 3 ||
+    bytes.length > thumbnailLimit ||
+    bytes[0] !== 0xff ||
+    bytes[1] !== 0xd8 ||
+    bytes[2] !== 0xff
+  ) {
+    return null;
   }
-  if (value && typeof value.text === "function") {
-    return value.text();
+  return Buffer.from(bytes).toString("base64");
+}
+
+async function thumbnailBytes(value: FormDataEntryValue | null) {
+  if (typeof value === "string") {
+    return new TextEncoder().encode(value);
+  }
+  if (value && typeof value.arrayBuffer === "function") {
+    return new Uint8Array(await value.arrayBuffer());
   }
   return null;
 }

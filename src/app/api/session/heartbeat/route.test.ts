@@ -88,6 +88,68 @@ test("R-02.13 a mismatched Origin stores no lastSeen", async () => {
   );
 });
 
+test("AC-11.3 a heartbeat cannot move complete back to review", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-01-01T00:00:10.000Z"));
+  const { id, store } = await sessionIn("complete");
+
+  const response = await POST(heartbeat(id, {}, "review"));
+
+  expect(response.status).toBe(204);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    step: "complete",
+    lastSeen: "2026-01-01T00:00:10.000Z",
+  });
+});
+
+test("AC-11.3 an unknown step cannot replace complete", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-01-01T00:00:10.000Z"));
+  const { id, store } = await sessionIn("complete");
+
+  const response = await POST(heartbeat(id, {}, "not-a-step"));
+
+  expect(response.status).toBe(204);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    step: "complete",
+    lastSeen: "2026-01-01T00:00:10.000Z",
+  });
+});
+
+test("AC-11.3 a finished processing or error step stays put", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-01-01T00:00:10.000Z"));
+  const processing = await sessionIn("processing");
+  const error = await sessionIn("error");
+
+  expect((await POST(heartbeat(processing.id, {}, "review"))).status).toBe(204);
+  expect((await POST(heartbeat(error.id, {}, "review"))).status).toBe(204);
+  await expect(
+    processing.store.get(`session:${processing.id}`),
+  ).resolves.toMatchObject({
+    step: "processing",
+    lastSeen: "2026-01-01T00:00:10.000Z",
+  });
+  await expect(error.store.get(`session:${error.id}`)).resolves.toMatchObject({
+    step: "error",
+    lastSeen: "2026-01-01T00:00:10.000Z",
+  });
+});
+
+test("AC-11.3 a heartbeat can move documentUpload to selfieCapture", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-01-01T00:00:10.000Z"));
+  const { id, store } = await sessionIn("documentUpload");
+
+  const response = await POST(heartbeat(id, {}, "selfieCapture"));
+
+  expect(response.status).toBe(204);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    step: "selfieCapture",
+    lastSeen: "2026-01-01T00:00:10.000Z",
+  });
+});
+
 test("AC-08.6 a heartbeat logs one line and leaves the session id out", async () => {
   const id = await sessionId();
   const store = createMemoryStore();
@@ -137,15 +199,33 @@ async function sessionId() {
   return header.split(";")[0]?.slice("session=".length) ?? "";
 }
 
-function heartbeat(session?: string, headers: Record<string, string> = {}) {
+async function sessionIn(step: string) {
+  const id = await sessionId();
+  const store = createMemoryStore();
+  const existing = await store.get(`session:${id}`);
+  await store.set(
+    `session:${id}`,
+    { ...record(existing), step, lastSeen: seenAt },
+    15 * 60,
+  );
+  return { id, store };
+}
+
+function heartbeat(
+  session?: string,
+  headers: Record<string, string> = {},
+  step?: string,
+) {
   return new Request("http://localhost:3000/api/session/heartbeat", {
     method: "POST",
     headers: {
       host: "localhost:3000",
       origin: "http://localhost:3000",
+      ...(step !== undefined ? { "content-type": "application/json" } : {}),
       ...(session ? { cookie: `session=${session}` } : {}),
       ...headers,
     },
+    ...(step !== undefined ? { body: JSON.stringify({ step }) } : {}),
   });
 }
 

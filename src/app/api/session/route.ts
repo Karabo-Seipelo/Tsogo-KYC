@@ -65,6 +65,7 @@ async function createSession(request: Request, log: { step: string | null }) {
     sameSite: "lax",
     path: "/",
     secure: target.secure,
+    maxAge: windowSeconds,
   });
   log.step = "idle";
   return response;

@@ -20,8 +20,39 @@ test("AC-02.13 a mismatched Origin stores no selfie", async () => {
     step: "idle",
   });
   expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
-    "thumb-bytes",
+    passingThumbnail,
   );
+});
+
+test("AC-11.2 a selfie thumbnail that is not a JPEG is rejected and the stored selfie stays", async () => {
+  const id = await sessionId();
+  const store = createMemoryStore();
+  await keepSelfie(store, id);
+
+  const response = await POST(
+    selfie(id, {}, new Blob(["not-a-jpeg"], { type: "image/jpeg" })),
+  );
+
+  expect(response.status).toBe(400);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    selfieThumbnail: "already-stored",
+  });
+  expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
+    "not-a-jpeg",
+  );
+});
+
+test("AC-11.2 a selfie JPEG larger than 150 KB is rejected and the stored selfie stays", async () => {
+  const id = await sessionId();
+  const store = createMemoryStore();
+  await keepSelfie(store, id);
+
+  const response = await POST(selfie(id, {}, jpeg(150 * 1024 + 1)));
+
+  expect(response.status).toBe(400);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    selfieThumbnail: "already-stored",
+  });
 });
 
 test("R-04.3 a passing selfie stores the thumbnail only", async () => {
@@ -45,7 +76,7 @@ test("R-04.3 a passing selfie stores the thumbnail only", async () => {
     step: "idle",
     handoffToken: expect.any(String),
     thumbnail: "document-thumb",
-    selfieThumbnail: "thumb-bytes",
+    selfieThumbnail: passingThumbnail,
   });
   expect(JSON.stringify(stored)).not.toContain("full-size-photo");
 });
@@ -66,18 +97,18 @@ async function sessionId() {
   return header.split(";")[0]?.slice("session=".length) ?? "";
 }
 
-function selfie(session?: string, headers: Record<string, string> = {}) {
+function selfie(
+  session?: string,
+  headers: Record<string, string> = {},
+  thumbnail = jpeg(32),
+) {
   const form = new FormData();
   form.set(
     "image",
     new Blob(["full-size-photo"], { type: "image/jpeg" }),
     "image.jpg",
   );
-  form.set(
-    "thumbnail",
-    new Blob(["thumb-bytes"], { type: "image/jpeg" }),
-    "thumb.jpg",
-  );
+  form.set("thumbnail", thumbnail, "thumb.jpg");
   return new Request("http://localhost:3000/api/session/selfie", {
     method: "POST",
     headers: {
@@ -88,6 +119,32 @@ function selfie(session?: string, headers: Record<string, string> = {}) {
     },
     body: form,
   });
+}
+
+async function keepSelfie(
+  store: ReturnType<typeof createMemoryStore>,
+  id: string,
+) {
+  const existing = await store.get(`session:${id}`);
+  await store.set(
+    `session:${id}`,
+    { ...record(existing), selfieThumbnail: "already-stored" },
+    15 * 60,
+  );
+}
+
+const passingThumbnail = Buffer.from(jpegBytes(32)).toString("base64");
+
+function jpeg(bytes: number) {
+  return new Blob([jpegBytes(bytes)], { type: "image/jpeg" });
+}
+
+function jpegBytes(size: number) {
+  const data = new Uint8Array(size);
+  data[0] = 0xff;
+  data[1] = 0xd8;
+  data[2] = 0xff;
+  return data;
 }
 
 function record(value: unknown): Record<string, unknown> {

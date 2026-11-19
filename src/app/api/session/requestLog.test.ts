@@ -224,14 +224,20 @@ function jsonRequest(path: string, headers: Record<string, string> = {}) {
   });
 }
 
+function jpegThumbnail() {
+  const marker = new TextEncoder().encode(thumbnail);
+  const data = new Uint8Array(3 + marker.length);
+  data[0] = 0xff;
+  data[1] = 0xd8;
+  data[2] = 0xff;
+  data.set(marker, 3);
+  return new Blob([data], { type: "image/jpeg" });
+}
+
 function documentRequest(session?: string) {
   const form = new FormData();
   form.set("side", "front");
-  form.set(
-    "thumbnail",
-    new Blob([thumbnail], { type: "image/jpeg" }),
-    "thumb.jpg",
-  );
+  form.set("thumbnail", jpegThumbnail(), "thumb.jpg");
   return new Request("http://localhost:3000/api/session/document", {
     method: "POST",
     headers: {
@@ -245,11 +251,7 @@ function documentRequest(session?: string) {
 
 function selfieRequest(session: string) {
   const form = new FormData();
-  form.set(
-    "thumbnail",
-    new Blob([thumbnail], { type: "image/jpeg" }),
-    "thumb.jpg",
-  );
+  form.set("thumbnail", jpegThumbnail(), "thumb.jpg");
   return new Request("http://localhost:3000/api/session/selfie", {
     method: "POST",
     headers: {

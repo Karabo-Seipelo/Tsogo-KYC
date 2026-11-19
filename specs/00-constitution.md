@@ -101,7 +101,7 @@ Applies to any AI agent working in this repo (see `.cursor/rules/`).
 - Change a test so that it passes instead of fixing the code.
 - Bypass git hooks (`--no-verify`) or push past a red CI run.
 - Edit files under `.cursor/skills/` or `.cursor/references/`. They're pinned third-party dependencies; project behaviour is set by overrides in `.cursor/rules/spec-driven.mdc`.
-- Implement a requirement, AC or task tagged `production`. Those are designed and agreed, but not built for the demo (see the production backlog in `specs/PLAN.md`).
+- Implement a requirement, AC or task tagged `production` or `post-ship`. `production` items are designed and not built for the demo (see the production backlog in `specs/PLAN.md`). `post-ship` items are spec 11 and wait until P6 is started.
 
 ## 10. Repo conventions
 

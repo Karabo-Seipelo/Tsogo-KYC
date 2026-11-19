@@ -3,6 +3,9 @@ import { logRequest } from "@/lib/analytics/requestLog";
 import { requestOrigin } from "@/lib/http/requestHost";
 import { createSessionStore } from "@/lib/store/redisStore";
 
+const sessionWindowSeconds = 15 * 60;
+const shortWindowSeconds = 60;
+
 // Dynamic route params are a Promise:
 // https://nextjs.org/docs/app/api-reference/file-conventions/route#context-optional
 
@@ -43,8 +46,21 @@ async function redeem(
     sameSite: "lax",
     path: "/",
     secure: target.secure,
+    maxAge: cookieMaxAge(session),
   });
   return response;
+}
+
+function cookieMaxAge(session: unknown) {
+  if (
+    typeof session === "object" &&
+    session !== null &&
+    "ttl" in session &&
+    session.ttl === 1
+  ) {
+    return shortWindowSeconds;
+  }
+  return sessionWindowSeconds;
 }
 
 function sessionIdFrom(value: unknown) {

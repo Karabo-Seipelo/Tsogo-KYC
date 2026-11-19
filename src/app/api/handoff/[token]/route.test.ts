@@ -32,26 +32,44 @@ test("R-02.5 a token is redeemed once, sets the phone cookie, and redirects to /
   });
 });
 
-test("R-02.13 the phone cookie is Secure when the forwarded protocol is HTTPS", async () => {
-  const { token } = await issuedToken({
-    host: "internal:3000",
+test("R-02.13 the phone cookie is Secure when the request URL is HTTPS", async () => {
+  const headers = {
+    host: "preview.example",
     origin: "https://preview.example",
-    "x-forwarded-host": "preview.example",
-    "x-forwarded-proto": "https",
-  });
+    "x-forwarded-host": "evil.example",
+    "x-forwarded-proto": "http",
+  };
+  const { token } = await issuedToken(
+    headers,
+    "https://preview.example/api/session",
+  );
 
   const response = await POST(
-    redeem(token, {
-      host: "internal:3000",
-      origin: "https://preview.example",
-      "x-forwarded-host": "preview.example",
-      "x-forwarded-proto": "https",
-    }),
+    redeem(token, headers, `https://preview.example/api/handoff/${token}`),
     params(token),
   );
 
   expect(response.status).toBe(303);
   expect(sessionCookie(response).attributes.has("secure")).toBe(true);
+});
+
+test("AC-11.4 the phone cookie uses the 15 minute window", async () => {
+  const { token } = await issuedToken();
+
+  const response = await POST(redeem(token), params(token));
+
+  expect(sessionCookie(response).attributes.get("max-age")).toBe("900");
+});
+
+test("AC-11.4 the phone cookie uses the 60 second window", async () => {
+  const { token } = await issuedToken(
+    {},
+    "http://localhost:3000/api/session?ttl=1",
+  );
+
+  const response = await POST(redeem(token), params(token));
+
+  expect(sessionCookie(response).attributes.get("max-age")).toBe("60");
 });
 
 test("AC-02.5 a redeemed token is 410 the second time and sets no cookie", async () => {
@@ -131,9 +149,12 @@ test("AC-08.6 redeeming a token logs one line and leaves the session id out", as
   expect(JSON.stringify(lines)).not.toContain(id);
 });
 
-async function issuedToken(headers: Record<string, string> = {}) {
+async function issuedToken(
+  headers: Record<string, string> = {},
+  url = "http://localhost:3000/api/session",
+) {
   const response = await createSession(
-    new Request("http://localhost:3000/api/session", {
+    new Request(url, {
       method: "POST",
       headers: {
         host: "localhost:3000",
@@ -146,8 +167,12 @@ async function issuedToken(headers: Record<string, string> = {}) {
   return { id: sessionCookie(response).value, token: body.handoffToken };
 }
 
-function redeem(token: string, headers: Record<string, string> = {}) {
-  return new Request(`http://localhost:3000/api/handoff/${token}`, {
+function redeem(
+  token: string,
+  headers: Record<string, string> = {},
+  url = `http://localhost:3000/api/handoff/${token}`,
+) {
+  return new Request(url, {
     method: "POST",
     headers: {
       host: "localhost:3000",

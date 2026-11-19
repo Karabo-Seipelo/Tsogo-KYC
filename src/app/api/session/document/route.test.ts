@@ -26,7 +26,7 @@ test("AC-02.13 a mismatched Origin stores nothing", async () => {
     step: "idle",
   });
   expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
-    "thumb-bytes",
+    passingThumbnail,
   );
 });
 
@@ -45,7 +45,7 @@ test("R-03.5 a passing upload returns the checks and stores only the thumbnail",
     step: "idle",
     handoffToken: expect.any(String),
     side: "front",
-    thumbnail: "thumb-bytes",
+    thumbnail: passingThumbnail,
     checks,
   });
   expect(JSON.stringify(stored)).not.toContain("full-size-photo");
@@ -71,6 +71,58 @@ test("AC-03.6 ?fail=document fails the first check and the retake passes", async
   expect(await second.json()).toMatchObject({ passed: true });
 });
 
+test("AC-11.2 a thumbnail that is not a JPEG is rejected and the stored thumbnail stays", async () => {
+  const id = await sessionId();
+  const store = createMemoryStore();
+  await keepThumbnail(store, id);
+
+  const response = await POST(
+    upload(
+      id,
+      {},
+      { thumbnail: new Blob(["not-a-jpeg"], { type: "image/jpeg" }) },
+    ),
+  );
+
+  expect(response.status).toBe(400);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    thumbnail: "already-stored",
+  });
+  expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
+    "not-a-jpeg",
+  );
+});
+
+test("AC-11.2 a JPEG larger than 150 KB is rejected and the stored thumbnail stays", async () => {
+  const id = await sessionId();
+  const store = createMemoryStore();
+  await keepThumbnail(store, id);
+
+  const response = await POST(
+    upload(id, {}, { thumbnail: jpeg(150 * 1024 + 1) }),
+  );
+
+  expect(response.status).toBe(400);
+  await expect(store.get(`session:${id}`)).resolves.toMatchObject({
+    thumbnail: "already-stored",
+  });
+});
+
+test("AC-11.2 a side other than front or back is rejected and the session stays", async () => {
+  const id = await sessionId();
+  const store = createMemoryStore();
+  await keepThumbnail(store, id);
+
+  const response = await POST(
+    upload(id, {}, { side: "sideways", thumbnail: jpeg(32) }),
+  );
+
+  expect(response.status).toBe(400);
+  const stored = await store.get(`session:${id}`);
+  expect(stored).toMatchObject({ thumbnail: "already-stored" });
+  expect(JSON.stringify(stored)).not.toContain("sideways");
+});
+
 test("AC-03.8 ?fail=upload fails three times and the next send succeeds", async () => {
   const id = await sessionId("http://localhost:3000/api/session?fail=upload");
   const store = createMemoryStore();
@@ -80,7 +132,7 @@ test("AC-03.8 ?fail=upload fails three times and the next send succeeds", async 
     expect(response.status).toBe(503);
   }
   expect(JSON.stringify(await store.get(`session:${id}`))).not.toContain(
-    "thumb-bytes",
+    passingThumbnail,
   );
 
   const recovered = await POST(upload(id));
@@ -104,19 +156,52 @@ async function sessionId(url = "http://localhost:3000/api/session") {
   return header.split(";")[0]?.slice("session=".length) ?? "";
 }
 
-function upload(session?: string, headers: Record<string, string> = {}) {
+async function keepThumbnail(
+  store: ReturnType<typeof createMemoryStore>,
+  id: string,
+) {
+  const existing = await store.get(`session:${id}`);
+  await store.set(
+    `session:${id}`,
+    { ...record(existing), thumbnail: "already-stored" },
+    15 * 60,
+  );
+}
+
+const passingThumbnail = Buffer.from(jpegBytes(32)).toString("base64");
+
+function jpeg(bytes: number) {
+  return new Blob([jpegBytes(bytes)], { type: "image/jpeg" });
+}
+
+function jpegBytes(size: number) {
+  const data = new Uint8Array(size);
+  data[0] = 0xff;
+  data[1] = 0xd8;
+  data[2] = 0xff;
+  return data;
+}
+
+function record(value: unknown): Record<string, unknown> {
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  throw new Error("session was not stored");
+}
+
+function upload(
+  session?: string,
+  headers: Record<string, string> = {},
+  parts: { side?: string; thumbnail?: Blob } = {},
+) {
   const form = new FormData();
-  form.set("side", "front");
+  form.set("side", parts.side ?? "front");
   form.set(
     "image",
     new Blob(["full-size-photo"], { type: "image/jpeg" }),
     "image.jpg",
   );
-  form.set(
-    "thumbnail",
-    new Blob(["thumb-bytes"], { type: "image/jpeg" }),
-    "thumb.jpg",
-  );
+  form.set("thumbnail", parts.thumbnail ?? jpeg(32), "thumb.jpg");
   return new Request("http://localhost:3000/api/session/document", {
     method: "POST",
     headers: {
