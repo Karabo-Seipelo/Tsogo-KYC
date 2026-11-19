@@ -29,9 +29,11 @@ test("AC-02.11 Keep going or Escape leaves the screen unchanged", async () => {
   expect(document.activeElement).toBe(
     screen.getByRole("heading", { name: content.saveExit.confirmTitle }),
   );
-  expect(
-    screen.getByText(withMinutes(content.saveExit.confirmBody)),
-  ).toBeDefined();
+  const confirmBody = screen.getByText(
+    withMinutes(content.saveExit.confirmBody),
+  );
+  expect(confirmBody.textContent).toContain(String(saveWindowMinutes));
+  expect(confirmBody.textContent).not.toMatch(/come back|carry on/i);
   expect(
     screen.getByRole("heading", { name: content.start.title, level: 1 }),
   ).toBeDefined();
@@ -87,9 +89,11 @@ test("AC-02.10 confirming Save & exit shows how long progress is kept", async ()
     level: 1,
   });
   expect(document.activeElement).toBe(saved);
-  expect(
-    screen.getByText(withMinutes(content.saveExit.savedBody)),
-  ).toBeDefined();
+  const savedBody = screen.getByText(withMinutes(content.saveExit.savedBody));
+  expect(savedBody.textContent).toContain(String(saveWindowMinutes));
+  expect(savedBody.textContent).not.toMatch(
+    /pick up where you left off|come back/i,
+  );
   expect(
     screen.getByRole("link", { name: content.saveExit.return }),
   ).toBeDefined();
