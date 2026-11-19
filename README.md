@@ -4,11 +4,23 @@ A front-end implementation of a digital Know Your Customer (KYC) onboarding jour
 
 OCR, facial recognition and liveness detection are **mocked**. The focus is workflow design, state management, UX, accessibility and resilience.
 
-**Live demo:** https://tsogo.karaboseipelo.com
+**Live demo:** the live site can be found at [tsogo.karaboseipelo.com](https://tsogo.karaboseipelo.com/).
 
 > ⚠️ **This is a demo.** Please don't upload a real ID document.
 
 > **Status:** ready for review. What is designed but not built is listed under Limitations.
+
+## What I prioritised and why
+
+The specs came first: the business requirements, then one spec per feature, and the code was checked against those acceptance criteria.
+
+One machine owns the journey. The server is the source of truth for the handoff, so the desktop and the phone read the same session.
+
+Resilience and manual review were built before extra features. A failed check has a next step, and a case the mock cannot decide goes to manual review instead of a dead end.
+
+Visual design came last, once the journey worked. What was held back is the production backlog: a real verification provider, resume, an offline queue, insights, and go-live hardening.
+
+I used spec-driven development with AI: agents wrote most of the code from the specs, and I reviewed every test and diff.
 
 ## Where to start
 
@@ -31,7 +43,7 @@ pnpm bootstrap   # checks Node and pnpm, and creates .env.local from .env.exampl
 pnpm dev         # http://localhost:3000, memory store
 ```
 
-`pnpm dev:phone` adds an HTTPS tunnel so a real phone can scan the QR code. Local `STORE_DRIVER` stays `memory` (see `.env.example`). Preview and production each use their own Upstash database.
+`pnpm dev:phone` adds an HTTPS tunnel so a real phone can scan the QR code. Local `STORE_DRIVER` stays `memory` (see `.env.example`). Preview and production share one Upstash database, kept apart by a key prefix per environment.
 
 ### Environments
 
@@ -40,9 +52,9 @@ The app behaves the same in every environment; only the session store changes.
 | Environment | Store | Purpose |
 |---|---|---|
 | `pnpm dev` | memory | Zero-setup single-device run |
-| `pnpm dev:phone` | memory or Upstash dev DB | Real phone over an HTTPS tunnel (`cloudflared`), for the QR handoff and camera |
-| Vercel preview | Upstash (preview DB) | Per-branch real deploy |
-| Production | Upstash (production DB) | `https://tsogo.karaboseipelo.com` |
+| `pnpm dev:phone` | memory or Upstash | Real phone over an HTTPS tunnel (`cloudflared`), for the QR handoff and camera |
+| Vercel preview | Upstash (shared database, `preview:` keys) | Per-branch real deploy |
+| Production | Upstash (shared database, `production:` keys) | `https://tsogo.karaboseipelo.com` |
 
 ## Testing failure states
 
@@ -75,8 +87,9 @@ These are the assumptions the demo was built on. The open questions are in [`spe
 
 ## Trade-offs
 
-- One XState machine holds the journey. There is no second client store. Refreshing the page starts again. Resume after Save & exit is PB-5.
-- `pnpm dev` keeps the session in memory. Preview and production each use their own Upstash database. The audit trail stays on the session in memory and is not written to Redis.
+- One XState machine holds the journey, instead of Zustand or Redux. I chose XState to work with something new, and because it maps the brief's states, transitions and actions one to one, so the flow can be read and tested directly. There is no second client store. Refreshing the page starts again. Resume after Save & exit is PB-5.
+- Status polling and uploads are small hand-written hooks instead of React Query. The project is small enough not to need it: one status endpoint, one interval, fewer dependencies. Components call them and `send()` the result, so the machine stays separate.
+- `pnpm dev` keeps the session in memory. Preview and production share one Upstash database, kept apart by a key prefix per environment. The audit trail stays on the session in memory and is not written to Redis.
 - Liveness shows the live camera and the prompts, then confirms each prompt on a timer. No face or movement is analysed.
 - The phone path is the recommended one. "Can't scan? Continue on this computer instead" continues document capture on this computer.
 - Photos are resized on the device. The server stores a thumbnail only. A session lasts 15 minutes, or 1 minute with `?ttl=1`.
@@ -86,7 +99,7 @@ These are the assumptions the demo was built on. The open questions are in [`spe
 
 The specs describe the full design; the demo builds the core journey. Items tagged `production` in the specs are designed but not built, each with a reason and a trigger in the [production backlog](specs/PLAN.md#production-backlog). The main ones:
 
-- A real verification provider (OCR, liveness, face match are mocked by design).
+- A real verification provider (SmileID, OCR, liveness, face match are mocked by design).
 - Liveness is simulated: the live camera is shown and the prompts are real, but each prompt is confirmed on a short timer; no face or movement is analysed (brief requirement 7). A real provider would replace the decision (PB-11).
 - Hardening for go-live: signed tokens, rate limiting, device binding, encryption at rest, durable audit storage, error tracking and alerts.
 - A CMS behind the content layer (the interface is in place; copy is a bundled JSON file).
@@ -100,7 +113,6 @@ Known issues from the [manual E2E run](docs/E2E-REPORT.md), not fixed for the de
 - Each step change scrolls the page slightly, which can hide the demo banner until you scroll up.
 - On desktop the viewfinder is portrait, so "Take photo" can sit below the fold.
 - A heading that receives focus on a step change shows a visible outline.
-- Upload retries are close together rather than backing off.
 - One failure tip on desktop mentions holding your phone steady.
 - The offline banner shows on the phone only, as specified; the desktop-only path has none.
 - The Content Security Policy allows inline scripts and styles, which Next.js needs without nonces (PB-16).

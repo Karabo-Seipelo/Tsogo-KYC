@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { JourneyProgress } from "@/components/ui/JourneyProgress";
 import { OptionCard } from "@/components/ui/OptionCard";
@@ -30,7 +30,12 @@ type Props = {
 
 export function DocumentType({ onChoose, onContinue }: Props) {
   const { t } = useContent();
+  const heading = useRef<HTMLHeadingElement>(null);
   const [choice, setChoice] = useState<DocumentKind | null>(null);
+
+  useEffect(() => {
+    heading.current?.focus();
+  }, []);
 
   function select(type: DocumentKind) {
     setChoice(type);
@@ -54,7 +59,12 @@ export function DocumentType({ onChoose, onContinue }: Props) {
       }
     >
       <JourneyProgress step="document" />
-      <h1 id="document-type-title" className={screenTitle}>
+      <h1
+        ref={heading}
+        id="document-type-title"
+        tabIndex={-1}
+        className={screenTitle}
+      >
         {t("document.select.title")}
       </h1>
       <p className="text-base leading-6">{t("document.select.intro")}</p>

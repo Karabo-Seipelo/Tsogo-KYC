@@ -78,7 +78,7 @@ stateDiagram-v2
 - Guards: `canRetryDoc`, `canRetryMatch`. Actions: `assign` for counters and flags.
 - `docAttempts` / `matchAttempts` count **failed** attempts, starting at 0. One constant, `MAX_ATTEMPTS = 3`; a retry is allowed while `attempts + 1 < MAX_ATTEMPTS`, so the third failure ends in manual review.
 - Every transition is appended to the session's audit trail and emits funnel events (spec 08), via one `actor.subscribe` hook rather than per-state code.
-- API calls stay **outside** the machine (React Query); components `send()` events with the results. This keeps the XState surface small and testable without network mocks.
+- API calls stay **outside** the machine (`useStatusPoll` and the capture `fetch` calls); components `send()` events with the results. This keeps the XState surface small and testable without network mocks.
 - The desktop machine **mirrors server status**: when a status poll reports progress, it sends the matching event (see spec 02).
 - `production` The current step is reflected in the URL (`?step=`) for refresh and back-button behaviour (PB-10).
 

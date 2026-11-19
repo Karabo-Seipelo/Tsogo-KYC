@@ -18,8 +18,8 @@ export type ReviewCheck = {
 
 type Props = {
   documentType: DocumentKind;
-  documentSrc: string;
-  selfieSrc: string;
+  documentSrc: string | null;
+  selfieSrc: string | null;
   checks: ReviewCheck[];
   livenessPassed: boolean;
   matched: boolean;
@@ -68,8 +68,12 @@ export function ReviewScreen({
         <h2 className="text-base font-semibold">{t("review.rows.document")}</h2>
         <p>{t(`document.select.options.${documentType}.title`)}</p>
         <div className="flex gap-4">
-          <Photo src={documentSrc} label={t("faceMatch.documentPhoto")} />
-          <Photo src={selfieSrc} label={t("faceMatch.selfie")} />
+          {documentSrc ? (
+            <Photo src={documentSrc} label={t("faceMatch.documentPhoto")} />
+          ) : null}
+          {selfieSrc ? (
+            <Photo src={selfieSrc} label={t("faceMatch.selfie")} />
+          ) : null}
         </div>
         <Retake
           label={t("review.rows.document")}

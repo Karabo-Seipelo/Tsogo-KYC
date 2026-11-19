@@ -109,6 +109,7 @@ Added to the specs as P6 tasks. The low findings are listed under Limitations in
 | T-06.6 A 401 is treated as expiry and shows E6 | R-2 | 06 · R-06.4, AC-06.6 |
 | T-02.24 E8 "Show the QR code again" issues a new code | R-3 | 02 · R-02.8, AC-02.7 |
 | PB-16 Nonce-based CSP | R-4 | PLAN backlog |
+| T-05.7 Return the stored thumbnails to the desktop review | N-1 | 05 · R-05.3, AC-05.8 |
 
 ## Re-run after P6 hardening
 
@@ -179,3 +180,73 @@ Fix: call `POST /api/session/handoff` when leaving E8 for the QR screen, and sho
 3. F-1 (T-11.6).
 4. R-3 (T-02.24), then the remaining P6 tasks.
 5. Re-run this report.
+
+## Third run · P6 fixes
+
+**Run:** 19 Nov 2026, against production after the P6 fixes were deployed. Same setup: two Chrome tabs and the real webcam. Camera capture was used for every document photo, with no uploaded files.
+
+### Fixes
+
+| Task | Check | Result |
+|---|---|---|
+| T-03.8 | "Take photo" sends a real JPEG: `image` 29 KB and `thumbnail` 8 KB, both starting `FF D8 FF`; the server returns 200. Desktop and phone. | Pass |
+| T-03.9 | A forced 400 on the document route makes one request, then "We couldn't read your document" with "Retake photo" and the upload fallback, not E2 | Pass |
+| T-06.6 | `?ttl=1`: E5 at 31 s, then E6 at 63 s with focus on its heading; "Start again" returns to the start | Pass |
+| T-11.6 | Submitting a new empty session returns 409; a heartbeat with `review`, then submit, still returns 409; the session never reaches `processing` | Pass |
+| T-01.9 | A handoff run in the same tab right after a completed run shows only the new session's data, and E8 works | Pass |
+| T-05.6 | After a handoff, desktop Review lists all three document checks plus liveness and face match | Pass |
+| T-02.21 | The phone opens the link without tapping; the desktop leaves D3 for D4 within 1 s | Pass |
+| T-02.22 | D3's `aria-live="polite"` region exists while waiting ("Waiting for your phone…") | Pass |
+| T-02.24 | "Show the QR code again" from E8 issues a new token with a full timer (9:58). The old token returns 410, and the new one connects the phone. | Pass |
+| T-02.23 | The Save & exit dialog and the saved page promise only the 15 minutes, not resume | Pass |
+| T-09.9 | Every screen sets a document title | Pass (see N-2) |
+| T-03.7 | The document-type screen shows "Step 1 of 4"; device choice and the QR screen show none | Pass |
+
+### Regression
+
+| Check | Result |
+|---|---|
+| Desktop-only happy path with the camera, ending at "You're verified" | Pass |
+| Phone handoff happy path with the camera; M7 on the phone; desktop review and submit, ending at "You're verified" | Pass |
+| `?fail=document:always`: "Attempt 1 of 3", "Attempt 2 of 3", then E9; focus on the heading each time | Pass |
+| `?fail=upload`: three 503s, then E2; "Try again" succeeds | Pass (retries still about 100 ms apart, F-12) |
+| `?fail=reject` with the camera path: submit is accepted, then E7 with a reference | Pass |
+| E8 about 21 s after the phone tab closed | Pass |
+| Response headers on `/api/session/status` | Pass |
+
+### New findings
+
+#### N-1 · Medium · Desktop review after a handoff shows blank thumbnails
+
+When the photos were taken on the phone, the desktop Review shows a 1×1 transparent placeholder for both photos, with the alt text "Document photo" and "Selfie". The user can't see what they're submitting, and a screen reader announces images that aren't there. R-05.3 says Review shows both thumbnails. The desktop-only path shows them correctly.
+
+Fix: the server already stores both thumbnails, so return them to the session's own devices from `GET /api/session/thumbnails`. The status poll stays free of image bytes. A missing thumbnail is left out rather than shown as an empty image.
+
+**Status:** fixed and deployed (T-05.7). The "Photo taken on your phone" wording was not used. The document name on that screen still falls back to "Passport" after a phone capture, because the chosen type is not stored.
+
+#### N-2 · Low · The page title lags behind the screen
+
+During document checking, the title stays "Checking document" after the screen changes to "Your document looks good" or "We couldn't read your document". The start screen's title reads "Verify your identity · Verify your identity".
+
+Cause: the title follows the journey step, not the heading on screen. The whole `documentValidation` step uses `document.result.title` ("Checking document"), including the result screens. On the start screen the screen name and the site name are the same words.
+
+Fix: take the title from the same text as the visible heading, and use only the site name on the start screen.
+
+**Status:** still open. T-09.9 gave every screen a title; it did not follow the heading inside a step.
+
+#### N-3 · Low · Save & exit is offered on E6
+
+The expired-session screen still shows "Save & exit" in the header, though there's nothing left to save. The same button is still there on the rejected screen (E7), manual review (E9), and the verified screen (D7).
+
+Cause: Save & exit is wired to the header for the whole journey, including those four screens.
+
+Fix: hide it on E6, E7, E9 and D7.
+
+**Status:** still open.
+
+### Still open
+
+- N-2 and N-3, as above
+- The document name after a phone capture still says "Passport" (left over from N-1)
+- F-8 – F-11, F-13 – F-15, and Q-1 as listed under Limitations in the README
+- R-4 / PB-16, the CSP allowing inline scripts
