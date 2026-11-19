@@ -67,7 +67,13 @@ Later phases, not built in P0 or P0.5:
 
 - [x] T-07.13 (P3) `pnpm dev:phone` prints an HTTPS tunnel URL. Scanning that QR from a phone completes the handoff and opens the camera → AC-07.8 · verify: manual · files: `package.json`
 - [ ] `production` `docker-compose.yml`, `Dockerfile`, `docker/nginx.conf` (PB-3)
-- [ ] Vercel project, environment variables per environment, Upstash databases (preview + production)
-- [ ] Domain `tsogo.karaboseipelo.com` + DNS
-- [ ] `DEMO_MODE` banner in the root layout, `noindex` headers + `robots.txt` → AC-07.6 (P5). The variable itself is in `.env.example` (T-07.4)
-- [ ] Run AC-07.1, AC-07.4 – AC-07.6 and AC-07.8 before handover
+
+P5 · Ship:
+
+- [x] T-07.14 (P5) Show the demo banner from the root layout on every route, including `/privacy`, the saved page and error pages, while `DEMO_MODE` is unset or `true`. Long copy from 768 px up, short copy below → AC-07.6 · verify: `pnpm test src/app` · files: `src/app/layout.tsx`, `src/components/DemoBanner.tsx`, `src/app/layout.test.tsx`
+- [x] T-07.15 (P5) Send `X-Robots-Tag: noindex` and add `robots.txt` while `DEMO_MODE` is unset or `true` → AC-07.6 · verify: `pnpm test` · files: `src/app/robots.ts`, `next.config.ts`
+- [x] T-07.16 (P5) Vercel project with preview and production env vars, and a separate Upstash database for each. The preview QR uses the preview URL and the preview database → AC-07.4 · verify: a preview deploy · files: `src/lib/store`, `docs/TECH-STACK.md`, `.env.example`
+- [x] T-07.17 (P5) Attach `tsogo.karaboseipelo.com` and the DNS record Vercel shows → AC-07.5 · verify: `https://tsogo.karaboseipelo.com` over HTTPS with `X-Robots-Tag: noindex` · files: none
+- [x] T-07.18 (P5) Keyboard-only run of the full journey → P5 checkpoint · verify: manual · files: none
+- [x] T-07.19 (P5) Fill the `_TBC_` marks in `README.md` and the test column in `specs/README.md` → P5 checkpoint · verify: no `_TBC_` left · files: `README.md`, `specs/README.md`
+- [ ] T-07.20 (P5) Handover check of a fresh local journey, the preview, production `noindex`, and `pnpm dev:phone` → AC-07.1, AC-07.4 – AC-07.6, AC-07.8 · verify: manual · files: none

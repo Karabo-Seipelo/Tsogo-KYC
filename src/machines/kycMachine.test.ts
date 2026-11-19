@@ -64,6 +64,12 @@ test("AC-01.2 CHOOSE_THIS_DEVICE skips the QR handoff", () => {
   expect(actor.getSnapshot().value).toBe("documentUpload");
 });
 
+test("AC-01.10 CHOOSE_THIS_DEVICE from the QR screen goes to documentUpload", () => {
+  const actor = journey([desktop, { type: "CHOOSE_PHONE" }, thisDevice]);
+
+  expect(actor.getSnapshot().value).toBe("documentUpload");
+});
+
 test("qrHandoff PHONE_CONNECTED goes to documentUpload", () => {
   const actor = journey([
     desktop,

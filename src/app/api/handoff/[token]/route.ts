@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { logRequest } from "@/lib/analytics/requestLog";
 import { requestOrigin } from "@/lib/http/requestHost";
-import { createMemoryStore } from "@/lib/store/memoryStore";
+import { createSessionStore } from "@/lib/store/redisStore";
 
 // Dynamic route params are a Promise:
 // https://nextjs.org/docs/app/api-reference/file-conventions/route#context-optional
@@ -26,7 +26,7 @@ async function redeem(
   }
 
   const { token } = await context.params;
-  const store = createMemoryStore();
+  const store = createSessionStore();
   const sessionId = sessionIdFrom(await store.getDel(`handoff:${token}`));
   if (!sessionId) {
     return new NextResponse(null, { status: 410 });

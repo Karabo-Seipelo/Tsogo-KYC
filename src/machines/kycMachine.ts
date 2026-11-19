@@ -83,6 +83,7 @@ export const kycMachine = setup({
     qrHandoff: {
       on: {
         PHONE_CONNECTED: { target: "documentUpload" },
+        CHOOSE_THIS_DEVICE: { target: "documentUpload" },
         HANDBACK: { target: "review" },
         SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },

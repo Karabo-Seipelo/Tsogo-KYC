@@ -5,7 +5,11 @@ import { ContentProvider } from "../../lib/content/ContentProvider";
 import { contentSchema } from "../../lib/content/schema";
 import { createT } from "../../lib/content/t";
 import { HelpProvider } from "../help/HelpDialog";
-import { LivenessCheck, livenessPromptMs } from "./LivenessCheck";
+import {
+  LivenessCheck,
+  livenessConfirmMs,
+  livenessPromptMs,
+} from "./LivenessCheck";
 
 const content = contentSchema.parse(bundled);
 const t = createT(content);
@@ -45,26 +49,59 @@ test("AC-04.3 prompts appear one at a time and are announced", async () => {
   expect(onPassed).toHaveBeenCalledOnce();
 });
 
-test("AC-04.4 a prompt stays up for at least 10 seconds and help opens", async () => {
-  expect(livenessPromptMs).toBeGreaterThanOrEqual(10_000);
+test("AC-04.4 waiting cannot fail the check, and help stays available", async () => {
   vi.useFakeTimers();
-  renderLiveness(vi.fn());
-  const first = document.querySelector("[aria-live='polite']")?.textContent;
+  const onPassed = vi.fn();
+  renderLiveness(onPassed);
 
   act(() => {
     screen.getByRole("button", { name: content.liveness.help }).click();
   });
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(9_999);
-  });
-
-  expect(document.querySelector("[aria-live='polite']")?.textContent).toBe(
-    first,
-  );
-  expect(screen.getByText(progress(1))).toBeDefined();
   expect(
     screen.getByRole("heading", { name: content.help.title }),
   ).toBeDefined();
+
+  for (let step = 0; step < 3; step += 1) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(livenessPromptMs);
+    });
+  }
+
+  expect(onPassed).toHaveBeenCalledOnce();
+});
+
+test("AC-04.10 Got it is announced within 4 seconds and the check takes 10 to 15 seconds", async () => {
+  expect(livenessConfirmMs).toBeLessThanOrEqual(4_000);
+  expect(livenessPromptMs * 3).toBeGreaterThanOrEqual(10_000);
+  expect(livenessPromptMs * 3).toBeLessThanOrEqual(15_000);
+  vi.useFakeTimers();
+  const onPassed = vi.fn();
+  renderLiveness(onPassed);
+  const first = document.querySelector("[aria-live='polite']")?.textContent;
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(livenessConfirmMs);
+  });
+
+  const announced = document.querySelector("[aria-live='polite']");
+  expect(announced?.textContent).toBe(content.liveness.confirmed);
+  expect(announced?.getAttribute("aria-live")).toBe("polite");
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(livenessPromptMs - livenessConfirmMs);
+  });
+
+  expect(document.querySelector("[aria-live='polite']")?.textContent).not.toBe(
+    first,
+  );
+  expect(onPassed).not.toHaveBeenCalled();
+
+  for (let step = 0; step < 2; step += 1) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(livenessPromptMs);
+    });
+  }
+  expect(onPassed).toHaveBeenCalledOnce();
 });
 
 function renderLiveness(onPassed: () => void) {

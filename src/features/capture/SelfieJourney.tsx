@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaceMatch } from "./FaceMatch";
 import { LivenessCheck } from "./LivenessCheck";
 import { SelfieCapture } from "./SelfieCapture";
+import { useCamera } from "./useCamera";
 
 const blankPhoto =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
@@ -29,10 +30,20 @@ export function SelfieJourney({ documentSrc, send, onSelfie }: Props) {
   const [attempt, setAttempt] = useState(1);
   const failures = useRef(0);
   const sendRef = useRef(send);
+  const camera = useCamera();
+  const cameraStarted = useRef(false);
 
   useEffect(() => {
     sendRef.current = send;
   }, [send]);
+
+  useEffect(() => {
+    if (cameraStarted.current) {
+      return;
+    }
+    cameraStarted.current = true;
+    void camera.start("user");
+  });
 
   useEffect(() => {
     if (phase !== "comparing") {
@@ -76,6 +87,7 @@ export function SelfieJourney({ documentSrc, send, onSelfie }: Props) {
   if (phase === "liveness") {
     return (
       <LivenessCheck
+        stream={camera.stream}
         onPassed={() => {
           void finishLiveness();
         }}
@@ -99,6 +111,7 @@ export function SelfieJourney({ documentSrc, send, onSelfie }: Props) {
 
   return (
     <SelfieCapture
+      camera={camera}
       onDone={(thumbnail) => {
         const src = URL.createObjectURL(thumbnail);
         setSelfieSrc(src);

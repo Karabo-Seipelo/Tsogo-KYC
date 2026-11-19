@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { logRequest } from "@/lib/analytics/requestLog";
 import { requestOrigin } from "@/lib/http/requestHost";
-import { createMemoryStore } from "@/lib/store/memoryStore";
+import { createSessionStore } from "@/lib/store/redisStore";
 
 const sessionTtlSeconds = 15 * 60;
 
@@ -25,7 +25,7 @@ async function markManualReview(
     return new NextResponse(null, { status: 401 });
   }
 
-  const store = createMemoryStore();
+  const store = createSessionStore();
   const existing = await store.get(`session:${sessionId}`);
   if (!isRecord(existing)) {
     return new NextResponse(null, { status: 401 });

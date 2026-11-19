@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { logRequest } from "@/lib/analytics/requestLog";
 import { requestOrigin } from "@/lib/http/requestHost";
-import { createMemoryStore } from "@/lib/store/memoryStore";
+import { createSessionStore } from "@/lib/store/redisStore";
 
 const sessionTtlSeconds = 15 * 60;
 const handoffTtlSeconds = 10 * 60;
@@ -41,7 +41,7 @@ async function createSession(request: Request, log: { step: string | null }) {
   const handoffToken = randomBytes(16).toString("hex");
   const switches = sessionSwitches(request);
   const windowSeconds = switches.ttl === 1 ? 60 : sessionTtlSeconds;
-  const store = createMemoryStore();
+  const store = createSessionStore();
   await store.set(
     `session:${sessionId}`,
     {

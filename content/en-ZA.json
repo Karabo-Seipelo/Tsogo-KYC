@@ -200,6 +200,7 @@
       "blink": "Blink twice"
     },
     "progress": "Prompt {current} of {total}",
+    "confirmed": "Got it",
     "help": "Having trouble?"
   },
   "faceMatch": {
