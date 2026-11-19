@@ -179,3 +179,61 @@ Fix: call `POST /api/session/handoff` when leaving E8 for the QR screen, and sho
 3. F-1 (T-11.6).
 4. R-3 (T-02.24), then the remaining P6 tasks.
 5. Re-run this report.
+
+## Third run · P6 fixes
+
+**Run:** 19 Nov 2026, against production after the P6 fixes were deployed. Same setup: two Chrome tabs and the real webcam. Camera capture was used for every document photo, with no uploaded files.
+
+### Fixes
+
+| Task | Check | Result |
+|---|---|---|
+| T-03.8 | "Take photo" sends a real JPEG: `image` 29 KB and `thumbnail` 8 KB, both starting `FF D8 FF`; the server returns 200. Desktop and phone. | Pass |
+| T-03.9 | A forced 400 on the document route makes one request, then "We couldn't read your document" with "Retake photo" and the upload fallback, not E2 | Pass |
+| T-06.6 | `?ttl=1`: E5 at 31 s, then E6 at 63 s with focus on its heading; "Start again" returns to the start | Pass |
+| T-11.6 | Submitting a new empty session returns 409; a heartbeat with `review`, then submit, still returns 409; the session never reaches `processing` | Pass |
+| T-01.9 | A handoff run in the same tab right after a completed run shows only the new session's data, and E8 works | Pass |
+| T-05.6 | After a handoff, desktop Review lists all three document checks plus liveness and face match | Pass |
+| T-02.21 | The phone opens the link without tapping; the desktop leaves D3 for D4 within 1 s | Pass |
+| T-02.22 | D3's `aria-live="polite"` region exists while waiting ("Waiting for your phone…") | Pass |
+| T-02.24 | "Show the QR code again" from E8 issues a new token with a full timer (9:58). The old token returns 410, and the new one connects the phone. | Pass |
+| T-02.23 | The Save & exit dialog and the saved page promise only the 15 minutes, not resume | Pass |
+| T-09.9 | Every screen sets a document title | Pass (see N-2) |
+| T-03.7 | The document-type screen shows "Step 1 of 4"; device choice and the QR screen show none | Pass |
+
+### Regression
+
+| Check | Result |
+|---|---|
+| Desktop-only happy path with the camera, ending at "You're verified" | Pass |
+| Phone handoff happy path with the camera; M7 on the phone; desktop review and submit, ending at "You're verified" | Pass |
+| `?fail=document:always`: "Attempt 1 of 3", "Attempt 2 of 3", then E9; focus on the heading each time | Pass |
+| `?fail=upload`: three 503s, then E2; "Try again" succeeds | Pass (retries still about 100 ms apart, F-12) |
+| `?fail=reject` with the camera path: submit is accepted, then E7 with a reference | Pass |
+| E8 about 21 s after the phone tab closed | Pass |
+| Response headers on `/api/session/status` | Pass |
+
+### New findings
+
+#### N-1 · Medium · Desktop review after a handoff shows blank thumbnails
+
+When the photos were taken on the phone, the desktop Review shows a 1×1 transparent placeholder for both photos, with the alt text "Document photo" and "Selfie". The user can't see what they're submitting, and a screen reader announces images that aren't there. R-05.3 says Review shows both thumbnails. The desktop-only path shows them correctly.
+
+Fix: the server already stores both thumbnails, so return them to the session's own devices, either in the status response or from a `GET /api/session/thumbnails` route. Until then, show "Photo taken on your phone" text instead of an empty image.
+
+#### N-2 · Low · The page title lags behind the screen
+
+During document checking, the title stays "Checking document" after the screen changes to "Your document looks good" or "We couldn't read your document". The start screen's title reads "Verify your identity · Verify your identity".
+
+Fix: take the title from the same key as the visible `h1`, and use only the site title on the start screen.
+
+#### N-3 · Low · Save & exit is offered on E6
+
+The expired-session screen still shows "Save & exit" in the header, though there's nothing left to save.
+
+Fix: hide it on E6, E7, E9 and D7.
+
+### Still open
+
+- F-8 – F-15 and Q-1 as listed under Limitations in the README
+- R-4 / PB-16, the CSP allowing inline scripts

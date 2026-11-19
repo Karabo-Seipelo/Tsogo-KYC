@@ -4,7 +4,7 @@ A front-end implementation of a digital Know Your Customer (KYC) onboarding jour
 
 OCR, facial recognition and liveness detection are **mocked**. The focus is workflow design, state management, UX, accessibility and resilience.
 
-**Live demo:** https://tsogo.karaboseipelo.com
+**Live demo:** the live site can be found at [tsogo.karaboseipelo.com](https://tsogo.karaboseipelo.com/).
 
 > ⚠️ **This is a demo.** Please don't upload a real ID document.
 
@@ -86,7 +86,7 @@ These are the assumptions the demo was built on. The open questions are in [`spe
 
 The specs describe the full design; the demo builds the core journey. Items tagged `production` in the specs are designed but not built, each with a reason and a trigger in the [production backlog](specs/PLAN.md#production-backlog). The main ones:
 
-- A real verification provider (OCR, liveness, face match are mocked by design).
+- A real verification provider (SmileID, OCR, liveness, face match are mocked by design).
 - Liveness is simulated: the live camera is shown and the prompts are real, but each prompt is confirmed on a short timer; no face or movement is analysed (brief requirement 7). A real provider would replace the decision (PB-11).
 - Hardening for go-live: signed tokens, rate limiting, device binding, encryption at rest, durable audit storage, error tracking and alerts.
 - A CMS behind the content layer (the interface is in place; copy is a bundled JSON file).

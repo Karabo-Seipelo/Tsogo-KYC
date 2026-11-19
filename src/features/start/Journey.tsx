@@ -31,8 +31,10 @@ import { useContent } from "@/lib/content/useContent";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
 
-const blankPhoto =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+type StoredPhotos = {
+  document: string | null;
+  selfie: string | null;
+};
 
 type Props = {
   device?: Device;
@@ -63,6 +65,7 @@ function JourneyFlow({ device }: { device: Device }) {
   const [manualReference, setManualReference] = useState<string | null>(null);
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
+  const [remotePhotos, setRemotePhotos] = useState<StoredPhotos | null>(null);
   const [documentType, setDocumentType] = useState<DocumentKind | null>(null);
   const [handoff, setHandoff] = useState<HandoffCode | null>(null);
   const deadline = laterDeadline(status?.expiresAt ?? null, heldExpiresAt);
@@ -98,6 +101,24 @@ function JourneyFlow({ device }: { device: Device }) {
   }, [send, state, status?.outcome]);
 
   useEffect(() => {
+    if (state !== "review" || device === "phone") {
+      return;
+    }
+    if (documentPhoto && selfiePhoto) {
+      return;
+    }
+    let cancelled = false;
+    void loadThumbnails().then((photos) => {
+      if (!cancelled) {
+        setRemotePhotos(photos);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [device, documentPhoto, selfiePhoto, state]);
+
+  useEffect(() => {
     if (reason !== "maxAttempts") {
       return;
     }
@@ -127,6 +148,7 @@ function JourneyFlow({ device }: { device: Device }) {
         return null;
       });
       setDocumentType(null);
+      setRemotePhotos(null);
       setHandoff(null);
       setHeldExpiresAt(null);
       send({ type: "RESTART" });
@@ -205,12 +227,15 @@ function JourneyFlow({ device }: { device: Device }) {
     );
   } else if (state === "review" && device === "phone") {
     screen = <PhoneDone />;
-  } else if (state === "review") {
+  } else if (
+    state === "review" &&
+    reviewPhotosReady(documentPhoto, selfiePhoto, remotePhotos)
+  ) {
     screen = (
       <ReviewScreen
         documentType={documentType ?? "passport"}
-        documentSrc={documentPhoto ?? blankPhoto}
-        selfieSrc={selfiePhoto ?? blankPhoto}
+        documentSrc={documentPhoto ?? remotePhotos?.document ?? null}
+        selfieSrc={selfiePhoto ?? remotePhotos?.selfie ?? null}
         checks={status?.checks ?? []}
         livenessPassed={status?.livenessPassed === true}
         matched={status?.match === true}
@@ -220,6 +245,8 @@ function JourneyFlow({ device }: { device: Device }) {
         }}
       />
     );
+  } else if (state === "review") {
+    screen = <main />;
   } else if (state === "processing") {
     screen = <ProcessingScreen onComplete={() => send({ type: "VERIFIED" })} />;
   } else if (state === "complete") {
@@ -450,6 +477,36 @@ function screenTitleKey(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function reviewPhotosReady(
+  documentPhoto: string | null,
+  selfiePhoto: string | null,
+  remotePhotos: StoredPhotos | null,
+) {
+  return (
+    (documentPhoto !== null && selfiePhoto !== null) || remotePhotos !== null
+  );
+}
+
+async function loadThumbnails(): Promise<StoredPhotos> {
+  const empty = { document: null, selfie: null };
+  try {
+    const response = await fetch("/api/session/thumbnails");
+    if (!response.ok) {
+      return empty;
+    }
+    const body: unknown = await response.json();
+    if (!isRecord(body)) {
+      return empty;
+    }
+    return {
+      document: typeof body.document === "string" ? body.document : null,
+      selfie: typeof body.selfie === "string" ? body.selfie : null,
+    };
+  } catch {
+    return empty;
+  }
 }
 
 async function submitReview(send: (event: { type: "SUBMIT" }) => void) {
