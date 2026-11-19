@@ -38,6 +38,34 @@ test("AC-09.8 the document title names the screen and changes with the step", as
   expect(document.title).not.toBe(titled(content.start.title));
 });
 
+test("the document type heading takes focus after continuing on this computer", async () => {
+  const user = userEvent.setup();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({}) })),
+  );
+
+  render(
+    <ContentProvider content={content}>
+      <Journey />
+    </ContentProvider>,
+  );
+
+  await user.click(screen.getByRole("button", { name: content.start.cta }));
+  await user.click(
+    screen.getByRole("radio", {
+      name: new RegExp(content.device.options.thisDevice.title),
+    }),
+  );
+  await user.click(
+    screen.getByRole("button", { name: content.common.actions.continue }),
+  );
+
+  expect(
+    screen.getByRole("heading", { name: content.document.select.title }),
+  ).toBe(document.activeElement);
+});
+
 const documentPhoto = "data:image/jpeg;base64,document-thumb";
 const selfiePhoto = "data:image/jpeg;base64,selfie-thumb";
 
