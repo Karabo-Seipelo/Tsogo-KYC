@@ -12,7 +12,7 @@ While the phone does the capture steps, the desktop shows live progress. When th
 
 - R-05.1 D4 lists the steps with status (Done / In progress / Waiting), driven by the status poll (spec 02, R-02.6).
 - R-05.2 M7 tells phone users to return to their computer. Single-device users go straight to review.
-- R-05.3 Review shows the document type, both thumbnails, each check's result, a "Retake" link per capture, and a confirmation checkbox.
+- R-05.3 Review shows the document type, both thumbnails, each check's result, a "Retake" link per capture, and a confirmation checkbox. Document rows come from `checks`, liveness from `livenessPassed`, and face match from `match`, all on `GET /api/session/status`. A missing or false result is not shown as passed. The desktop does not substitute its own context, and it does not pass those flags as literal `true`.
 - R-05.4 `POST /api/session/submit` moves the session to `processing`; the result arrives via the status poll.
 - R-05.5 Processing that takes longer than ~2 minutes shows "Taking longer than usual".
 
@@ -24,12 +24,13 @@ While the phone does the capture steps, the desktop shows live progress. When th
 - **AC-05.4** GIVEN D5 WHEN the confirmation box is not ticked THEN "Submit" is disabled AND explains why (`aria-describedby`).
 - **AC-05.5** GIVEN D5 WHEN "Retake" is used THEN the user returns to that step and other captures are kept (spec 01, AC-01.7).
 - **AC-05.6** GIVEN submit WHEN processing completes THEN D7 shows "You're verified", AND the session and handoff token are closed.
+- **AC-05.7** GIVEN `GET /api/session/status` returns `checks`, `livenessPassed` and `match` WHEN D5 renders THEN those rows match the status. GIVEN a check is missing or not passed THEN that row is not shown as passed.
 
 ## API
 
 | Method | Endpoint | Response |
 |---|---|---|
-| `POST` | `/api/session/submit` | `202 { step: 'processing' }` |
+| `POST` | `/api/session/submit` | `202 { step: 'processing' }`, or `409` when the session isn't ready (spec 11, R-11.6) |
 | `GET` | `/api/session/status` | (spec 02) |
 
 ## Tasks
@@ -39,3 +40,4 @@ While the phone does the capture steps, the desktop shows live progress. When th
 - [x] T-05.3 D6 processing, including "taking longer", and D7 complete → R-05.5, AC-05.6 · verify: `pnpm test src/features/review` · files: `src/features/review/ProcessingScreen.tsx`, `src/features/review/CompleteScreen.tsx`
 - [x] T-05.4 (P3) D4 lists the steps with an icon and text, and updates within one poll. After 30 seconds without a heartbeat it shows E8, and it returns to normal when heartbeats resume. M7 tells the phone user to go back to the computer, and the desktop then moves to review → R-05.1, R-05.2, AC-05.1 – AC-05.3, AC-02.7 · verify: `pnpm test src/features/review` · files: `src/features/review/StatusScreen.tsx`, `src/features/review/StatusScreen.test.tsx`, `src/features/review/PhoneDone.tsx`, `src/features/review/PhoneDone.test.tsx`
 - [x] T-05.5 (P4) `?fail=reject` on submit → AC-06.5 · verify: `pnpm test src/app/api/session/submit` · files: `src/app/api/session/submit/route.ts` · gate: tests reviewed
+- [x] T-05.6 (P6) **Tests first:** status returns `checks`, `livenessPassed` and `match`, and D5 renders those. Journey must not pass liveness or face match as literal `true` (E2E F-2, F-3) → R-05.3, AC-05.7 · verify: `pnpm test src/app/api/session/status src/features/review` · files: `src/app/api/session/status/route.ts`, `src/app/api/session/status/route.test.ts`, `src/features/start/Journey.tsx`, `src/features/review/ReviewScreen.tsx`, `src/features/review/ReviewScreen.test.tsx` · gate: tests reviewed

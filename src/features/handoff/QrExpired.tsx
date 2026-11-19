@@ -66,6 +66,24 @@ export function HandoffScreen({
     return () => window.clearTimeout(id);
   }, [code.expiresAt]);
 
+  async function showQrAgain() {
+    try {
+      const response = await fetch("/api/session/handoff", { method: "POST" });
+      if (!response.ok) {
+        return;
+      }
+      const issued = handoffCodeFrom(await response.json());
+      if (!issued) {
+        return;
+      }
+      setOverride(issued);
+      onIssued(issued);
+      setQrAgain(true);
+    } catch {
+      return;
+    }
+  }
+
   if (expired && !sawPhone) {
     return (
       <QrExpired
@@ -85,7 +103,9 @@ export function HandoffScreen({
         phoneConnected={connected}
         outcome={status?.outcome}
         reference={status?.reference}
-        onShowQr={() => setQrAgain(true)}
+        onShowQr={() => {
+          void showQrAgain();
+        }}
         onReview={onReview}
       />
     );

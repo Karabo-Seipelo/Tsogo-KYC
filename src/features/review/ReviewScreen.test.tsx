@@ -51,6 +51,37 @@ test("R-05.3 review shows the document, both photos, and each result", () => {
   ).toBeGreaterThan(0);
 });
 
+test("AC-05.7 a failed or missing result is not shown as passed", () => {
+  render(
+    <ContentProvider content={content}>
+      <ReviewScreen
+        {...props()}
+        checks={[
+          {
+            id: "corners",
+            label: content.document.result.passed.checks.corners,
+            passed: false,
+          },
+        ]}
+        livenessPassed={false}
+        matched={false}
+        onRetake={vi.fn()}
+        onSubmit={vi.fn()}
+      />
+    </ContentProvider>,
+  );
+
+  expect(rowText(content.document.result.passed.checks.corners)).not.toContain(
+    content.common.status.passed,
+  );
+  expect(rowText(content.review.rows.liveness)).not.toContain(
+    content.common.status.passed,
+  );
+  expect(rowText(content.review.rows.faceMatch)).not.toContain(
+    content.common.status.passed,
+  );
+});
+
 test("AC-05.4 submit stays disabled until the confirmation is ticked", async () => {
   const user = userEvent.setup();
   const onSubmit = vi.fn();
@@ -115,6 +146,10 @@ function props() {
     livenessPassed: true,
     matched: true,
   };
+}
+
+function rowText(label: string) {
+  return screen.getByText(label).parentElement?.textContent ?? "";
 }
 
 function retake(capture: string) {

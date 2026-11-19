@@ -20,7 +20,7 @@ Each phase ends at a checkpoint. The next phase doesn't start until the checkpoi
 | **P4 · Resilience** | Offline, timeout warning/expiry, rejection, camera/upload errors, manual review (E9), `?fail=` / `?ttl=` switches | 06, 08 (E9) | Every scenario E1 – E9 can be forced and recovers as specified; switches listed in the README |
 | **P4.5 · Visual design** | Tokens and Montserrat, contrast test, raw-colour lint rule, restyled components with all states, layouts matched to the Figma reference screens (see `specs/10-visual-design/handoff.md`) | 10 | AC-10.1 – AC-10.6; screenshots at 390 / 768 / 1440 px in the PR |
 | **P5 · Ship** | Vercel + Upstash per environment, domain, demo banner + `noindex`; accessibility pass; README TBCs filled | 07 | AC-07.4 – AC-07.6; keyboard-only run of the full journey; README has no _TBC_ left |
-| **P6 · Hardening** | Response headers, server-side thumbnail check, heartbeat step allowlist, cookie `Max-Age`, origin check against the request URL | 11 | AC-11.1 – AC-11.5 |
+| **P6 · Hardening** | Response headers, server-side thumbnail check, heartbeat step allowlist, cookie `Max-Age`, origin check against the request URL; then the fixes from the [E2E run](../docs/E2E-REPORT.md): submit guard, clean context on a new session, review rows from the server, phone heartbeat on load, D3 live region, Save & exit copy, page titles, document-type step counter; from the re-run: camera document capture, 401 as expiry, a new QR from E8 | 11, 01, 02, 03, 05, 06, 09 | AC-11.1 – AC-11.6, AC-01.9, AC-01.11, AC-02.4, AC-02.7, AC-02.10, AC-03.10, AC-03.11, AC-05.7, AC-06.6, AC-09.8; E8 and the happy path re-run on the deployed build |
 
 ## Dependencies
 
@@ -42,7 +42,7 @@ flowchart LR
 
 - **In parallel:** 09 and 01 don't depend on each other. Within P2, the document (03) and selfie (04) screens can be built side by side once the machine and content exist.
 - **Strictly in order:** checks (P0.5) before any feature code, so every agent-written change from P1 on is gated; nothing with copy before 09; nothing with journey behaviour before 01; cross-device before resilience, because E4/E8 depend on the heartbeat and polling.
-- **P6 waits to be asked for.** It was specified from the handover security review, after P5. Rate limiting, signed handoff tokens, encryption at rest and the `DEMO_MODE=false` startup refusal stay in the production backlog (PB-12, PB-13, PB-8).
+- **P6 is in progress.** T-11.1 – T-11.5 are done. The E2E fixes (T-11.6, T-01.9, T-03.7, T-05.6, T-02.21 – T-02.23, T-09.9) and the re-run fixes (T-03.8, T-03.9, T-06.6, T-02.24) are still open. Start with T-03.8: the camera capture is broken in production. Rate limiting, signed handoff tokens, encryption at rest and the `DEMO_MODE=false` startup refusal stay in the production backlog (PB-12, PB-13, PB-8).
 
 ## Risks
 
@@ -87,3 +87,4 @@ Designed in the specs, not built for the demo. Effort: S < half a day, M ≈ 1�
 | PB-13 | Encryption at rest, retention policy, durable access-controlled audit storage for the FICA retention period | 08 · R-08.2; constitution §5 | The demo keeps nothing beyond the session | Go-live | M |
 | PB-14 | Error tracking, tracing, alerts and SLOs (time to verify, BR-3; failure-rate spikes), real-user Web Vitals | 08 | Request logs cover the demo | Go-live | M |
 | PB-15 | Dark theme and a client brand theme as token sets | 10 · R-10.8, T-10.6 | One neutral theme is enough for the demo | Brand guidelines from the client | S |
+| PB-16 | Nonce-based CSP without `'unsafe-inline'` for scripts | 11 · design note | The demo renders no user-supplied HTML | Go-live; a security review | S |

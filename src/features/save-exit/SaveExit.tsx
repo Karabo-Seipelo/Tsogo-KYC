@@ -104,6 +104,14 @@ function ConfirmDialog({
 function SavedPage() {
   const { t } = useContent();
   const heading = useRef<HTMLHeadingElement>(null);
+  const title = t("common.documentTitle", {
+    screen: t("saveExit.savedTitle"),
+    site: t("common.header.title"),
+  });
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
   useEffect(() => {
     heading.current?.focus();

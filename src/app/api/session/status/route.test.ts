@@ -41,6 +41,8 @@ test("R-02.6 a new session reports its step and an open handoff", async () => {
     phoneConnected: false,
     lastSeen: null,
     checks: [],
+    livenessPassed: false,
+    match: false,
     handoffExpired: false,
     expired: false,
     expiresAt: "2026-01-01T00:15:00.000Z",
@@ -77,9 +79,37 @@ test("R-02.6 status returns the stored step and checks", async () => {
     phoneConnected: false,
     lastSeen: "2026-01-01T00:00:00.000Z",
     checks,
+    livenessPassed: false,
+    match: false,
     handoffExpired: false,
     expired: false,
     expiresAt: null,
+  });
+});
+
+test("AC-05.7 status returns the stored checks, liveness and face match", async () => {
+  const store = createMemoryStore();
+  const checks = [
+    { id: "page", passed: true },
+    { id: "print", passed: false },
+  ];
+  await store.set(
+    "session:abc",
+    {
+      step: "review",
+      checks,
+      livenessPassed: true,
+      match: false,
+    },
+    60,
+  );
+
+  const response = await GET(statusRequest("abc"));
+
+  expect(await response.json()).toMatchObject({
+    checks,
+    livenessPassed: true,
+    match: false,
   });
 });
 

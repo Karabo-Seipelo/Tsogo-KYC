@@ -19,6 +19,7 @@ Compliance may need to change legal wording, marketing will want to tune tone, a
 - R-09.7 API error codes map directly to copy: an error `{ code: 'SESSION_EXPIRED' }` renders `errors.SESSION_EXPIRED.*`.
 - R-09.8 The locale comes from a single setting (`en-ZA` today). Adding a language means adding a file or a CMS locale, not changing code. Supporting a second locale is `production` (PB-2).
 - R-09.9 `production` `GET /api/content/{locale}` serves the payload, so the client can refresh copy and a CMS publish can revalidate it without a deploy (PB-1).
+- R-09.10 Every route sets a document `<title>` from content: the current screen's title, then the site title (`"Review and submit · Verify your identity"`). The title changes with the step (WCAG 2.4.2).
 
 ## Acceptance criteria
 
@@ -29,6 +30,7 @@ Compliance may need to change legal wording, marketing will want to tune tone, a
 - **AC-09.5** GIVEN a placeholder value (`{time}`, `{reference}`, `{attempt}`) THEN it's filled in correctly; a missing value fails in development, not silently in production.
 - **AC-09.6** `production` GIVEN a second locale file (e.g. a test `xx-XX.json`) and the locale setting changed THEN every screen renders that locale's copy.
 - **AC-09.7** GIVEN any API error with a known code THEN the matching `errors.{CODE}` copy is shown; an unknown code falls back to a generic error message.
+- **AC-09.8** GIVEN any screen, `/privacy` or an error page THEN `document.title` is not empty AND names that screen; WHEN the step changes THEN the title changes with it.
 
 ## API
 
@@ -58,3 +60,4 @@ Compliance may need to change legal wording, marketing will want to tune tone, a
 - [x] T-09.6 (P2) Lint or test that components contain no hard-coded user-facing strings → AC-09.1 · verify: `pnpm lint` · files: `eslint.config.mjs`
 - [ ] T-09.7 `production` `GET /api/content/[locale]` and the CMS fallback (PB-1)
 - [ ] T-09.8 `production` `cms` source and publish revalidation (PB-1)
+- [x] T-09.9 (P6) Document titles per screen from content (E2E F-6) → R-09.10, AC-09.8 · verify: `pnpm test src/lib/content src/features` · files: `src/app/layout.tsx`, `src/features/start/Journey.tsx`, `content/en-ZA.json`

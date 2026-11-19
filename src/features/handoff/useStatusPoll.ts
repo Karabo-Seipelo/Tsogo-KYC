@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const statusPollMs = 2_500;
 
@@ -14,10 +14,21 @@ export type SessionStatus = {
   ttl: 1 | null;
   outcome: string | null;
   reference: string | null;
+  checks: ReviewCheck[];
+  livenessPassed: boolean;
+  match: boolean;
+};
+
+type ReviewCheck = {
+  id: string;
+  label: string;
+  passed: boolean;
 };
 
 export function useStatusPoll() {
   const [status, setStatus] = useState<SessionStatus | null>(null);
+
+  const hadSession = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,11 +39,21 @@ export function useStatusPoll() {
       }
       try {
         const response = await fetch("/api/session/status");
-        if (!response.ok || cancelled) {
+        if (cancelled) {
+          return;
+        }
+        if (response.status === 401 && hadSession.current) {
+          setStatus((current) =>
+            current ? { ...current, expired: true } : current,
+          );
+          return;
+        }
+        if (!response.ok) {
           return;
         }
         const next = sessionStatusFrom(await response.json());
         if (next && !cancelled) {
+          hadSession.current = true;
           setStatus(next);
         }
       } catch {
@@ -76,7 +97,28 @@ function sessionStatusFrom(body: unknown): SessionStatus | null {
     ttl: body.ttl === 1 ? 1 : null,
     outcome: typeof body.outcome === "string" ? body.outcome : null,
     reference: typeof body.reference === "string" ? body.reference : null,
+    checks: reviewChecks(body.checks),
+    livenessPassed: body.livenessPassed === true,
+    match: body.match === true,
   };
+}
+
+function reviewChecks(value: unknown): ReviewCheck[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.flatMap((item) => {
+    if (!isRecord(item) || typeof item.id !== "string") {
+      return [];
+    }
+    return [
+      {
+        id: item.id,
+        label: typeof item.label === "string" ? item.label : item.id,
+        passed: item.passed === true,
+      },
+    ];
+  });
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

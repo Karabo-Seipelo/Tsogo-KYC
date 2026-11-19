@@ -7,7 +7,7 @@ import { SelfieJourney } from "@/features/capture/SelfieJourney";
 import { CompleteScreen } from "@/features/review/CompleteScreen";
 import { ManualReview } from "@/features/review/ManualReview";
 import { ProcessingScreen } from "@/features/review/ProcessingScreen";
-import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
+import { ReviewScreen } from "@/features/review/ReviewScreen";
 import { HelpProvider } from "@/features/help/HelpDialog";
 import { SaveExitProvider } from "@/features/save-exit/SaveExit";
 import type { Device } from "@/machines/kycMachine.types";
@@ -26,6 +26,8 @@ import {
   shouldWarn,
 } from "@/features/resilience/TimeoutWarning";
 import { useStatusPoll } from "@/features/handoff/useStatusPoll";
+import type { ContentKey } from "@/lib/content/t";
+import { useContent } from "@/lib/content/useContent";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
 
@@ -49,21 +51,29 @@ export function Journey({ device = "desktop" }: Props) {
 
 function JourneyFlow({ device }: { device: Device }) {
   const { state, send, reason } = useKycMachine();
+  const { t } = useContent();
   usePhoneHeartbeat(device, state);
   const status = useStatusPoll();
+  const title = t("common.documentTitle", {
+    screen: t(screenTitleKey(state, reason, device, status?.outcome ?? null)),
+    site: t("common.header.title"),
+  });
   const [now, setNow] = useState(() => Date.now());
   const [heldExpiresAt, setHeldExpiresAt] = useState<string | null>(null);
   const [manualReference, setManualReference] = useState<string | null>(null);
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
   const [documentType, setDocumentType] = useState<DocumentKind | null>(null);
-  const [checks, setChecks] = useState<ReviewCheck[]>([]);
   const [handoff, setHandoff] = useState<HandoffCode | null>(null);
   const deadline = laterDeadline(status?.expiresAt ?? null, heldExpiresAt);
   const remaining =
     deadline === null ? Number.POSITIVE_INFINITY : deadline - now;
   const heldRemaining =
     heldExpiresAt === null ? 0 : Date.parse(heldExpiresAt) - now;
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -116,7 +126,6 @@ function JourneyFlow({ device }: { device: Device }) {
         }
         return null;
       });
-      setChecks([]);
       setDocumentType(null);
       setHandoff(null);
       setHeldExpiresAt(null);
@@ -173,7 +182,6 @@ function JourneyFlow({ device }: { device: Device }) {
           });
         }}
         onDocumentType={setDocumentType}
-        onChecks={setChecks}
       />
     );
   } else if (
@@ -203,9 +211,9 @@ function JourneyFlow({ device }: { device: Device }) {
         documentType={documentType ?? "passport"}
         documentSrc={documentPhoto ?? blankPhoto}
         selfieSrc={selfiePhoto ?? blankPhoto}
-        checks={checks}
-        livenessPassed
-        matched
+        checks={status?.checks ?? []}
+        livenessPassed={status?.livenessPassed === true}
+        matched={status?.match === true}
         onRetake={(target) => send({ type: "RETAKE", target })}
         onSubmit={() => {
           void submitReview(send);
@@ -262,23 +270,28 @@ const phoneHeartbeatMs = 10_000;
 
 function usePhoneHeartbeat(device: Device, step: string) {
   useEffect(() => {
-    if (device !== "phone" || step === "idle") {
+    if (device !== "phone") {
       return;
     }
-    void sendHeartbeat(step);
+    const reported = step === "idle" ? null : step;
+    void sendHeartbeat(reported);
     const timer = window.setInterval(() => {
-      void sendHeartbeat(step);
+      void sendHeartbeat(reported);
     }, phoneHeartbeatMs);
     return () => window.clearInterval(timer);
   }, [device, step]);
 }
 
-async function sendHeartbeat(step: string) {
+async function sendHeartbeat(step: string | null) {
   try {
     await fetch("/api/session/heartbeat", {
       method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ step }),
+      ...(step
+        ? {
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ step }),
+          }
+        : {}),
     });
   } catch {
     return;
@@ -379,6 +392,60 @@ function laterDeadline(server: string | null, held: string | null) {
     return null;
   }
   return Math.max(...times);
+}
+
+function screenTitleKey(
+  state: string,
+  reason: string | null,
+  device: Device,
+  outcome: string | null,
+): ContentKey {
+  if (state === "error" && reason === "sessionExpired") {
+    return "errors.SESSION_EXPIRED.title";
+  }
+  if (state === "error" && reason === "maxAttempts") {
+    return "manualReview.title";
+  }
+  if (state === "error" && outcome === "rejected") {
+    return "errors.VERIFICATION_REJECTED.title";
+  }
+  if (state === "error") {
+    return "errors.generic.title";
+  }
+  if (state === "deviceSelection") {
+    return "device.title";
+  }
+  if (state === "qrHandoff") {
+    return "handoff.title";
+  }
+  if (state === "documentUpload") {
+    return "document.select.title";
+  }
+  if (state === "documentValidation") {
+    return "document.result.title";
+  }
+  if (state === "selfieCapture") {
+    return "selfie.title";
+  }
+  if (state === "livenessCheck") {
+    return "liveness.title";
+  }
+  if (state === "faceMatch") {
+    return "faceMatch.title";
+  }
+  if (state === "review" && device === "phone") {
+    return "phoneDone.title";
+  }
+  if (state === "review") {
+    return "review.title";
+  }
+  if (state === "processing") {
+    return "processing.title";
+  }
+  if (state === "complete") {
+    return "complete.title";
+  }
+  return "start.title";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

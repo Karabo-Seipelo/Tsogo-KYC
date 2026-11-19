@@ -18,10 +18,11 @@ type Camera = Pick<ReturnType<typeof useCamera>, "start" | "stream" | "error">;
 
 type Props = {
   onDone: (thumbnail: Blob) => void;
+  onExpired?: () => void;
   camera?: Camera;
 };
 
-export function SelfieCapture({ onDone, camera }: Props) {
+export function SelfieCapture({ onDone, onExpired, camera }: Props) {
   const { t } = useContent();
   const video = useRef<HTMLVideoElement>(null);
   const started = useRef(false);
@@ -62,6 +63,11 @@ export function SelfieCapture({ onDone, camera }: Props) {
         method: "POST",
         body: form,
       });
+      if (response.status === 401) {
+        setUploading(false);
+        onExpired?.();
+        return;
+      }
       if (!response.ok) {
         setUploading(false);
         return;

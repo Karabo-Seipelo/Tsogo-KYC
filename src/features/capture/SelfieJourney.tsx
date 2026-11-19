@@ -16,7 +16,8 @@ type SelfieEvent =
   | { type: "LIVENESS_PASSED" }
   | { type: "MATCHED" }
   | { type: "NO_MATCH" }
-  | { type: "RETAKE"; target: "document" };
+  | { type: "RETAKE"; target: "document" }
+  | { type: "SESSION_EXPIRED" };
 
 type Props = {
   documentSrc?: string | null;
@@ -112,6 +113,7 @@ export function SelfieJourney({ documentSrc, send, onSelfie }: Props) {
   return (
     <SelfieCapture
       camera={camera}
+      onExpired={() => send({ type: "SESSION_EXPIRED" })}
       onDone={(thumbnail) => {
         const src = URL.createObjectURL(thumbnail);
         setSelfieSrc(src);

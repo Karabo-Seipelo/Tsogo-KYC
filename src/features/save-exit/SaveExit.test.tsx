@@ -5,9 +5,11 @@ import bundled from "../../../content/en-ZA.json";
 import { Journey } from "../../features/start/Journey";
 import { ContentProvider } from "../../lib/content/ContentProvider";
 import { contentSchema } from "../../lib/content/schema";
+import { createT } from "../../lib/content/t";
 import { saveWindowMinutes } from "./SaveExit";
 
 const content = contentSchema.parse(bundled);
+const t = createT(content);
 
 function withMinutes(template: string) {
   return template.replaceAll("{minutes}", String(saveWindowMinutes));
@@ -29,9 +31,11 @@ test("AC-02.11 Keep going or Escape leaves the screen unchanged", async () => {
   expect(document.activeElement).toBe(
     screen.getByRole("heading", { name: content.saveExit.confirmTitle }),
   );
-  expect(
-    screen.getByText(withMinutes(content.saveExit.confirmBody)),
-  ).toBeDefined();
+  const confirmBody = screen.getByText(
+    withMinutes(content.saveExit.confirmBody),
+  );
+  expect(confirmBody.textContent).toContain(String(saveWindowMinutes));
+  expect(confirmBody.textContent).not.toMatch(/come back|carry on/i);
   expect(
     screen.getByRole("heading", { name: content.start.title, level: 1 }),
   ).toBeDefined();
@@ -87,9 +91,17 @@ test("AC-02.10 confirming Save & exit shows how long progress is kept", async ()
     level: 1,
   });
   expect(document.activeElement).toBe(saved);
-  expect(
-    screen.getByText(withMinutes(content.saveExit.savedBody)),
-  ).toBeDefined();
+  expect(document.title).toBe(
+    t("common.documentTitle", {
+      screen: content.saveExit.savedTitle,
+      site: content.common.header.title,
+    }),
+  );
+  const savedBody = screen.getByText(withMinutes(content.saveExit.savedBody));
+  expect(savedBody.textContent).toContain(String(saveWindowMinutes));
+  expect(savedBody.textContent).not.toMatch(
+    /pick up where you left off|come back/i,
+  );
   expect(
     screen.getByRole("link", { name: content.saveExit.return }),
   ).toBeDefined();

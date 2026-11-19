@@ -66,6 +66,31 @@ test("R-02.6 AC-02.4 the desktop polls every 2.5 seconds, pauses while hidden, a
   expect(fetchMock).toHaveBeenCalledTimes(3);
 });
 
+test("AC-06.6 a 401 after a session existed marks the status expired", async () => {
+  vi.useFakeTimers();
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(jsonStatus(false, "documentUpload"))
+    .mockResolvedValue(new Response(null, { status: 401 }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  const { result } = renderHook(() => useStatusPoll());
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
+  expect(result.current).toMatchObject({
+    step: "documentUpload",
+    expired: false,
+  });
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(statusPollMs);
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(result.current).toMatchObject({ expired: true });
+});
+
 function jsonStatus(phoneConnected: boolean, step: string) {
   return Promise.resolve({
     ok: true,

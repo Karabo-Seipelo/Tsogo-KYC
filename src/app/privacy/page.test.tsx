@@ -2,9 +2,11 @@ import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import bundled from "../../../content/en-ZA.json";
 import { contentSchema } from "../../lib/content/schema";
+import { createT } from "../../lib/content/t";
 import Page from "./page";
 
 const content = contentSchema.parse(bundled);
+const t = createT(content);
 
 test("AC-02.12 /privacy shows every notice section and a way back to the journey", () => {
   render(<Page />);
@@ -24,4 +26,10 @@ test("AC-02.12 /privacy shows every notice section and a way back to the journey
       .getByRole("link", { name: content.privacy.back })
       .getAttribute("href"),
   ).toBe("/");
+  expect(document.title).toBe(
+    t("common.documentTitle", {
+      screen: content.privacy.title,
+      site: content.common.header.title,
+    }),
+  );
 });

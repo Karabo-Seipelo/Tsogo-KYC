@@ -70,6 +70,7 @@ stateDiagram-v2
 - **AC-01.7** GIVEN `review` WHEN `RETAKE` with a target step THEN the machine returns to that step and keeps all other captured data.
 - **AC-01.8** Events not defined for the current state are ignored (no transition, no error).
 - **AC-01.9** GIVEN any of the three paths (desktop only, desktop → phone, mobile only) WHEN the user reaches `documentUpload` THEN the counter reads "Step 1 of 4"; GIVEN `deviceSelection` or `qrHandoff` THEN no counter is shown; GIVEN D4 THEN its counter equals the phone's.
+- **AC-01.11** GIVEN a desktop tab that has finished or abandoned a journey WHEN a new session is created (`START` after `RESTART`, or a fresh `POST /api/session`) THEN the machine context is reset: no document type, attempts, captures or check results carry over from the earlier session.
 
 ## Design notes
 
@@ -91,3 +92,4 @@ stateDiagram-v2
 - [x] T-01.6 Check the machine in the Stately visualiser against the flow map → all · verify: manual; screenshot in the PR · files: none
 - [ ] T-01.7 `production` Model-based paths with `createTestModel` (PB-4) → AC-01.1 – AC-01.9 · verify: `pnpm test src/machines` · files: `src/machines/kycMachine.paths.test.ts`
 - [x] T-01.8 `CHOOSE_THIS_DEVICE` from `qrHandoff` goes to `documentUpload` → AC-01.10 · verify: `pnpm test src/machines` · files: `src/machines/kycMachine.ts`, `src/machines/kycMachine.test.ts` · gate: tests reviewed
+- [x] T-01.9 (P6) **Tests first:** a new session starts with a clean context, so no check result from an earlier run in the same tab is shown (E2E F-2) → AC-01.11 · verify: `pnpm test src/machines` · files: `src/machines/kycMachine.ts`, `src/machines/kycMachine.test.ts`, `src/machines/useKycMachine.ts` · gate: tests reviewed

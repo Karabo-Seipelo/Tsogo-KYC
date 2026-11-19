@@ -7,6 +7,7 @@ import { resizeImage } from "@/lib/image/resizeImage";
 import { DocumentCapture } from "./DocumentCapture";
 import {
   DocumentFailed,
+  DocumentRefused,
   UploadFailed,
   isDocumentReason,
   type DocumentReason,
@@ -15,13 +16,20 @@ import { DocumentPassed } from "./DocumentPassed";
 import { DocumentType, type DocumentChoice } from "./DocumentType";
 
 type Phase =
-  "type" | "capture" | "checking" | "passed" | "failed" | "uploadFailed";
+  | "type"
+  | "capture"
+  | "checking"
+  | "passed"
+  | "failed"
+  | "refused"
+  | "uploadFailed";
 
 type DocumentEvent =
   | { type: "DOC_CAPTURED" }
   | { type: "DOC_VALID" }
   | { type: "DOC_INVALID" }
-  | { type: "UPLOAD_FAILED" };
+  | { type: "UPLOAD_FAILED" }
+  | { type: "SESSION_EXPIRED" };
 
 type PassedCheck = {
   id: string;
@@ -51,7 +59,7 @@ export function DocumentJourney({
   const saved = useRef<SavedPhoto | null>(null);
   const failures = useRef(0);
 
-  async function submit(file?: File) {
+  async function submit(file?: Blob) {
     if (!choice) {
       return;
     }
@@ -70,6 +78,14 @@ export function DocumentJourney({
     onThumbnail?.(upload.thumbnail);
     const result = await postDocument(upload);
     if (!result.ok) {
+      if (result.expired) {
+        send({ type: "SESSION_EXPIRED" });
+        return;
+      }
+      if (result.refused) {
+        setPhase("refused");
+        return;
+      }
       send({ type: "UPLOAD_FAILED" });
       setPhase("uploadFailed");
       return;
@@ -111,6 +127,20 @@ export function DocumentJourney({
         onRetake={() => {
           setSide(1);
           setPhase("capture");
+        }}
+      />
+    );
+  }
+
+  if (phase === "refused") {
+    return (
+      <DocumentRefused
+        onRetake={() => {
+          setSide(1);
+          setPhase("capture");
+        }}
+        onUpload={(file) => {
+          void submit(file);
         }}
       />
     );
@@ -201,11 +231,17 @@ async function postDocument(photo: SavedPhoto) {
           body: (await response.json()) as DocumentBody,
         };
       }
+      if (response.status === 400) {
+        return { ok: false as const, refused: true, expired: false };
+      }
+      if (response.status === 401) {
+        return { ok: false as const, refused: false, expired: true };
+      }
     } catch {
       // The next wait is longer, then the saved photo can be sent again.
     }
   }
-  return { ok: false as const };
+  return { ok: false as const, refused: false, expired: false };
 }
 
 function documentBody(photo: SavedPhoto) {
@@ -220,7 +256,7 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function documentForm(file: File | undefined, side: number) {
+async function documentForm(file: Blob | undefined, side: number) {
   const source = file ?? new Blob(["photo"], { type: "image/jpeg" });
   const image = file ? await resizeImage(file, 1600, 0.8) : source;
   const thumbnail = file ? await resizeImage(file, 320, 0.7) : source;

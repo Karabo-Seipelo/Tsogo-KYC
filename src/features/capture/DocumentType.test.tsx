@@ -4,9 +4,11 @@ import { expect, test, vi } from "vitest";
 import bundled from "../../../content/en-ZA.json";
 import { ContentProvider } from "../../lib/content/ContentProvider";
 import { contentSchema } from "../../lib/content/schema";
+import { createT } from "../../lib/content/t";
 import { DocumentType } from "./DocumentType";
 
 const content = contentSchema.parse(bundled);
+const t = createT(content);
 
 test("AC-03.1 choosing a document sets its side count and arrows move the radios", async () => {
   const user = userEvent.setup();
@@ -20,6 +22,16 @@ test("AC-03.1 choosing a document sets its side count and arrows move the radios
   const passport = radio(content.document.select.options.passport.title);
   const nationalId = radio(content.document.select.options.nationalId.title);
   const licence = radio(content.document.select.options.driversLicence.title);
+
+  expect(
+    screen.getByText(
+      t("common.progress.label", {
+        current: 1,
+        total: 4,
+        name: content.common.progress.steps.document,
+      }),
+    ),
+  ).toBeDefined();
 
   await user.click(passport);
   expect(onChoose).toHaveBeenLastCalledWith({ type: "passport", sides: 1 });

@@ -6,6 +6,7 @@ import { createSessionStore } from "@/lib/store/redisStore";
 
 const sessionTtlSeconds = 15 * 60;
 const resultDelayMs = 5_000;
+const finishedSteps = new Set(["processing", "complete", "error"]);
 
 export async function POST(request: Request) {
   const log = { step: null as string | null, errorCode: null as string | null };
@@ -26,6 +27,10 @@ async function beginProcessing(request: Request, log: { step: string | null }) {
   const existing = await store.get(`session:${sessionId}`);
   if (!isRecord(existing)) {
     return new NextResponse(null, { status: 401 });
+  }
+  log.step = typeof existing.step === "string" ? existing.step : null;
+  if (!readyToSubmit(existing)) {
+    return new NextResponse(null, { status: 409 });
   }
 
   await store.set(
@@ -62,6 +67,31 @@ async function recordResult(sessionId: string) {
   if (typeof existing.handoffToken === "string") {
     await store.getDel(`handoff:${existing.handoffToken}`);
   }
+}
+
+function readyToSubmit(session: Record<string, unknown>) {
+  return (
+    !finishedSteps.has(String(session.step)) &&
+    present(session.thumbnail) &&
+    present(session.selfieThumbnail) &&
+    passedChecks(session.checks) &&
+    session.livenessPassed === true &&
+    session.match === true
+  );
+}
+
+function present(value: unknown) {
+  return typeof value === "string" && value.length > 0;
+}
+
+function passedChecks(value: unknown) {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every(
+      (item) => isRecord(item) && "passed" in item && item.passed === true,
+    )
+  );
 }
 
 function supportReference() {

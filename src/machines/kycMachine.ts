@@ -33,9 +33,10 @@ export const kycMachine = setup({
     canRetryMatch: ({ context }) => context.matchAttempts + 1 < MAX_ATTEMPTS,
   },
   actions: {
-    setDevice: assign({
-      device: ({ event }) => (event.type === "START" ? event.device : null),
-    }),
+    beginSession: assign(({ event }) => ({
+      ...initialContext(),
+      device: event.type === "START" ? event.device : null,
+    })),
     incrementDocAttempts: assign({
       docAttempts: ({ context }) => context.docAttempts + 1,
     }),
@@ -66,9 +67,9 @@ export const kycMachine = setup({
           {
             guard: "isPhone",
             target: "documentUpload",
-            actions: "setDevice",
+            actions: "beginSession",
           },
-          { target: "deviceSelection", actions: "setDevice" },
+          { target: "deviceSelection", actions: "beginSession" },
         ],
         SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
@@ -155,7 +156,19 @@ export const kycMachine = setup({
         SESSION_EXPIRED: { target: "error", actions: "setSessionExpired" },
       },
     },
-    complete: { type: "final" },
+    complete: {
+      on: {
+        RESTART: { target: "idle", actions: "reset" },
+        START: [
+          {
+            guard: "isPhone",
+            target: "documentUpload",
+            actions: "beginSession",
+          },
+          { target: "deviceSelection", actions: "beginSession" },
+        ],
+      },
+    },
     error: {
       on: {
         RESTART: { target: "idle", actions: "reset" },

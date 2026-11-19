@@ -45,7 +45,8 @@
       "waiting": "Waiting",
       "passed": "Passed"
     },
-    "attempt": "Attempt {attempt} of {max}"
+    "attempt": "Attempt {attempt} of {max}",
+    "documentTitle": "{screen} · {site}"
   },
   "start": {
     "title": "Verify your identity",
@@ -338,11 +339,11 @@
   },
   "saveExit": {
     "confirmTitle": "Save and exit?",
-    "confirmBody": "We'll keep your progress for {minutes} minutes. Come back in this browser to carry on.",
+    "confirmBody": "We'll keep your progress for {minutes} minutes.",
     "confirm": "Save and exit",
     "cancel": "Keep going",
     "savedTitle": "Your progress is saved",
-    "savedBody": "Come back within {minutes} minutes in this browser and you'll pick up where you left off. After that, you'll need to start again.",
+    "savedBody": "We'll keep this session for {minutes} minutes.",
     "return": "Return to Tsogo"
   },
   "privacy": {

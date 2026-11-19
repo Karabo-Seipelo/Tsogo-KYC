@@ -57,6 +57,7 @@ export const contentSchema = z.object({
       passed: text,
     }),
     attempt: text,
+    documentTitle: text,
   }),
   start: z.object({
     title: text,

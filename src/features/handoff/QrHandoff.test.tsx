@@ -65,3 +65,29 @@ test("AC-02.4 Phone connected is announced when the phone has joined", () => {
   expect(announced.getAttribute("aria-live")).toBe("polite");
   expect(screen.queryByText(content.handoff.waiting)).toBeNull();
 });
+
+test("AC-02.4 the connection status is already live while waiting", () => {
+  const props = {
+    token: "a1b2c3d4e5f67890",
+    host: "preview.example",
+    onContinueHere: vi.fn(),
+  };
+  const { rerender } = render(
+    <ContentProvider content={content}>
+      <QrHandoff {...props} />
+    </ContentProvider>,
+  );
+
+  const announced = screen.getByRole("status");
+  expect(announced.textContent).toBe(content.handoff.waiting);
+  expect(announced.getAttribute("aria-live")).toBe("polite");
+
+  rerender(
+    <ContentProvider content={content}>
+      <QrHandoff {...props} phoneConnected />
+    </ContentProvider>,
+  );
+
+  expect(screen.getByRole("status")).toBe(announced);
+  expect(announced.textContent).toBe(content.handoff.connected);
+});

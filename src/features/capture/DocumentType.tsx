@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { JourneyProgress } from "@/components/ui/JourneyProgress";
 import { OptionCard } from "@/components/ui/OptionCard";
 import { Screen } from "@/components/ui/Screen";
 import { screenTitle } from "@/components/ui/styles";
@@ -52,6 +53,7 @@ export function DocumentType({ onChoose, onContinue }: Props) {
         </Button>
       }
     >
+      <JourneyProgress step="document" />
       <h1 id="document-type-title" className={screenTitle}>
         {t("document.select.title")}
       </h1>
