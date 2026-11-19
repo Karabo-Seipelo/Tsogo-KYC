@@ -28,6 +28,11 @@ type UploadProps = {
   onRetry: () => void;
 };
 
+type RefusedProps = {
+  onRetake: () => void;
+  onUpload: (file: File) => void;
+};
+
 export function isDocumentReason(id: string | undefined): id is DocumentReason {
   return reasons.some((reason) => reason === id);
 }
@@ -106,6 +111,33 @@ export function CameraBlocked({ error, onRetry, onUpload }: CameraProps) {
             ? t("errors.CAMERA_DENIED.fallback")
             : t("errors.CAMERA_NOT_FOUND.cta")
         }
+        onUpload={onUpload}
+      />
+    </Screen>
+  );
+}
+
+export function DocumentRefused({ onRetake, onUpload }: RefusedProps) {
+  const { t } = useContent();
+  const heading = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    heading.current?.focus();
+  }, []);
+
+  return (
+    <Screen
+      action={
+        <Button className="w-full md:w-fit" onClick={onRetake}>
+          {t("common.actions.retakePhoto")}
+        </Button>
+      }
+    >
+      <h1 ref={heading} tabIndex={-1} className={screenTitle}>
+        {t("document.result.failed.title")}
+      </h1>
+      <UploadInput
+        label={t("document.capture.uploadInstead")}
         onUpload={onUpload}
       />
     </Screen>

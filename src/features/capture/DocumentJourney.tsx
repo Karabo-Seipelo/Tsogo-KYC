@@ -7,6 +7,7 @@ import { resizeImage } from "@/lib/image/resizeImage";
 import { DocumentCapture } from "./DocumentCapture";
 import {
   DocumentFailed,
+  DocumentRefused,
   UploadFailed,
   isDocumentReason,
   type DocumentReason,
@@ -15,7 +16,13 @@ import { DocumentPassed } from "./DocumentPassed";
 import { DocumentType, type DocumentChoice } from "./DocumentType";
 
 type Phase =
-  "type" | "capture" | "checking" | "passed" | "failed" | "uploadFailed";
+  | "type"
+  | "capture"
+  | "checking"
+  | "passed"
+  | "failed"
+  | "refused"
+  | "uploadFailed";
 
 type DocumentEvent =
   | { type: "DOC_CAPTURED" }
@@ -70,6 +77,10 @@ export function DocumentJourney({
     onThumbnail?.(upload.thumbnail);
     const result = await postDocument(upload);
     if (!result.ok) {
+      if (result.refused) {
+        setPhase("refused");
+        return;
+      }
       send({ type: "UPLOAD_FAILED" });
       setPhase("uploadFailed");
       return;
@@ -111,6 +122,20 @@ export function DocumentJourney({
         onRetake={() => {
           setSide(1);
           setPhase("capture");
+        }}
+      />
+    );
+  }
+
+  if (phase === "refused") {
+    return (
+      <DocumentRefused
+        onRetake={() => {
+          setSide(1);
+          setPhase("capture");
+        }}
+        onUpload={(file) => {
+          void submit(file);
         }}
       />
     );
@@ -201,11 +226,14 @@ async function postDocument(photo: SavedPhoto) {
           body: (await response.json()) as DocumentBody,
         };
       }
+      if (response.status === 400) {
+        return { ok: false as const, refused: true };
+      }
     } catch {
       // The next wait is longer, then the saved photo can be sent again.
     }
   }
-  return { ok: false as const };
+  return { ok: false as const, refused: false };
 }
 
 function documentBody(photo: SavedPhoto) {

@@ -174,6 +174,41 @@ test("AC-03.10 Take photo sends a JPEG of the video frame, resized for upload", 
   );
 });
 
+test("AC-03.11 a 400 asks for a retake with an upload and does not retry", async () => {
+  const user = userEvent.setup();
+  const send = vi.fn();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => Promise.resolve(new Response(null, { status: 400 }))),
+  );
+  renderJourney(send);
+
+  await user.click(radio(content.document.select.options.passport.title));
+  await user.click(screen.getByRole("button", { name: "Continue" }));
+  await user.click(
+    screen.getByRole("button", { name: content.document.capture.takePhoto }),
+  );
+
+  expect(
+    await screen.findByRole("button", {
+      name: content.common.actions.retakePhoto,
+    }),
+  ).toBeDefined();
+  expect(
+    screen.queryByRole("heading", {
+      name: content.errors.UPLOAD_FAILED.message,
+    }),
+  ).toBeNull();
+  expect(
+    screen.queryByRole("button", { name: content.errors.UPLOAD_FAILED.cta }),
+  ).toBeNull();
+  expect(
+    screen.getByLabelText(content.document.capture.uploadInstead),
+  ).toBeDefined();
+  expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
+  expect(send).not.toHaveBeenCalledWith({ type: "UPLOAD_FAILED" });
+});
+
 function renderJourney(send: (event: { type: string }) => void) {
   if (!vi.isMockFunction(globalThis.createImageBitmap)) {
     stubJpegCanvas();
