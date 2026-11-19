@@ -51,7 +51,7 @@ export function DocumentJourney({
   const saved = useRef<SavedPhoto | null>(null);
   const failures = useRef(0);
 
-  async function submit(file?: File) {
+  async function submit(file?: Blob) {
     if (!choice) {
       return;
     }
@@ -220,7 +220,7 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function documentForm(file: File | undefined, side: number) {
+async function documentForm(file: Blob | undefined, side: number) {
   const source = file ?? new Blob(["photo"], { type: "image/jpeg" });
   const image = file ? await resizeImage(file, 1600, 0.8) : source;
   const thumbnail = file ? await resizeImage(file, 320, 0.7) : source;

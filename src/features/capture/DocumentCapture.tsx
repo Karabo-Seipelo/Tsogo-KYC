@@ -17,7 +17,7 @@ type Props = {
   side: number;
   total: number;
   checking: boolean;
-  onCapture: (file?: File) => void;
+  onCapture: (file?: Blob) => void;
 };
 
 export function DocumentCapture({ side, total, checking, onCapture }: Props) {
@@ -89,7 +89,11 @@ export function DocumentCapture({ side, total, checking, onCapture }: Props) {
               focusRing,
               stateMotion,
             )}
-            onClick={() => onCapture()}
+            onClick={() => {
+              void captureFrame(video.current).then((frame) => {
+                onCapture(frame);
+              });
+            }}
           >
             <span
               aria-hidden="true"
@@ -122,6 +126,32 @@ function CornerGuides() {
       />
     </div>
   );
+}
+
+// Source: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+function captureFrame(video: HTMLVideoElement | null) {
+  const canvas = document.createElement("canvas");
+  const width = video?.videoWidth || 640;
+  const height = video?.videoHeight || 480;
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (context && video) {
+    context.drawImage(video, 0, 0, width, height);
+  }
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Could not capture the document"));
+          return;
+        }
+        resolve(blob);
+      },
+      "image/jpeg",
+      0.8,
+    );
+  });
 }
 
 function UploadInstead({
