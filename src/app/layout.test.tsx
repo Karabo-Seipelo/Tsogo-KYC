@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
 import bundled from "../../content/en-ZA.json";
 import { contentSchema } from "@/lib/content/schema";
-import RootLayout from "./layout";
+import RootLayout, { metadata } from "./layout";
 
 vi.mock("next/font/google", () => ({
   Montserrat: () => ({ variable: "--font-montserrat" }),
@@ -12,6 +12,13 @@ const content = contentSchema.parse(bundled);
 
 afterEach(() => {
   vi.unstubAllEnvs();
+});
+
+test("the document description comes from content and does not set a title", () => {
+  expect(metadata).toEqual({
+    description: content.common.description,
+  });
+  expect(metadata.description).toBe("Demo identity verification journey.");
 });
 
 test("AC-07.6 the demo banner sits above every route when DEMO_MODE is unset", () => {

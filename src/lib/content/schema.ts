@@ -22,6 +22,7 @@ export const contentSchema = z.object({
     notes: z.array(text),
   }),
   common: z.object({
+    description: text,
     demoBanner: z.object({
       long: text,
       short: text,

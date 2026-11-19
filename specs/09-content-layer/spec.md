@@ -47,6 +47,7 @@ Compliance may need to change legal wording, marketing will want to tune tone, a
 - **Types:** the schema is the source of the TypeScript type, so `t('start.titel')` is a type error.
 - **Structure of the payload:** a `meta` block (locale, version, source) plus one object per screen, a `common` block and an `errors` block keyed by API error code.
 - **Not content:** icons, layout and behaviour stay in code. Only words are content.
+- **Document description:** the root layout sets `metadata.description` from `common.description`. It does not set `metadata.title` or `metadata.robots`. Screen titles stay on `document.title` (R-09.10), and `noindex` stays on the response header.
 - **Starting point:** `content/en-ZA.json` was extracted from the wireframes, so the build's copy matches the designs. Copy the specs need but the wireframes don't have yet is listed in `meta.notes`.
 - **Unknown codes:** `errors.generic` is the fallback for AC-09.7. Title: "Something went wrong". Body: "We couldn't complete that step. Please try again." Known codes stay `errors.{CODE}`.
 

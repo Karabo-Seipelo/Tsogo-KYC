@@ -7,10 +7,12 @@
       "Icons (✓, ✕, ⏱, !) are UI, not copy, so they're not in this file.",
       "Values in {braces} are placeholders filled in by the app.",
       "Not in the wireframes yet, drafted from the specs: document.checking, faceMatch.comparing, processing.slow, document.capture.sideLabel, errors.CAMERA_NOT_FOUND, errors.HANDOFF_USED, document.result.failed.reasons (glare, cropped, expired).",
-      "Not in the wireframes yet, drafted from spec 02 (R-02.9 – R-02.12): help.*, saveExit.*, privacy.*."
+      "Not in the wireframes yet, drafted from spec 02 (R-02.9 – R-02.12): help.*, saveExit.*, privacy.*.",
+      "Not in the wireframes: common.description, the document meta description."
     ]
   },
   "common": {
+    "description": "Demo identity verification journey.",
     "demoBanner": {
       "long": "DEMO — this is a test site. Please don't upload a real ID document.",
       "short": "DEMO — please don't use a real ID"
