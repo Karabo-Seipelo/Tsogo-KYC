@@ -222,7 +222,7 @@ When the photos were taken on the phone, the desktop Review shows a 1×1 transpa
 
 Fix: the server already stores both thumbnails, so return them to the session's own devices from `GET /api/session/thumbnails`. The status poll stays free of image bytes. A missing thumbnail is left out rather than shown as an empty image.
 
-**Status:** fixed locally in T-05.7, and checked on localhost. Not yet on the deployed site. The "Photo taken on your phone" wording was not used. The document name on that screen still falls back to "Passport" after a phone capture, because the chosen type is not stored.
+**Status:** fixed and deployed (T-05.7). The "Photo taken on your phone" wording was not used. The document name on that screen still falls back to "Passport" after a phone capture, because the chosen type is not stored.
 
 #### N-2 · Low · The page title lags behind the screen
 
@@ -250,4 +250,3 @@ Fix: hide it on E6, E7, E9 and D7.
 - The document name after a phone capture still says "Passport" (left over from N-1)
 - F-8 – F-15 and Q-1 as listed under Limitations in the README
 - R-4 / PB-16, the CSP allowing inline scripts
-- N-1 is fixed locally (T-05.7) and has not been re-run on the deployed site

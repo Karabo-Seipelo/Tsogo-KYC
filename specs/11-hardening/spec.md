@@ -4,7 +4,7 @@
 **Serves:** BR-8 (personal data is bounded); constitution §5 (the server is the source of truth, and only a thumbnail is kept).
 **Screens:** none. The journey looks the same. Capture must still be able to open the camera.
 
-T-11.1 – T-11.5 are done. T-11.6 is not. Requirements below stay tagged `post-ship` so they are not picked up outside P6.
+T-11.1 – T-11.6 are done. Requirements below stay tagged `post-ship` as the record of when they were specified. The nonce-based content security policy (PB-16) is not built.
 
 ## Requirements
 

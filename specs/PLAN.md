@@ -4,7 +4,7 @@ The specs say **what** to build; this says **in what order**, what depends on wh
 
 ## Delivery scope
 
-The specs describe the full design. Anything tagged `production` in a spec is designed and agreed but **not built for the demo**; it's listed in the [production backlog](#production-backlog) below with why it waits and what would trigger it. Anything tagged `post-ship` is the same kind of hold for work specified after the demo shipped; it lives in [spec 11](11-hardening/spec.md) and is not built until P6 is started. Untagged requirements and ACs are the demo scope.
+The specs describe the full design. Anything tagged `production` in a spec is designed and agreed but **not built for the demo**; it's listed in the [production backlog](#production-backlog) below with why it waits and what would trigger it. Anything tagged `post-ship` was specified after the demo shipped and was built in P6 ([spec 11](11-hardening/spec.md)). The nonce-based content security policy stays in the backlog (PB-16). Untagged requirements and ACs are the demo scope.
 
 ## Build order
 
@@ -42,7 +42,7 @@ flowchart LR
 
 - **In parallel:** 09 and 01 don't depend on each other. Within P2, the document (03) and selfie (04) screens can be built side by side once the machine and content exist.
 - **Strictly in order:** checks (P0.5) before any feature code, so every agent-written change from P1 on is gated; nothing with copy before 09; nothing with journey behaviour before 01; cross-device before resilience, because E4/E8 depend on the heartbeat and polling.
-- **P6 is in progress.** T-11.1 – T-11.5 are done. The E2E fixes (T-11.6, T-01.9, T-03.7, T-05.6, T-02.21 – T-02.23, T-09.9) and the re-run fixes (T-03.8, T-03.9, T-06.6, T-02.24) are still open. Start with T-03.8: the camera capture is broken in production. Rate limiting, signed handoff tokens, encryption at rest and the `DEMO_MODE=false` startup refusal stay in the production backlog (PB-12, PB-13, PB-8).
+- **P6 is done.** AC-11.1 – AC-11.6 are built. Still open, and listed under Limitations: N-2 (the page title lags the heading), N-3 (Save & exit on E6, E7, E9 and D7), and the document name after a phone capture (it falls back to Passport). Rate limiting, signed handoff tokens, encryption at rest and the `DEMO_MODE=false` startup refusal stay in the production backlog (PB-12, PB-13, PB-8).
 
 ## Risks
 
