@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { logRequest } from "@/lib/analytics/requestLog";
+import { requestOrigin } from "@/lib/http/requestHost";
 import { createSessionStore } from "@/lib/store/redisStore";
 
 const sessionTtlSeconds = 15 * 60;
@@ -43,12 +44,7 @@ async function saveSelfie(request: Request, log: { step: string | null }) {
 }
 
 function originAllowed(request: Request) {
-  const host =
-    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  const protocol =
-    request.headers.get("x-forwarded-proto") ??
-    new URL(request.url).protocol.replace(":", "");
-  return request.headers.get("origin") === `${protocol}://${host}`;
+  return request.headers.get("origin") === requestOrigin(request).origin;
 }
 
 function readSessionId(request: Request) {

@@ -1,17 +1,14 @@
-// Headers.get: https://developer.mozilla.org/en-US/docs/Web/API/Headers/get
-// URL.protocol includes the trailing colon: https://developer.mozilla.org/en-US/docs/Web/API/URL/protocol
+// URL.origin is the scheme, host and port the browser sends as Origin.
+// Source: https://developer.mozilla.org/en-US/docs/Web/API/URL/origin
 
 export function requestOrigin(request: Request) {
-  const host =
-    request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  const protocol =
-    request.headers.get("x-forwarded-proto") ??
-    new URL(request.url).protocol.replace(":", "");
+  const url = new URL(request.url);
+  const protocol = url.protocol.replace(":", "");
 
   return {
-    host,
+    host: url.host,
     protocol,
-    origin: `${protocol}://${host}`,
+    origin: url.origin,
     secure: protocol === "https",
   };
 }

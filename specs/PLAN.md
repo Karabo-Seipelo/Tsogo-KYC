@@ -20,7 +20,7 @@ Each phase ends at a checkpoint. The next phase doesn't start until the checkpoi
 | **P4 · Resilience** | Offline, timeout warning/expiry, rejection, camera/upload errors, manual review (E9), `?fail=` / `?ttl=` switches | 06, 08 (E9) | Every scenario E1 – E9 can be forced and recovers as specified; switches listed in the README |
 | **P4.5 · Visual design** | Tokens and Montserrat, contrast test, raw-colour lint rule, restyled components with all states, layouts matched to the Figma reference screens (see `specs/10-visual-design/handoff.md`) | 10 | AC-10.1 – AC-10.6; screenshots at 390 / 768 / 1440 px in the PR |
 | **P5 · Ship** | Vercel + Upstash per environment, domain, demo banner + `noindex`; accessibility pass; README TBCs filled | 07 | AC-07.4 – AC-07.6; keyboard-only run of the full journey; README has no _TBC_ left |
-| **P6 · Hardening** | Response headers, server-side thumbnail check, heartbeat step allowlist, cookie `Max-Age`, origin check against the request URL. Not started: passing P5 does not start this phase | 11 | AC-11.1 – AC-11.5 |
+| **P6 · Hardening** | Response headers, server-side thumbnail check, heartbeat step allowlist, cookie `Max-Age`, origin check against the request URL | 11 | AC-11.1 – AC-11.5 |
 
 ## Dependencies
 

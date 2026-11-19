@@ -32,21 +32,20 @@ test("R-02.5 a token is redeemed once, sets the phone cookie, and redirects to /
   });
 });
 
-test("R-02.13 the phone cookie is Secure when the forwarded protocol is HTTPS", async () => {
-  const { token } = await issuedToken({
-    host: "internal:3000",
+test("R-02.13 the phone cookie is Secure when the request URL is HTTPS", async () => {
+  const headers = {
+    host: "preview.example",
     origin: "https://preview.example",
-    "x-forwarded-host": "preview.example",
-    "x-forwarded-proto": "https",
-  });
+    "x-forwarded-host": "evil.example",
+    "x-forwarded-proto": "http",
+  };
+  const { token } = await issuedToken(
+    headers,
+    "https://preview.example/api/session",
+  );
 
   const response = await POST(
-    redeem(token, {
-      host: "internal:3000",
-      origin: "https://preview.example",
-      "x-forwarded-host": "preview.example",
-      "x-forwarded-proto": "https",
-    }),
+    redeem(token, headers, `https://preview.example/api/handoff/${token}`),
     params(token),
   );
 
@@ -168,8 +167,12 @@ async function issuedToken(
   return { id: sessionCookie(response).value, token: body.handoffToken };
 }
 
-function redeem(token: string, headers: Record<string, string> = {}) {
-  return new Request(`http://localhost:3000/api/handoff/${token}`, {
+function redeem(
+  token: string,
+  headers: Record<string, string> = {},
+  url = `http://localhost:3000/api/handoff/${token}`,
+) {
+  return new Request(url, {
     method: "POST",
     headers: {
       host: "localhost:3000",

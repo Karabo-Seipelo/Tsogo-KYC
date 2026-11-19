@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { requestOrigin } from "./requestHost";
 
-test("R-02.4 x-forwarded-host and x-forwarded-proto win", () => {
+test("a forwarded host does not replace the request URL", () => {
   expect(
     requestOrigin(
       new Request("http://internal:3000/api/session", {
@@ -13,9 +13,26 @@ test("R-02.4 x-forwarded-host and x-forwarded-proto win", () => {
       }),
     ),
   ).toEqual({
-    host: "preview.example",
+    host: "internal:3000",
+    protocol: "http",
+    origin: "http://internal:3000",
+    secure: false,
+  });
+});
+
+test("AC-11.5 a conflicting x-forwarded-host does not move the origin", () => {
+  const request = new Request("https://tsogo.example/api/session", {
+    headers: {
+      host: "tsogo.example",
+      "x-forwarded-host": "evil.example",
+      "x-forwarded-proto": "http",
+    },
+  });
+
+  expect(requestOrigin(request)).toEqual({
+    host: "tsogo.example",
     protocol: "https",
-    origin: "https://preview.example",
+    origin: "https://tsogo.example",
     secure: true,
   });
 });

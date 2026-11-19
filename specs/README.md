@@ -32,7 +32,7 @@ The workflow is gated: **specify → plan → tasks → implement**, and each st
 | 08  | [Funnel events, audit trail & manual review](08-insights-audit-manual-review/spec.md) | Approved · backlog: PB-9             |
 | 09  | [Content layer](09-content-layer/spec.md)                                             | Approved · backlog: PB-1, PB-2       |
 | 10  | [Visual design](10-visual-design/spec.md)                                             | Approved · backlog: PB-15 |
-| 11  | [Hardening (post-ship)](11-hardening/spec.md)                                         | Specified · not started (P6) |
+| 11  | [Hardening (post-ship)](11-hardening/spec.md)                                         | Built · AC-11.1 – AC-11.5 |
 
 ## Traceability: business goal → requirement → spec → screen → test
 

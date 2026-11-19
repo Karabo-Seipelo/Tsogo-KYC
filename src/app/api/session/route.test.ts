@@ -44,13 +44,13 @@ test("AC-02.13 the session cookie is host-only on plain HTTP", async () => {
   expect(cookie.attributes.has("secure")).toBe(false);
 });
 
-test("AC-02.13 the cookie is Secure when the forwarded protocol is HTTPS", async () => {
+test("AC-02.13 the cookie is Secure when the request URL is HTTPS", async () => {
   const response = await POST(
-    request("http://internal:3000/api/session", {
-      host: "internal:3000",
+    request("https://preview.example/api/session", {
+      host: "preview.example",
       origin: "https://preview.example",
-      "x-forwarded-host": "preview.example",
-      "x-forwarded-proto": "https",
+      "x-forwarded-host": "evil.example",
+      "x-forwarded-proto": "http",
     }),
   );
 
@@ -78,6 +78,34 @@ test("AC-11.4 ?ttl=1 sets the cookie Max-Age to 60 seconds", async () => {
   );
 
   expect(sessionCookie(response).attributes.get("max-age")).toBe("60");
+});
+
+test("AC-11.5 a conflicting x-forwarded-host does not accept the attacker's Origin", async () => {
+  const response = await POST(
+    request("https://tsogo.example/api/session", {
+      host: "tsogo.example",
+      origin: "https://evil.example",
+      "x-forwarded-host": "evil.example",
+      "x-forwarded-proto": "https",
+    }),
+  );
+
+  expect(response.status).toBe(403);
+  expect(response.headers.getSetCookie()).toEqual([]);
+});
+
+test("AC-11.5 an Origin that matches the request URL is accepted", async () => {
+  const response = await POST(
+    request("https://tsogo.example/api/session", {
+      host: "tsogo.example",
+      origin: "https://tsogo.example",
+      "x-forwarded-host": "evil.example",
+      "x-forwarded-proto": "http",
+    }),
+  );
+
+  expect(response.status).toBe(200);
+  expect(sessionCookie(response).value).not.toBe("");
 });
 
 test("AC-02.14 the session id is only in the cookie", async () => {
