@@ -9,7 +9,7 @@
 - R-06.1 **Offline (phone):** detected via `online`/`offline` events and failed fetches. Capture keeps working. An upload attempted while offline fails into E2, where "Try again" re-sends the same image. Heartbeats resume on reconnect.
 - R-06.2 **Phone disconnected (desktop):** see spec 02, R-02.7.
 - R-06.3 **Session timeout warning:** with 2 minutes left of the 15-minute idle window, show a dialog with a countdown and "I'm still here". With `?ttl=1` the session lasts 1 minute and the warning shows at 30 s left.
-- R-06.4 **Session expired:** server reports `expired`; every device shows E6; the QR link no longer works; captures are discarded.
+- R-06.4 **Session expired:** server reports `expired`, OR any `/api/session/*` call returns 401 after this device has had a session (the cookie ends with the session, spec 11, R-11.4); every device shows E6; the QR link no longer works; captures are discarded.
 - R-06.5 **Final rejection:** show a support reference, not which check failed.
 - R-06.6 Every scenario can be forced for review (`?fail=` / `?ttl=` or real conditions) and is listed in the README.
   - Switches are read when the session is created and **stored on the session**, so they apply on both devices after the QR handoff. On the mobile-only path they're added to the phone URL.
@@ -25,6 +25,7 @@
 - **AC-06.3** GIVEN 2 minutes of the session remain THEN E5 opens as `role="alertdialog"`, traps focus, Esc = "I'm still here", and the countdown is announced at most every 30 s.
 - **AC-06.4** GIVEN the session expires (or `?ttl=1`) THEN E6 says nothing was submitted, with "Start again" → `idle`.
 - **AC-06.5** GIVEN processing is rejected (or `?fail=reject`) THEN E7 shows a support reference and next steps, with no fraud-check detail.
+- **AC-06.6** GIVEN `?ttl=1` WHEN 60 s pass THEN E6 shows within one poll, with focus on its heading. GIVEN the cookie has expired WHEN a capture is uploaded THEN E6 shows, not E2.
 
 ## Design notes
 
@@ -40,3 +41,4 @@
 - [x] T-06.4 E5 opens with 2 minutes left (30 seconds when `?ttl=1`). E6 says nothing was submitted, and "Start again" returns to the start → AC-06.3, AC-06.4 · verify: `pnpm test src/features/resilience` · files: `src/features/resilience/TimeoutWarning.tsx`, `src/features/resilience/SessionExpired.tsx`, `src/features/resilience/SessionExpired.test.tsx`
 - [x] T-06.5 E7 shows a support reference and the next step, with no fraud-check detail → AC-06.5 · verify: `pnpm test src/features/resilience` · files: `src/features/resilience/Rejected.tsx`, `src/features/resilience/Rejected.test.tsx`
 - [ ] `production` Upload queue (PB-7)
+- [ ] T-06.6 (P6) **Tests first:** a 401 from status, or from a document or selfie upload, after a session existed, sends `SESSION_EXPIRED` and shows E6 (E2E R-2). The selfie upload case is asserted in `SelfieJourney.test.tsx` → R-06.4, AC-06.4, AC-06.6 · verify: `pnpm test src/features/handoff/useStatusPoll.test.ts src/features/capture/DocumentJourney.test.tsx src/features/capture/SelfieJourney.test.tsx` · files: `src/features/handoff/useStatusPoll.ts`, `src/features/handoff/useStatusPoll.test.ts`, `src/features/capture/DocumentJourney.tsx`, `src/features/capture/DocumentJourney.test.tsx`, `src/features/capture/SelfieJourney.tsx` · gate: tests reviewed
