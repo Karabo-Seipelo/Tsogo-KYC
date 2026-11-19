@@ -42,7 +42,7 @@ The user picks a document type, captures it with the device camera (or uploads a
 
 - `useCamera()` hook: start/stop, error mapping (`NotAllowedError`, `NotFoundError`, `NotReadableError`), cleanup on unmount (stop tracks).
 - `resizeImage(file|blob, maxEdge, quality)` in `src/lib/image/` using a canvas. Unit-tested with a fixture.
-- The document upload is a `fetch` to `POST /api/session/document`, retried on waits of 0, 20 and 40 ms. The blob is held in component state so a manual retry re-sends it.
+- The document upload is a `fetch` to `POST /api/session/document`, retried immediately, then after 1 s, then after 2 s. The blob is held in component state so a manual retry re-sends it.
 - Mock: random latency 300–1500 ms; `MOCK_FAILURE_RATE` and `?fail=` switches (rules in spec 06, R-06.6).
 
 ## Tasks

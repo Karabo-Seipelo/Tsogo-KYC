@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, test, vi } from "vitest";
 import bundled from "../../../content/en-ZA.json";
@@ -9,6 +9,7 @@ import { DocumentJourney } from "./DocumentJourney";
 const content = contentSchema.parse(bundled);
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -69,8 +70,49 @@ test("R-03.6 a failed check sends DOC_INVALID", async () => {
   expect(send).toHaveBeenCalledWith({ type: "DOC_INVALID" });
 });
 
+test("R-03.7 a failed upload retries after 1s and then 2s", async () => {
+  vi.useFakeTimers();
+  const fetchMock = vi.fn(() => Promise.reject(new Error("offline")));
+  vi.stubGlobal("fetch", fetchMock);
+  renderJourney(vi.fn());
+
+  await act(async () => {
+    radio(content.document.select.options.passport.title).click();
+  });
+  await act(async () => {
+    screen.getByRole("button", { name: "Continue" }).click();
+  });
+  await act(async () => {
+    screen
+      .getByRole("button", { name: content.document.capture.takePhoto })
+      .click();
+  });
+
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(999);
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1);
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1999);
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1);
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(3);
+});
+
 test("R-03.6 an upload that does not complete sends UPLOAD_FAILED", async () => {
-  const user = userEvent.setup();
+  vi.useFakeTimers();
   const send = vi.fn();
   vi.stubGlobal(
     "fetch",
@@ -78,14 +120,21 @@ test("R-03.6 an upload that does not complete sends UPLOAD_FAILED", async () => 
   );
   renderJourney(send);
 
-  await user.click(radio(content.document.select.options.passport.title));
-  await user.click(screen.getByRole("button", { name: "Continue" }));
-  await user.click(
-    screen.getByRole("button", { name: content.document.capture.takePhoto }),
-  );
+  await act(async () => {
+    radio(content.document.select.options.passport.title).click();
+  });
+  await act(async () => {
+    screen.getByRole("button", { name: "Continue" }).click();
+  });
+  await act(async () => {
+    screen
+      .getByRole("button", { name: content.document.capture.takePhoto })
+      .click();
+    await vi.advanceTimersByTimeAsync(3000);
+  });
 
   expect(
-    await screen.findByRole("heading", {
+    screen.getByRole("heading", {
       name: content.errors.UPLOAD_FAILED.message,
     }),
   ).toBeDefined();
@@ -95,7 +144,7 @@ test("R-03.6 an upload that does not complete sends UPLOAD_FAILED", async () => 
 });
 
 test("AC-03.8 Try again sends the saved photo after the automatic retries", async () => {
-  const user = userEvent.setup();
+  vi.useFakeTimers();
   const bodies: FormData[] = [];
   let calls = 0;
   vi.stubGlobal(
@@ -111,19 +160,26 @@ test("AC-03.8 Try again sends the saved photo after the automatic retries", asyn
   );
   renderJourney(vi.fn());
 
-  await user.click(radio(content.document.select.options.passport.title));
-  await user.click(screen.getByRole("button", { name: "Continue" }));
-  await user.click(
-    screen.getByRole("button", { name: content.document.capture.takePhoto }),
-  );
-  await user.click(
-    await screen.findByRole("button", {
-      name: content.errors.UPLOAD_FAILED.cta,
-    }),
-  );
+  await act(async () => {
+    radio(content.document.select.options.passport.title).click();
+  });
+  await act(async () => {
+    screen.getByRole("button", { name: "Continue" }).click();
+  });
+  await act(async () => {
+    screen
+      .getByRole("button", { name: content.document.capture.takePhoto })
+      .click();
+    await vi.advanceTimersByTimeAsync(3000);
+  });
+  await act(async () => {
+    screen
+      .getByRole("button", { name: content.errors.UPLOAD_FAILED.cta })
+      .click();
+  });
 
   expect(
-    await screen.findByRole("heading", {
+    screen.getByRole("heading", {
       name: content.document.result.passed.title,
     }),
   ).toBeDefined();

@@ -111,7 +111,6 @@ Known issues from the [manual E2E run](docs/E2E-REPORT.md), not fixed for the de
 - Each step change scrolls the page slightly, which can hide the demo banner until you scroll up.
 - On desktop the viewfinder is portrait, so "Take photo" can sit below the fold.
 - A heading that receives focus on a step change shows a visible outline.
-- Upload retries are close together rather than backing off.
 - One failure tip on desktop mentions holding your phone steady.
 - The offline banner shows on the phone only, as specified; the desktop-only path has none.
 - The Content Security Policy allows inline scripts and styles, which Next.js needs without nonces (PB-16).

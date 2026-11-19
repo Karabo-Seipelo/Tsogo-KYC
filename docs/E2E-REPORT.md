@@ -248,5 +248,5 @@ Fix: hide it on E6, E7, E9 and D7.
 
 - N-2 and N-3, as above
 - The document name after a phone capture still says "Passport" (left over from N-1)
-- F-8 – F-15 and Q-1 as listed under Limitations in the README
+- F-8 – F-11, F-13 – F-15, and Q-1 as listed under Limitations in the README
 - R-4 / PB-16, the CSP allowing inline scripts

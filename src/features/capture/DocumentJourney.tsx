@@ -213,7 +213,7 @@ type DocumentBody = {
   checks?: PassedCheck[];
 };
 
-const retryDelays = [0, 20, 40];
+const retryDelays = [0, 1000, 2000];
 
 async function postDocument(photo: SavedPhoto) {
   for (const wait of retryDelays) {
