@@ -4,7 +4,7 @@ The specs say **what** to build; this says **in what order**, what depends on wh
 
 ## Delivery scope
 
-The specs describe the full design. Anything tagged `production` in a spec is designed and agreed but **not built for the demo**; it's listed in the [production backlog](#production-backlog) below with why it waits and what would trigger it. Untagged requirements and ACs are the demo scope.
+The specs describe the full design. Anything tagged `production` in a spec is designed and agreed but **not built for the demo**; it's listed in the [production backlog](#production-backlog) below with why it waits and what would trigger it. Anything tagged `post-ship` is the same kind of hold for work specified after the demo shipped; it lives in [spec 11](11-hardening/spec.md) and is not built until P6 is started. Untagged requirements and ACs are the demo scope.
 
 ## Build order
 
@@ -20,6 +20,7 @@ Each phase ends at a checkpoint. The next phase doesn't start until the checkpoi
 | **P4 · Resilience** | Offline, timeout warning/expiry, rejection, camera/upload errors, manual review (E9), `?fail=` / `?ttl=` switches | 06, 08 (E9) | Every scenario E1 – E9 can be forced and recovers as specified; switches listed in the README |
 | **P4.5 · Visual design** | Tokens and Montserrat, contrast test, raw-colour lint rule, restyled components with all states, layouts matched to the Figma reference screens (see `specs/10-visual-design/handoff.md`) | 10 | AC-10.1 – AC-10.6; screenshots at 390 / 768 / 1440 px in the PR |
 | **P5 · Ship** | Vercel + Upstash per environment, domain, demo banner + `noindex`; accessibility pass; README TBCs filled | 07 | AC-07.4 – AC-07.6; keyboard-only run of the full journey; README has no _TBC_ left |
+| **P6 · Hardening** | Response headers, server-side thumbnail check, heartbeat step allowlist, cookie `Max-Age`, origin check against the request URL. Not started: passing P5 does not start this phase | 11 | AC-11.1 – AC-11.5 |
 
 ## Dependencies
 
@@ -36,10 +37,12 @@ flowchart LR
   X --> R[P4 Resilience]
   R --> V[P4.5 Visual design]
   V --> S[P5 Ship]
+  S -.-> H[P6 Hardening]
 ```
 
 - **In parallel:** 09 and 01 don't depend on each other. Within P2, the document (03) and selfie (04) screens can be built side by side once the machine and content exist.
 - **Strictly in order:** checks (P0.5) before any feature code, so every agent-written change from P1 on is gated; nothing with copy before 09; nothing with journey behaviour before 01; cross-device before resilience, because E4/E8 depend on the heartbeat and polling.
+- **P6 waits to be asked for.** It was specified from the handover security review, after P5. Rate limiting, signed handoff tokens, encryption at rest and the `DEMO_MODE=false` startup refusal stay in the production backlog (PB-12, PB-13, PB-8).
 
 ## Risks
 

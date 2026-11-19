@@ -21,7 +21,7 @@ When asked to start a PLAN phase:
 
 1. Read `specs/00-constitution.md`: §9 (boundaries) and §10 (commands, structure, code style, git) are binding.
 2. Read `specs/PLAN.md` to confirm the task belongs to the current phase.
-3. Read only the spec for the task (`specs/NN-*/spec.md`), not the whole folder. Skip every requirement, AC and task tagged `production`: those are designed, not built.
+3. Read only the spec for the task (`specs/NN-*/spec.md`), not the whole folder. Skip every requirement, AC and task tagged `production` or `post-ship`: those are designed, not built. `post-ship` is spec 11 and waits until P6 is started.
 4. If the task is ambiguous or the spec doesn't cover it, stop and ask. Don't fill gaps with assumptions.
 
 ## Which skill to use
