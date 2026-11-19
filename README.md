@@ -92,3 +92,14 @@ The specs describe the full design; the demo builds the core journey. Items tagg
 - A CMS behind the content layer (the interface is in place; copy is a bundled JSON file).
 - Resume after Save & exit, an offline upload queue, and funnel reporting (`/insights`).
 - A Docker setup that proves two-instance behaviour locally; for the demo this is checked on a Vercel preview.
+
+Known issues from the [manual E2E run](docs/E2E-REPORT.md), not fixed for the demo:
+
+- With the `?ttl=1` test switch, the expiry message reads "after 1 minutes".
+- The desktop document-type screen has no progress bar, and has no Back button or tick on the selected card as in the design.
+- Each step change scrolls the page slightly, which can hide the demo banner until you scroll up.
+- On desktop the viewfinder is portrait, so "Take photo" can sit below the fold.
+- A heading that receives focus on a step change shows a visible outline.
+- Upload retries are close together rather than backing off.
+- One failure tip on desktop mentions holding your phone steady.
+- The offline banner shows on the phone only, as specified; the desktop-only path has none.

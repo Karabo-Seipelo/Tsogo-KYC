@@ -32,7 +32,7 @@ The workflow is gated: **specify → plan → tasks → implement**, and each st
 | 08  | [Funnel events, audit trail & manual review](08-insights-audit-manual-review/spec.md) | Approved · backlog: PB-9             |
 | 09  | [Content layer](09-content-layer/spec.md)                                             | Approved · backlog: PB-1, PB-2       |
 | 10  | [Visual design](10-visual-design/spec.md)                                             | Approved · backlog: PB-15 |
-| 11  | [Hardening (post-ship)](11-hardening/spec.md)                                         | Built · AC-11.1 – AC-11.5 |
+| 11  | [Hardening (post-ship)](11-hardening/spec.md)                                         | Built · AC-11.1 – AC-11.5 · open: AC-11.6 |
 
 ## Traceability: business goal → requirement → spec → screen → test
 
@@ -72,7 +72,7 @@ Screen codes refer to `docs/wireframes.pdf`: **D** = desktop, **M** = mobile, **
 | Mock APIs: session, document, selfie, face match, status | 02, 03, 04, 05 | See each spec's API section |
 | Architecture doc ≤ 2 pages | — | `docs/ARCHITECTURE.md` |
 | Session security: cookie-only session identity, cookie flags, cross-site request check (not in the brief) | 02 | AC-02.13, AC-02.14 |
-| Post-ship hardening: headers, thumbnail check, heartbeat step, cookie `Max-Age`, origin host (not in the brief) | 11 | AC-11.1 – AC-11.5. Not built until P6 is started |
+| Post-ship hardening: headers, thumbnail check, heartbeat step, cookie `Max-Age`, origin host (not in the brief) | 11 | AC-11.1 – AC-11.6. Not built until P6 is started |
 
 ### Resilience requirements
 

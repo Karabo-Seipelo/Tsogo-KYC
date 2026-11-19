@@ -41,7 +41,7 @@ sequenceDiagram
 - R-02.4 The QR code encodes `https://<host>/m/{token}`, with the host from `x-forwarded-host` → `host`. It contains no session ID.
 - R-02.5 `POST /api/handoff/{token}` redeems the token with `GETDEL` (single use), sets the phone's cookie and redirects to `/m`.
 - R-02.6 The desktop polls `GET /api/session/status` every 2–3 s (paused while the tab is hidden) and mirrors the server step into its machine. D4's step counter is taken from that same `session.step`, so desktop and phone always show the same number (R-01.7).
-- R-02.7 The phone sends `POST /api/session/heartbeat` every 10 s. The desktop treats `lastSeen > 30 s` as disconnected.
+- R-02.7 The phone sends its first `POST /api/session/heartbeat` as soon as `/m` loads after a redeem, before the user taps anything, and then every 10 s. The desktop treats `lastSeen > 30 s` as disconnected.
 - R-02.8 `POST /api/session/handoff` issues a new token and revokes the old one, without restarting the session.
 - R-02.9 **Help** (header, every screen, desktop and phone) opens one responsive dialog. It holds three short answers (why we need this, which documents are accepted, what happens to my photos), a link to the privacy notice and a support contact line. It doesn't change the journey state.
 - R-02.10 **Save & exit** (desktop header) asks for confirmation, then shows a "saved" page saying the session is kept for its normal 15-minute idle window. It doesn't promise more, because the demo has no account. "Return to Tsogo" is a stub link in the demo.
@@ -56,13 +56,13 @@ sequenceDiagram
 - **AC-02.1** GIVEN a new visitor WHEN D1 loads THEN they see the time estimate, the requirements list (as a `<ul>`), the privacy line and "Start verification", AND focus is on the `h1`.
 - **AC-02.2** GIVEN desktop WHEN D2 loads THEN "Use my phone" is selected AND the options are a radio group usable with arrow keys.
 - **AC-02.3** GIVEN D3 WHEN the QR is rendered THEN its URL contains the handoff token and no session ID, AND the host matches the address the desktop is using.
-- **AC-02.4** GIVEN a valid token WHEN the phone opens the link THEN the phone joins the session, the URL becomes `/m`, AND within one poll the desktop chip reads "Phone connected" (announced via `aria-live`).
+- **AC-02.4** GIVEN a valid token WHEN the phone opens the link THEN the phone joins the session, the URL becomes `/m`, AND within one poll the desktop chip reads "Phone connected" (announced via `aria-live`), without the user tapping anything on the phone.
 - **AC-02.5** GIVEN a token that has been redeemed WHEN it's opened again THEN it's rejected with a friendly "This link has already been used" page.
 - **AC-02.6** GIVEN D3 WHEN the token expires before redemption THEN D3b shows; "Get a new code" shows a fresh QR, AND the session and step are unchanged.
 - **AC-02.7** GIVEN the phone is connected WHEN no heartbeat arrives for 30 s THEN D4 switches to the E8 state with "Show the QR code again"; WHEN heartbeats resume THEN it returns to normal.
 - **AC-02.8** `production` GIVEN the Docker `prodlike` profile (2 instances) WHEN the full handoff is run THEN it succeeds (proves no in-memory dependency).
 - **AC-02.9** GIVEN any screen WHEN "Help" is activated THEN the panel opens with focus on its heading, traps focus, closes with Esc or "Close", returns focus to "Help", AND the journey state is unchanged.
-- **AC-02.10** GIVEN desktop WHEN "Save & exit" is confirmed THEN the saved page says how long progress is kept.
+- **AC-02.10** GIVEN desktop WHEN "Save & exit" is confirmed THEN the saved page says how long the session is kept AND does not say the user can pick up where they left off (resume is PB-5).
 - **AC-02.11** GIVEN the "Save & exit" confirmation WHEN "Keep going" or Esc is chosen THEN nothing changes and focus returns to the trigger.
 - **AC-02.12** GIVEN D1 or the Help panel WHEN the privacy link is followed THEN `/privacy` opens with every section from R-02.11, AND the journey can be resumed from it.
 - **AC-02.13** GIVEN any `POST` to `/api` WHEN its `Origin` doesn't match the request host THEN it returns 403 AND the session is unchanged; GIVEN the session cookie THEN it carries `HttpOnly`, `SameSite=Lax` and, over HTTPS, `Secure`.
@@ -109,3 +109,6 @@ sequenceDiagram
 - [ ] T-02.11 `production` Resume a saved session in the same browser (PB-5) → AC-02.15
 - [ ] T-02.12 `production` Phone Help opens as a bottom sheet (PB-6) → R-02.14
 - [x] T-02.20 "Can't scan? Continue on this computer instead" on D3, and "Continue on this computer instead" on D3b, leaves the QR for document capture → AC-02.16 · verify: `pnpm test src/machines` · files: `src/features/start/Journey.tsx`
+- [ ] T-02.21 (P6) `/m` sends a heartbeat on load, so the desktop shows "Phone connected" before the phone user taps Start (E2E F-4) → R-02.7, AC-02.4 · verify: `pnpm test src/app/m src/features/handoff` · files: `src/app/m/page.tsx`, `src/features/start/Journey.tsx` · gate: tests reviewed
+- [ ] T-02.22 (P6) D3's connection status sits in an `aria-live="polite"` region (E2E F-7) → AC-02.4 · verify: `pnpm test src/features/handoff` · files: `src/features/handoff/QrHandoff.tsx`, `src/features/handoff/QrHandoff.test.tsx`
+- [ ] T-02.23 (P6) Save & exit copy promises only the idle window, not resume (E2E F-5) → R-02.10, AC-02.10 · verify: `pnpm test src/features/save-exit` · files: `content/en-ZA.json`, `src/features/save-exit/SaveExit.test.tsx`
