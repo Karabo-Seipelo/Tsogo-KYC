@@ -5,9 +5,11 @@ import bundled from "../../../content/en-ZA.json";
 import { Journey } from "../../features/start/Journey";
 import { ContentProvider } from "../../lib/content/ContentProvider";
 import { contentSchema } from "../../lib/content/schema";
+import { createT } from "../../lib/content/t";
 import { saveWindowMinutes } from "./SaveExit";
 
 const content = contentSchema.parse(bundled);
+const t = createT(content);
 
 function withMinutes(template: string) {
   return template.replaceAll("{minutes}", String(saveWindowMinutes));
@@ -89,6 +91,12 @@ test("AC-02.10 confirming Save & exit shows how long progress is kept", async ()
     level: 1,
   });
   expect(document.activeElement).toBe(saved);
+  expect(document.title).toBe(
+    t("common.documentTitle", {
+      screen: content.saveExit.savedTitle,
+      site: content.common.header.title,
+    }),
+  );
   const savedBody = screen.getByText(withMinutes(content.saveExit.savedBody));
   expect(savedBody.textContent).toContain(String(saveWindowMinutes));
   expect(savedBody.textContent).not.toMatch(

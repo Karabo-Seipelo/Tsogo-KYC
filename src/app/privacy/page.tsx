@@ -23,6 +23,14 @@ export default function Page() {
 function PrivacyNotice() {
   const { content, t } = useContent();
   const heading = useRef<HTMLHeadingElement>(null);
+  const title = t("common.documentTitle", {
+    screen: t("privacy.title"),
+    site: t("common.header.title"),
+  });
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
   useEffect(() => {
     heading.current?.focus();

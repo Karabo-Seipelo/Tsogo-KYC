@@ -45,7 +45,8 @@
       "waiting": "Waiting",
       "passed": "Passed"
     },
-    "attempt": "Attempt {attempt} of {max}"
+    "attempt": "Attempt {attempt} of {max}",
+    "documentTitle": "{screen} · {site}"
   },
   "start": {
     "title": "Verify your identity",

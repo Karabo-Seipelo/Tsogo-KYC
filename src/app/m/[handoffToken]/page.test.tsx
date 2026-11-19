@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, expect, test, vi } from "vitest";
 import bundled from "../../../../content/en-ZA.json";
 import { contentSchema } from "../../../lib/content/schema";
+import { createT } from "../../../lib/content/t";
 import PhonePage from "../page";
 import Page from "./page";
 
@@ -13,6 +14,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const content = contentSchema.parse(bundled);
+const t = createT(content);
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -59,6 +61,12 @@ test("AC-02.5 opening a used link shows that the link has already been used", as
   });
   expect(heading).toBe(document.activeElement);
   expect(screen.getByText(content.errors.HANDOFF_USED.body)).toBeDefined();
+  expect(document.title).toBe(
+    t("common.documentTitle", {
+      screen: content.errors.HANDOFF_USED.title,
+      site: content.common.header.title,
+    }),
+  );
 });
 
 test("R-02.2 the phone journey starts without the device choice", async () => {

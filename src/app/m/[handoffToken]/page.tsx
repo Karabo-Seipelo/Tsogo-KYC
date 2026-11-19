@@ -76,6 +76,14 @@ function Notice({
 }) {
   const { t } = useContent();
   const heading = useRef<HTMLHeadingElement>(null);
+  const title = t("common.documentTitle", {
+    screen: t(titleKey),
+    site: t("common.header.title"),
+  });
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
   useEffect(() => {
     heading.current?.focus();

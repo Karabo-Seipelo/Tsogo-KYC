@@ -26,6 +26,8 @@ import {
   shouldWarn,
 } from "@/features/resilience/TimeoutWarning";
 import { useStatusPoll } from "@/features/handoff/useStatusPoll";
+import type { ContentKey } from "@/lib/content/t";
+import { useContent } from "@/lib/content/useContent";
 import { DeviceSelection } from "./DeviceSelection";
 import { StartScreen } from "./StartScreen";
 
@@ -49,8 +51,13 @@ export function Journey({ device = "desktop" }: Props) {
 
 function JourneyFlow({ device }: { device: Device }) {
   const { state, send, reason } = useKycMachine();
+  const { t } = useContent();
   usePhoneHeartbeat(device, state);
   const status = useStatusPoll();
+  const title = t("common.documentTitle", {
+    screen: t(screenTitleKey(state, reason, device, status?.outcome ?? null)),
+    site: t("common.header.title"),
+  });
   const [now, setNow] = useState(() => Date.now());
   const [heldExpiresAt, setHeldExpiresAt] = useState<string | null>(null);
   const [manualReference, setManualReference] = useState<string | null>(null);
@@ -64,6 +71,10 @@ function JourneyFlow({ device }: { device: Device }) {
     deadline === null ? Number.POSITIVE_INFINITY : deadline - now;
   const heldRemaining =
     heldExpiresAt === null ? 0 : Date.parse(heldExpiresAt) - now;
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -384,6 +395,60 @@ function laterDeadline(server: string | null, held: string | null) {
     return null;
   }
   return Math.max(...times);
+}
+
+function screenTitleKey(
+  state: string,
+  reason: string | null,
+  device: Device,
+  outcome: string | null,
+): ContentKey {
+  if (state === "error" && reason === "sessionExpired") {
+    return "errors.SESSION_EXPIRED.title";
+  }
+  if (state === "error" && reason === "maxAttempts") {
+    return "manualReview.title";
+  }
+  if (state === "error" && outcome === "rejected") {
+    return "errors.VERIFICATION_REJECTED.title";
+  }
+  if (state === "error") {
+    return "errors.generic.title";
+  }
+  if (state === "deviceSelection") {
+    return "device.title";
+  }
+  if (state === "qrHandoff") {
+    return "handoff.title";
+  }
+  if (state === "documentUpload") {
+    return "document.select.title";
+  }
+  if (state === "documentValidation") {
+    return "document.result.title";
+  }
+  if (state === "selfieCapture") {
+    return "selfie.title";
+  }
+  if (state === "livenessCheck") {
+    return "liveness.title";
+  }
+  if (state === "faceMatch") {
+    return "faceMatch.title";
+  }
+  if (state === "review" && device === "phone") {
+    return "phoneDone.title";
+  }
+  if (state === "review") {
+    return "review.title";
+  }
+  if (state === "processing") {
+    return "processing.title";
+  }
+  if (state === "complete") {
+    return "complete.title";
+  }
+  return "start.title";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

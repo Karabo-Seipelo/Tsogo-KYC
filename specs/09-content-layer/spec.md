@@ -60,4 +60,4 @@ Compliance may need to change legal wording, marketing will want to tune tone, a
 - [x] T-09.6 (P2) Lint or test that components contain no hard-coded user-facing strings → AC-09.1 · verify: `pnpm lint` · files: `eslint.config.mjs`
 - [ ] T-09.7 `production` `GET /api/content/[locale]` and the CMS fallback (PB-1)
 - [ ] T-09.8 `production` `cms` source and publish revalidation (PB-1)
-- [ ] T-09.9 (P6) Document titles per screen from content (E2E F-6) → R-09.10, AC-09.8 · verify: `pnpm test src/lib/content src/features` · files: `src/app/layout.tsx`, `src/features/start/Journey.tsx`, `content/en-ZA.json`
+- [x] T-09.9 (P6) Document titles per screen from content (E2E F-6) → R-09.10, AC-09.8 · verify: `pnpm test src/lib/content src/features` · files: `src/app/layout.tsx`, `src/features/start/Journey.tsx`, `content/en-ZA.json`
