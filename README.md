@@ -10,6 +10,16 @@ OCR, facial recognition and liveness detection are **mocked**. The focus is work
 
 > **Status:** ready for review. What is designed but not built is listed under Limitations.
 
+## What I prioritised and why
+
+The specs came first: the business requirements, then one spec per feature, and the code was checked against those acceptance criteria.
+
+One machine owns the journey. The server is the source of truth for the handoff, so the desktop and the phone read the same session.
+
+Resilience and manual review were built before extra features. A failed check has a next step, and a case the mock cannot decide goes to manual review instead of a dead end.
+
+Visual design came last, once the journey worked. What was held back is the production backlog: a real verification provider, resume, an offline queue, insights, and go-live hardening.
+
 ## Where to start
 
 | Read | What it covers |
@@ -105,3 +115,16 @@ Known issues from the [manual E2E run](docs/E2E-REPORT.md), not fixed for the de
 - One failure tip on desktop mentions holding your phone steady.
 - The offline banner shows on the phone only, as specified; the desktop-only path has none.
 - The Content Security Policy allows inline scripts and styles, which Next.js needs without nonces (PB-16).
+
+## Time spent
+
+| Work | Hours |
+|---|---|
+| Specs, wireframes and planning | |
+| Build P0–P4 | |
+| Visual design (P4.5) | |
+| Ship and E2E testing (P5) | |
+| Hardening (P6) | |
+| Total | |
+
+AI agents wrote most of the code from the specs, and I reviewed every test and diff.
