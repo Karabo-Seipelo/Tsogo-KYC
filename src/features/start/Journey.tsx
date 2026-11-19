@@ -262,23 +262,28 @@ const phoneHeartbeatMs = 10_000;
 
 function usePhoneHeartbeat(device: Device, step: string) {
   useEffect(() => {
-    if (device !== "phone" || step === "idle") {
+    if (device !== "phone") {
       return;
     }
-    void sendHeartbeat(step);
+    const reported = step === "idle" ? null : step;
+    void sendHeartbeat(reported);
     const timer = window.setInterval(() => {
-      void sendHeartbeat(step);
+      void sendHeartbeat(reported);
     }, phoneHeartbeatMs);
     return () => window.clearInterval(timer);
   }, [device, step]);
 }
 
-async function sendHeartbeat(step: string) {
+async function sendHeartbeat(step: string | null) {
   try {
     await fetch("/api/session/heartbeat", {
       method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ step }),
+      ...(step
+        ? {
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ step }),
+          }
+        : {}),
     });
   } catch {
     return;

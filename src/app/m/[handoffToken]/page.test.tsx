@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, test, vi } from "vitest";
 import bundled from "../../../../content/en-ZA.json";
@@ -16,6 +16,7 @@ const content = contentSchema.parse(bundled);
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 test("AC-02.4 opening a valid link redeems it and the address becomes /m", async () => {
@@ -75,4 +76,34 @@ test("R-02.2 the phone journey starts without the device choice", async () => {
   expect(
     screen.getByRole("heading", { name: content.document.select.title }),
   ).toBeDefined();
+});
+
+test("AC-02.4 /m heartbeats before Start and does not open a new session", async () => {
+  vi.useFakeTimers();
+  const fetchMock = vi.fn<
+    (
+      input: RequestInfo | URL,
+      init?: RequestInit,
+    ) => Promise<{ ok: boolean; status: number }>
+  >(() => Promise.resolve({ ok: true, status: 204 }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  render(<PhonePage />);
+
+  expect(
+    screen.getByRole("heading", { name: content.start.title }),
+  ).toBeDefined();
+  expect(fetchMock).toHaveBeenCalledWith("/api/session/heartbeat", {
+    method: "POST",
+  });
+  expect(fetchMock).not.toHaveBeenCalledWith("/api/session", expect.anything());
+
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(10_000);
+  });
+  const heartbeats = fetchMock.mock.calls.filter(
+    (call) => call[0] === "/api/session/heartbeat",
+  );
+  expect(heartbeats).toHaveLength(2);
+  expect(heartbeats[1]?.[1]).toEqual({ method: "POST" });
 });
