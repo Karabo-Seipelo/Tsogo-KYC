@@ -7,6 +7,8 @@ type SessionRecord = {
   phoneConnected?: boolean;
   lastSeen?: string | null;
   checks?: unknown[];
+  livenessPassed?: boolean;
+  match?: boolean;
   handoffToken?: string;
   expiresAt?: string;
   ttl?: number;
@@ -43,6 +45,8 @@ async function readStatus(request: Request, log: { step: string | null }) {
     phoneConnected: connectedWithin(session.lastSeen, 30_000),
     lastSeen: session.lastSeen ?? null,
     checks: Array.isArray(session.checks) ? session.checks : [],
+    livenessPassed: session.livenessPassed === true,
+    match: session.match === true,
     handoffExpired: handoff === null,
     expired: expiry.expired,
     expiresAt: expiry.expiresAt,

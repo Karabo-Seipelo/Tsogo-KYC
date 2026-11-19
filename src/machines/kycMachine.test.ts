@@ -314,6 +314,49 @@ test("AC-01.8 an event with no transition is ignored", () => {
   expect(actor.getSnapshot().context).toEqual(before.context);
 });
 
+test("AC-01.11 a new session after a finished journey starts from a clean context", () => {
+  const actor = journey([
+    ...toDocumentValidation,
+    invalid,
+    captured,
+    valid,
+    selfie,
+    liveness,
+    matched,
+    { type: "SUBMIT" },
+    { type: "VERIFIED" },
+  ]);
+  expect(actor.getSnapshot().value).toBe("complete");
+  expect(actor.getSnapshot().context.docAttempts).toBe(1);
+
+  actor.send({ type: "RESTART" });
+
+  expect(actor.getSnapshot().value).toBe("idle");
+  expect(actor.getSnapshot().context).toEqual(initialContext);
+
+  actor.send({ type: "START", device: "phone" });
+
+  expect(actor.getSnapshot().value).toBe("documentUpload");
+  expect(actor.getSnapshot().context).toEqual({
+    ...initialContext,
+    device: "phone",
+  });
+});
+
+test("AC-01.11 START from a finished journey clears the earlier context", () => {
+  const actor = journey([...toProcessing, { type: "VERIFIED" }]);
+  expect(actor.getSnapshot().value).toBe("complete");
+  expect(actor.getSnapshot().context.device).toBe("desktop");
+
+  actor.send(desktop);
+
+  expect(actor.getSnapshot().value).toBe("deviceSelection");
+  expect(actor.getSnapshot().context).toEqual({
+    ...initialContext,
+    device: "desktop",
+  });
+});
+
 test("AC-01.8 SESSION_EXPIRED is ignored once the journey is complete", () => {
   const actor = journey([...toProcessing, { type: "VERIFIED" }]);
   expect(actor.getSnapshot().value).toBe("complete");

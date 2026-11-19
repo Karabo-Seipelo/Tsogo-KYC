@@ -7,7 +7,7 @@ import { SelfieJourney } from "@/features/capture/SelfieJourney";
 import { CompleteScreen } from "@/features/review/CompleteScreen";
 import { ManualReview } from "@/features/review/ManualReview";
 import { ProcessingScreen } from "@/features/review/ProcessingScreen";
-import { ReviewScreen, type ReviewCheck } from "@/features/review/ReviewScreen";
+import { ReviewScreen } from "@/features/review/ReviewScreen";
 import { HelpProvider } from "@/features/help/HelpDialog";
 import { SaveExitProvider } from "@/features/save-exit/SaveExit";
 import type { Device } from "@/machines/kycMachine.types";
@@ -64,7 +64,6 @@ function JourneyFlow({ device }: { device: Device }) {
   const [documentPhoto, setDocumentPhoto] = useState<string | null>(null);
   const [selfiePhoto, setSelfiePhoto] = useState<string | null>(null);
   const [documentType, setDocumentType] = useState<DocumentKind | null>(null);
-  const [checks, setChecks] = useState<ReviewCheck[]>([]);
   const [handoff, setHandoff] = useState<HandoffCode | null>(null);
   const deadline = laterDeadline(status?.expiresAt ?? null, heldExpiresAt);
   const remaining =
@@ -127,7 +126,6 @@ function JourneyFlow({ device }: { device: Device }) {
         }
         return null;
       });
-      setChecks([]);
       setDocumentType(null);
       setHandoff(null);
       setHeldExpiresAt(null);
@@ -184,7 +182,6 @@ function JourneyFlow({ device }: { device: Device }) {
           });
         }}
         onDocumentType={setDocumentType}
-        onChecks={setChecks}
       />
     );
   } else if (
@@ -214,9 +211,9 @@ function JourneyFlow({ device }: { device: Device }) {
         documentType={documentType ?? "passport"}
         documentSrc={documentPhoto ?? blankPhoto}
         selfieSrc={selfiePhoto ?? blankPhoto}
-        checks={checks}
-        livenessPassed
-        matched
+        checks={status?.checks ?? []}
+        livenessPassed={status?.livenessPassed === true}
+        matched={status?.match === true}
         onRetake={(target) => send({ type: "RETAKE", target })}
         onSubmit={() => {
           void submitReview(send);
