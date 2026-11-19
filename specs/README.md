@@ -41,27 +41,27 @@ Screen codes refer to `docs/wireframes.pdf`: **D** = desktop, **M** = mobile, **
 
 | Brief requirement | Serves | Spec | Acceptance criteria | Screens | Test |
 |---|---|---|---|---|---|
-| 1. Start screen with time estimate and requirements | BR-2, BR-3 | 02 | AC-02.1 | D1 | _TBC_ |
-| 2. Device selection (this device / phone via QR) | BR-2 | 02 | AC-02.2 | D2 | _TBC_ |
-| 3. QR-code mobile handoff | BR-2, BR-4, BR-7 | 02 | AC-02.3 – AC-02.7 | D3, D3b | _TBC_ |
-| 4. Document capture (passport, national ID, licence) | BR-1 | 03 | AC-03.1 – AC-03.3 | M1, M2 | _TBC_ |
-| 5. Document validation with success/failure | BR-2, BR-4, BR-7 | 03 | AC-03.4 – AC-03.6 | M3a, M3b | _TBC_ |
-| 6. Selfie capture with device camera | BR-1 | 04 | AC-04.1 – AC-04.2 | M4 | _TBC_ |
-| 7. Mock liveness step | BR-4 | 04 | AC-04.3 – AC-04.4 | M5 | _TBC_ |
-| 8. Face matching via mocked API | BR-1, BR-4 | 04 | AC-04.5 – AC-04.7 | M6, E3 | _TBC_ |
-| 9. Verification status tracking | BR-2, BR-3 | 05 | AC-05.1 – AC-05.3 | D4, D6 | _TBC_ |
-| 10. Review and submit | BR-1, BR-2 | 05 | AC-05.4 – AC-05.6 | D5, D7, M7 | _TBC_ |
+| 1. Start screen with time estimate and requirements | BR-2, BR-3 | 02 | AC-02.1 | D1 | `pnpm test src/features/start/StartScreen.test.tsx` |
+| 2. Device selection (this device / phone via QR) | BR-2 | 02 | AC-02.2 | D2 | `pnpm test src/features/start/DeviceSelection.test.tsx` |
+| 3. QR-code mobile handoff | BR-2, BR-4, BR-7 | 02 | AC-02.3 – AC-02.7 | D3, D3b | `pnpm test src/features/handoff src/app/m`. Real phone: `pnpm dev:phone`. Preview QR checked on the preview deploy. |
+| 4. Document capture (passport, national ID, licence) | BR-1 | 03 | AC-03.1 – AC-03.3 | M1, M2 | `pnpm test src/features/capture/DocumentType.test.tsx src/features/capture/DocumentCapture.test.tsx` |
+| 5. Document validation with success/failure | BR-2, BR-4, BR-7 | 03 | AC-03.4 – AC-03.6 | M3a, M3b | `pnpm test src/features/capture/DocumentPassed.test.tsx src/features/capture/DocumentJourney.test.tsx src/app/api/session/document` |
+| 6. Selfie capture with device camera | BR-1 | 04 | AC-04.1 – AC-04.2 | M4 | `pnpm test src/features/capture/SelfieCapture.test.tsx` |
+| 7. Mock liveness step | BR-4 | 04 | AC-04.3 – AC-04.4 | M5 | `pnpm test src/features/capture/LivenessCheck.test.tsx` |
+| 8. Face matching via mocked API | BR-1, BR-4 | 04 | AC-04.5 – AC-04.7 | M6, E3 | `pnpm test src/features/capture/FaceMatch.test.tsx src/app/api/session/face-match` |
+| 9. Verification status tracking | BR-2, BR-3 | 05 | AC-05.1 – AC-05.3 | D4, D6 | `pnpm test src/features/review/StatusScreen.test.tsx` |
+| 10. Review and submit | BR-1, BR-2 | 05 | AC-05.4 – AC-05.6 | D5, D7, M7 | `pnpm test src/features/review/ReviewScreen.test.tsx src/features/review/ProcessingScreen.test.tsx src/features/review/CompleteScreen.test.tsx src/features/review/PhoneDone.test.tsx src/app/api/session/submit` |
 
 ### Business requirements not in the take-home brief
 
 | Business requirement | Spec | Acceptance criteria | Screens | Test |
 |---|---|---|---|---|
-| BR-1, BR-4 · Audit trail of every decision | 08 | AC-08.2 | — | _TBC_ |
-| BR-5 · Manual review instead of dead ends | 08 | AC-08.3 – AC-08.4 | E9, D4 | _TBC_ |
-| BR-6, BR-7 · Funnel events | 08 | AC-08.1 | — | _TBC_ |
-| BR-6 · Insights page (`production`, PB-9) | 08 | AC-08.5 | `/insights` | _TBC_ |
-| BR-8 · Data minimisation and expiry | Constitution §5, 03 | AC-03.9 | — | _TBC_ |
-| BR-9 · Copy editable without a release | 09 | AC-09.1 – AC-09.7 | All | _TBC_ |
+| BR-1, BR-4 · Audit trail of every decision | 08 | AC-08.2 | — | `pnpm test src/lib/analytics/audit.test.ts` |
+| BR-5 · Manual review instead of dead ends | 08 | AC-08.3 – AC-08.4 | E9, D4 | `pnpm test src/features/review/ManualReview.test.tsx src/features/review/StatusScreen.test.tsx src/app/api/session/manual-review` |
+| BR-6, BR-7 · Funnel events | 08 | AC-08.1 | — | `pnpm test src/lib/analytics/track.test.ts` |
+| BR-6 · Insights page (`production`, PB-9) | 08 | AC-08.5 | `/insights` | Not built (PB-9) |
+| BR-8 · Data minimisation and expiry | Constitution §5, 03 | AC-03.9 | — | `pnpm test src/lib/image/resizeImage.test.ts src/app/api/session/document` |
+| BR-9 · Copy editable without a release | 09 | AC-09.1 – AC-09.7 | All | `pnpm test src/lib/content` and `pnpm lint`. AC-09.3, AC-09.4 and AC-09.6 are production (PB-1, PB-2). |
 
 ### State management, API and architecture requirements
 

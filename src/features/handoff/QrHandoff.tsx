@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Button } from "@/components/ui/Button";
 import { Screen } from "@/components/ui/Screen";
-import { screenTitle } from "@/components/ui/styles";
+import { focusRing, screenTitle } from "@/components/ui/styles";
 import { useContent } from "@/lib/content/useContent";
 
 type Props = {
@@ -72,13 +71,13 @@ export function QrHandoff({
               {t("handoff.waiting")}
             </p>
           )}
-          <Button
-            variant="text"
-            className="w-fit px-0"
+          <button
+            type="button"
+            className={`w-fit cursor-pointer text-left text-sm text-gold-strong underline ${focusRing}`}
             onClick={onContinueHere}
           >
             {t("handoff.fallback")}
-          </Button>
+          </button>
         </div>
       </div>
       <p id="handoff-url" className="sr-only">

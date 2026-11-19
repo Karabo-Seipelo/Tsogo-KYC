@@ -4,11 +4,11 @@ A front-end implementation of a digital Know Your Customer (KYC) onboarding jour
 
 OCR, facial recognition and liveness detection are **mocked**. The focus is workflow design, state management, UX, accessibility and resilience.
 
-**Live demo:** https://tsogo.karaboseipelo.com _(TBC)_
+**Live demo:** https://tsogo.karaboseipelo.com
 
 > ⚠️ **This is a demo.** Please don't upload a real ID document.
 
-> **Status:** work in progress. Sections marked _TBC_ are filled in as the build lands.
+> **Status:** ready for review. What is designed but not built is listed under Limitations.
 
 ## Where to start
 
@@ -23,13 +23,15 @@ OCR, facial recognition and liveness detection are **mocked**. The focus is work
 
 ## Setup
 
-_TBC: confirmed once the code exists._
+Node.js 20.9 or newer and pnpm 9 or newer. This repo pins pnpm 12.18.0.
 
 ```bash
-# Requirements: Node 20+, pnpm 9+
 pnpm install
-pnpm dev            # http://localhost:3000
+pnpm bootstrap   # checks Node and pnpm, and creates .env.local from .env.example
+pnpm dev         # http://localhost:3000, memory store
 ```
+
+`pnpm dev:phone` adds an HTTPS tunnel so a real phone can scan the QR code. Local `STORE_DRIVER` stays `memory` (see `.env.example`). Preview and production each use their own Upstash database.
 
 ### Environments
 
@@ -63,11 +65,22 @@ Screen codes (E1–E9, M3b) match [`docs/wireframes.pdf`](docs/wireframes.pdf).
 
 ## Assumptions
 
-_TBC._
+These are the assumptions the demo was built on. The open questions are in [`specs/00-product-brief.md`](specs/00-product-brief.md).
+
+- KYC sits before the first deposit.
+- The accepted documents are a passport, a Smart ID card, and a driver's licence. Proof of address and the green ID book are out of scope.
+- Cases the mock cannot decide go to manual review. The player is told this usually takes up to 24 hours. Who works that queue, and the real turnaround, are still open.
+- Nothing is kept beyond the session. How long FICA requires a verification record to be kept is still open.
+- Copy is one locale, `en-ZA`, in a bundled JSON file. A CMS and a second language are designed and not built (PB-1, PB-2).
 
 ## Trade-offs
 
-_TBC._
+- One XState machine holds the journey. There is no second client store. Refreshing the page starts again. Resume after Save & exit is PB-5.
+- `pnpm dev` keeps the session in memory. Preview and production each use their own Upstash database. The audit trail stays on the session in memory and is not written to Redis.
+- Liveness shows the live camera and the prompts, then confirms each prompt on a timer. No face or movement is analysed.
+- The phone path is the recommended one. "Can't scan? Continue on this computer instead" continues document capture on this computer.
+- Photos are resized on the device. The server stores a thumbnail only. A session lasts 15 minutes, or 1 minute with `?ttl=1`.
+- `DEMO_MODE` turns on both the demo banner and `noindex`. The site is not for crawlers.
 
 ## Limitations
 
@@ -79,5 +92,3 @@ The specs describe the full design; the demo builds the core journey. Items tagg
 - A CMS behind the content layer (the interface is in place; copy is a bundled JSON file).
 - Resume after Save & exit, an offline upload queue, and funnel reporting (`/insights`).
 - A Docker setup that proves two-instance behaviour locally; for the demo this is checked on a Vercel preview.
-
-_Anything else found during the build is added here._

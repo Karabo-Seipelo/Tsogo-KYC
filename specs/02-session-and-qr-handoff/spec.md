@@ -68,6 +68,7 @@ sequenceDiagram
 - **AC-02.13** GIVEN any `POST` to `/api` WHEN its `Origin` doesn't match the request host THEN it returns 403 AND the session is unchanged; GIVEN the session cookie THEN it carries `HttpOnly`, `SameSite=Lax` and, over HTTPS, `Secure`.
 - **AC-02.14** GIVEN any `/api/session/*` call without a valid session cookie THEN it returns 401; AND no API response body or URL contains the session ID.
 - **AC-02.15** `production` GIVEN a saved session WHEN the user returns in the same browser within 15 minutes THEN the journey resumes at the same step; after that THEN E6 shows.
+- **AC-02.16** GIVEN D3 WHEN "Can't scan? Continue on this computer instead" is activated, OR GIVEN D3b WHEN "Continue on this computer instead" is activated, THEN the desktop continues at document capture (spec 01, AC-01.10).
 
 ## API
 
@@ -107,3 +108,4 @@ sequenceDiagram
 - [ ] T-02.10 `production` Docker `prodlike` handoff (PB-3) → AC-02.8
 - [ ] T-02.11 `production` Resume a saved session in the same browser (PB-5) → AC-02.15
 - [ ] T-02.12 `production` Phone Help opens as a bottom sheet (PB-6) → R-02.14
+- [x] T-02.20 "Can't scan? Continue on this computer instead" on D3, and "Continue on this computer instead" on D3b, leaves the QR for document capture → AC-02.16 · verify: `pnpm test src/machines` · files: `src/features/start/Journey.tsx`

@@ -16,6 +16,7 @@ stateDiagram-v2
   deviceSelection --> qrHandoff: CHOOSE_PHONE
   deviceSelection --> documentUpload: CHOOSE_THIS_DEVICE
   qrHandoff --> documentUpload: PHONE_CONNECTED
+  qrHandoff --> documentUpload: CHOOSE_THIS_DEVICE
   documentUpload --> documentValidation: DOC_CAPTURED
   documentValidation --> selfieCapture: DOC_VALID
   documentValidation --> documentUpload: DOC_INVALID canRetryDoc
@@ -61,6 +62,7 @@ stateDiagram-v2
 
 - **AC-01.1** GIVEN `idle` WHEN `START` on desktop THEN state is `deviceSelection`; on mobile THEN `documentUpload`.
 - **AC-01.2** GIVEN `deviceSelection` WHEN `CHOOSE_THIS_DEVICE` THEN state is `documentUpload` (QR skipped).
+- **AC-01.10** GIVEN `qrHandoff` WHEN `CHOOSE_THIS_DEVICE` THEN state is `documentUpload`.
 - **AC-01.3** GIVEN `documentValidation` and `docAttempts < 2` WHEN `DOC_INVALID` THEN state is `documentUpload` AND `docAttempts` increments.
 - **AC-01.4** GIVEN `documentValidation` and `docAttempts = 2` WHEN `DOC_INVALID` (the third failed attempt) THEN state is `error` with reason `maxAttempts`, shown as the manual-review screen E9 (spec 08).
 - **AC-01.5** GIVEN `faceMatch` WHEN `NO_MATCH` THEN the same rule applies to `matchAttempts`: back to `selfieCapture` after the first and second failures, `error` with `maxAttempts` (E9) on the third.
@@ -88,3 +90,4 @@ stateDiagram-v2
 - [x] T-01.5 `useKycMachine` hook exposing `state`, `send` and `stepNumber` (1–4) → AC-01.1, AC-01.9 · verify: `pnpm test src/machines` · files: `src/machines/useKycMachine.ts`, `src/machines/useKycMachine.test.tsx`
 - [x] T-01.6 Check the machine in the Stately visualiser against the flow map → all · verify: manual; screenshot in the PR · files: none
 - [ ] T-01.7 `production` Model-based paths with `createTestModel` (PB-4) → AC-01.1 – AC-01.9 · verify: `pnpm test src/machines` · files: `src/machines/kycMachine.paths.test.ts`
+- [x] T-01.8 `CHOOSE_THIS_DEVICE` from `qrHandoff` goes to `documentUpload` → AC-01.10 · verify: `pnpm test src/machines` · files: `src/machines/kycMachine.ts`, `src/machines/kycMachine.test.ts` · gate: tests reviewed

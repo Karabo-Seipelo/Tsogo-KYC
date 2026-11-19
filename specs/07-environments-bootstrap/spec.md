@@ -75,5 +75,5 @@ P5 · Ship:
 - [x] T-07.16 (P5) Vercel project with preview and production env vars, and a separate Upstash database for each. The preview QR uses the preview URL and the preview database → AC-07.4 · verify: a preview deploy · files: `src/lib/store`, `docs/TECH-STACK.md`, `.env.example`
 - [x] T-07.17 (P5) Attach `tsogo.karaboseipelo.com` and the DNS record Vercel shows → AC-07.5 · verify: `https://tsogo.karaboseipelo.com` over HTTPS with `X-Robots-Tag: noindex` · files: none
 - [x] T-07.18 (P5) Keyboard-only run of the full journey → P5 checkpoint · verify: manual · files: none
-- [ ] T-07.19 (P5) Fill the `_TBC_` marks in `README.md` and the test column in `specs/README.md` → P5 checkpoint · verify: no `_TBC_` left · files: `README.md`, `specs/README.md`
+- [x] T-07.19 (P5) Fill the `_TBC_` marks in `README.md` and the test column in `specs/README.md` → P5 checkpoint · verify: no `_TBC_` left · files: `README.md`, `specs/README.md`
 - [ ] T-07.20 (P5) Handover check of a fresh local journey, the preview, production `noindex`, and `pnpm dev:phone` → AC-07.1, AC-07.4 – AC-07.6, AC-07.8 · verify: manual · files: none
