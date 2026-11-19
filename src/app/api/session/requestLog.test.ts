@@ -1,4 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
+import { createMemoryStore } from "../../../lib/store/memoryStore";
 import { POST as createSession } from "./route";
 import { POST as uploadDocument } from "./document/route";
 import { POST as matchFace } from "./face-match/route";
@@ -156,7 +157,29 @@ test("AC-08.6 face match logs the stored step and leaves the session id out", as
 
 test("AC-08.6 submit logs the processing step and leaves the session id out", async () => {
   vi.useFakeTimers();
-  const id = await sessionId(await createSession(jsonRequest("/api/session")));
+  const created = await createSession(jsonRequest("/api/session"));
+  const id = sessionId(created);
+  const store = createMemoryStore();
+  const existing = await store.get(`session:${id}`);
+  if (!isRecord(existing)) {
+    throw new Error("session was not stored");
+  }
+  await store.set(
+    `session:${id}`,
+    {
+      ...existing,
+      thumbnail: "thumb",
+      selfieThumbnail: "selfie",
+      checks: [
+        { id: "page", passed: true },
+        { id: "print", passed: true },
+        { id: "date", passed: true },
+      ],
+      livenessPassed: true,
+      match: true,
+    },
+    900,
+  );
   const { response, lines } = await logged(() =>
     submitSession(
       jsonRequest("/api/session/submit", { cookie: `session=${id}` }),
@@ -261,6 +284,10 @@ function selfieRequest(session: string) {
     },
     body: form,
   });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function sessionId(response: Response) {
