@@ -109,6 +109,7 @@ Added to the specs as P6 tasks. The low findings are listed under Limitations in
 | T-06.6 A 401 is treated as expiry and shows E6 | R-2 | 06 · R-06.4, AC-06.6 |
 | T-02.24 E8 "Show the QR code again" issues a new code | R-3 | 02 · R-02.8, AC-02.7 |
 | PB-16 Nonce-based CSP | R-4 | PLAN backlog |
+| T-05.7 Return the stored thumbnails to the desktop review | N-1 | 05 · R-05.3, AC-05.8 |
 
 ## Re-run after P6 hardening
 
@@ -219,21 +220,34 @@ Fix: call `POST /api/session/handoff` when leaving E8 for the QR screen, and sho
 
 When the photos were taken on the phone, the desktop Review shows a 1×1 transparent placeholder for both photos, with the alt text "Document photo" and "Selfie". The user can't see what they're submitting, and a screen reader announces images that aren't there. R-05.3 says Review shows both thumbnails. The desktop-only path shows them correctly.
 
-Fix: the server already stores both thumbnails, so return them to the session's own devices, either in the status response or from a `GET /api/session/thumbnails` route. Until then, show "Photo taken on your phone" text instead of an empty image.
+Fix: the server already stores both thumbnails, so return them to the session's own devices from `GET /api/session/thumbnails`. The status poll stays free of image bytes. A missing thumbnail is left out rather than shown as an empty image.
+
+**Status:** fixed locally in T-05.7, and checked on localhost. Not yet on the deployed site. The "Photo taken on your phone" wording was not used. The document name on that screen still falls back to "Passport" after a phone capture, because the chosen type is not stored.
 
 #### N-2 · Low · The page title lags behind the screen
 
 During document checking, the title stays "Checking document" after the screen changes to "Your document looks good" or "We couldn't read your document". The start screen's title reads "Verify your identity · Verify your identity".
 
-Fix: take the title from the same key as the visible `h1`, and use only the site title on the start screen.
+Cause: the title follows the journey step, not the heading on screen. The whole `documentValidation` step uses `document.result.title` ("Checking document"), including the result screens. On the start screen the screen name and the site name are the same words.
+
+Fix: take the title from the same text as the visible heading, and use only the site name on the start screen.
+
+**Status:** still open. T-09.9 gave every screen a title; it did not follow the heading inside a step.
 
 #### N-3 · Low · Save & exit is offered on E6
 
-The expired-session screen still shows "Save & exit" in the header, though there's nothing left to save.
+The expired-session screen still shows "Save & exit" in the header, though there's nothing left to save. The same button is still there on the rejected screen (E7), manual review (E9), and the verified screen (D7).
+
+Cause: Save & exit is wired to the header for the whole journey, including those four screens.
 
 Fix: hide it on E6, E7, E9 and D7.
 
+**Status:** still open.
+
 ### Still open
 
+- N-2 and N-3, as above
+- The document name after a phone capture still says "Passport" (left over from N-1)
 - F-8 – F-15 and Q-1 as listed under Limitations in the README
 - R-4 / PB-16, the CSP allowing inline scripts
+- N-1 is fixed locally (T-05.7) and has not been re-run on the deployed site
