@@ -27,7 +27,7 @@ async function saveSelfie(request: Request, log: { step: string | null }) {
   log.step = typeof existing.step === "string" ? existing.step : null;
 
   const form = await request.formData();
-  const selfieThumbnail = await readPart(form.get("thumbnail"));
+  const selfieThumbnail = await readThumbnail(form.get("thumbnail"));
   if (selfieThumbnail === null) {
     return new NextResponse(null, { status: 400 });
   }
@@ -64,12 +64,29 @@ function readSessionId(request: Request) {
   return null;
 }
 
-async function readPart(value: FormDataEntryValue | null) {
-  if (typeof value === "string") {
-    return value;
+const thumbnailLimit = 150 * 1024;
+
+async function readThumbnail(value: FormDataEntryValue | null) {
+  const bytes = await thumbnailBytes(value);
+  if (
+    bytes === null ||
+    bytes.length > thumbnailLimit ||
+    bytes.length < 3 ||
+    bytes[0] !== 0xff ||
+    bytes[1] !== 0xd8 ||
+    bytes[2] !== 0xff
+  ) {
+    return null;
   }
-  if (value && typeof value.text === "function") {
-    return value.text();
+  return Buffer.from(bytes).toString("base64");
+}
+
+async function thumbnailBytes(value: FormDataEntryValue | null) {
+  if (typeof value === "string") {
+    return new TextEncoder().encode(value);
+  }
+  if (value && typeof value.arrayBuffer === "function") {
+    return new Uint8Array(await value.arrayBuffer());
   }
   return null;
 }
