@@ -14,16 +14,22 @@ import { resizeImage } from "@/lib/image/resizeImage";
 import { CameraBlocked } from "./DocumentFailed";
 import { useCamera } from "./useCamera";
 
+type Camera = Pick<ReturnType<typeof useCamera>, "start" | "stream" | "error">;
+
 type Props = {
   onDone: (thumbnail: Blob) => void;
+  camera?: Camera;
 };
 
-export function SelfieCapture({ onDone }: Props) {
+export function SelfieCapture({ onDone, camera }: Props) {
   const { t } = useContent();
   const video = useRef<HTMLVideoElement>(null);
   const started = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
-  const { start, stream, error } = useCamera();
+  const owned = useCamera();
+  const start = camera?.start ?? owned.start;
+  const stream = camera ? camera.stream : owned.stream;
+  const error = camera ? camera.error : owned.error;
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -31,11 +37,11 @@ export function SelfieCapture({ onDone }: Props) {
   }, []);
 
   useEffect(() => {
-    if (started.current) {
+    if (camera || started.current) {
       return;
     }
     started.current = true;
-    void start("user");
+    void owned.start("user");
   });
 
   useEffect(() => {

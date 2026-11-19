@@ -23,6 +23,24 @@ test("R-03.2 start asks for the rear camera and keeps the stream", async () => {
   expect(tracks[0]?.stop).not.toHaveBeenCalled();
 });
 
+test("start reuses a live stream instead of asking again", async () => {
+  const { stream, tracks } = fakeStream("live");
+  const getUserMedia = installCamera(async () => stream);
+  const { result } = renderHook(() => useCamera());
+
+  await act(async () => {
+    await result.current.start("user");
+  });
+  await act(async () => {
+    await result.current.start("user");
+  });
+
+  expect(getUserMedia).toHaveBeenCalledOnce();
+  expect(getUserMedia).toHaveBeenCalledWith({ video: { facingMode: "user" } });
+  expect(result.current.stream).toBe(stream);
+  expect(tracks[0]?.stop).not.toHaveBeenCalled();
+});
+
 test("stop ends every track and drops the stream", async () => {
   const { stream, tracks } = fakeStream();
   installCamera(async () => stream);
@@ -76,8 +94,11 @@ function installCamera(getUserMedia: () => Promise<MediaStream>) {
   return request;
 }
 
-function fakeStream() {
-  const tracks = [{ stop: vi.fn() }, { stop: vi.fn() }];
+function fakeStream(readyState?: MediaStreamTrack["readyState"]) {
+  const tracks = [
+    { stop: vi.fn(), readyState },
+    { stop: vi.fn(), readyState },
+  ];
   const stream = { getTracks: () => tracks } as unknown as MediaStream;
   return { stream, tracks };
 }

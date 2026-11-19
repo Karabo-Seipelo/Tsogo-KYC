@@ -165,6 +165,7 @@ export const contentSchema = z.object({
       blink: text,
     }),
     progress: text,
+    confirmed: text,
     help: text,
   }),
   faceMatch: z.object({

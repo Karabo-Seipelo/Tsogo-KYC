@@ -19,7 +19,7 @@ Versions are taken from `pnpm-lock.yaml` at scaffold time (PLAN, P0) and updated
 | TanStack Query | Server state, polling, mutations | 5.x | https://tanstack.com/query/latest |
 | Tailwind CSS | Styling | tailwindcss 4.3.3 | https://tailwindcss.com/docs |
 | Vitest + Testing Library | Unit and component tests | vitest 5.1.0, @testing-library/react 16.3.3 | https://vitest.dev · https://testing-library.com/docs/react-testing-library/intro/ |
-| Upstash Redis (`@upstash/redis`) | Session store on Vercel | Pinned at P0 | https://upstash.com/docs/redis |
+| Upstash Redis (`@upstash/redis`) | Session store on Vercel | 1.41.0 | https://upstash.com/docs/redis |
 | Vercel | Hosting, previews, production | — | https://vercel.com/docs |
 | Montserrat (via `next/font/google`, self-hosted at build) | Typeface for all UI text (spec 10) | — | https://nextjs.org/docs/app/getting-started/fonts |
 | GitHub Actions | CI: the checks in constitution §10 on every push and PR | — | https://docs.github.com/actions |

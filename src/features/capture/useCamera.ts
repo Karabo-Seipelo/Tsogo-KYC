@@ -23,6 +23,9 @@ export function useCamera() {
   }, []);
 
   async function start(facingMode: "user" | "environment" = "environment") {
+    if (isLive(streamRef.current)) {
+      return;
+    }
     try {
       const next = await navigator.mediaDevices.getUserMedia({
         video: { facingMode },
@@ -46,6 +49,12 @@ export function useCamera() {
   }
 
   return { start, stop, stream, error };
+}
+
+function isLive(stream: MediaStream | null) {
+  return (
+    stream?.getTracks().some((track) => track.readyState === "live") ?? false
+  );
 }
 
 function stopTracks(stream: MediaStream | null) {

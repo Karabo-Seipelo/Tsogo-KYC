@@ -57,6 +57,41 @@ test("a passing selfie sends SELFIE_CAPTURED, LIVENESS_PASSED, and Continue send
   expect(send).toHaveBeenCalledWith({ type: "MATCHED" });
 });
 
+test("AC-04.9 liveness reuses the open front camera and only posts the liveness result", async () => {
+  const send = vi.fn();
+  const getUserMedia = installJourney(
+    Promise.resolve(json({ match: true, confidence: 0.99 })),
+  );
+  renderJourney(send);
+
+  await act(async () => {
+    screen.getByRole("button", { name: content.selfie.cta }).click();
+    await flush();
+  });
+  await act(async () => {
+    await flush();
+  });
+
+  const preview = screen.getByLabelText(content.selfie.cameraAlt);
+  expect(preview.tagName).toBe("VIDEO");
+  expect(preview.className).toContain("-scale-x-100");
+  expect(preview.parentElement?.innerHTML).toContain("border-gold-bright");
+  expect(getUserMedia).toHaveBeenCalledOnce();
+  expect(getUserMedia).toHaveBeenCalledWith({ video: { facingMode: "user" } });
+
+  const fetchMock = vi.mocked(fetch);
+  const before = fetchMock.mock.calls.length;
+  await passLiveness();
+  const added = fetchMock.mock.calls.slice(before);
+
+  expect(added.map((call) => String(call[0]))).toEqual([
+    "/api/session/liveness",
+    "/api/session/face-match",
+  ]);
+  expect(added[0]?.[1]).toEqual({ method: "POST" });
+  expect(getUserMedia).toHaveBeenCalledOnce();
+});
+
 test("a failed face match sends NO_MATCH and returns to the selfie", async () => {
   const send = vi.fn();
   installJourney(Promise.resolve(json({ match: false, confidence: 0.99 })));
@@ -110,12 +145,11 @@ function installJourney(faceMatch: Promise<Response>) {
     writable: true,
     value: null,
   });
+  const getUserMedia = vi.fn(async () => ({
+    getTracks: () => [{ stop: vi.fn(), readyState: "live" }],
+  }));
   vi.stubGlobal("navigator", {
-    mediaDevices: {
-      getUserMedia: vi.fn(async () => ({
-        getTracks: () => [{ stop: vi.fn() }],
-      })),
-    },
+    mediaDevices: { getUserMedia },
   });
   vi.stubGlobal(
     "createImageBitmap",
@@ -149,6 +183,7 @@ function installJourney(faceMatch: Promise<Response>) {
       return Promise.resolve(json({ ok: true }));
     }),
   );
+  return getUserMedia;
 }
 
 function progress(current: number) {

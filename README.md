@@ -74,6 +74,7 @@ _TBC._
 The specs describe the full design; the demo builds the core journey. Items tagged `production` in the specs are designed but not built, each with a reason and a trigger in the [production backlog](specs/PLAN.md#production-backlog). The main ones:
 
 - A real verification provider (OCR, liveness, face match are mocked by design).
+- Liveness is simulated: the live camera is shown and the prompts are real, but each prompt is confirmed on a short timer; no face or movement is analysed (brief requirement 7). A real provider would replace the decision (PB-11).
 - Hardening for go-live: signed tokens, rate limiting, device binding, encryption at rest, durable audit storage, error tracking and alerts.
 - A CMS behind the content layer (the interface is in place; copy is a bundled JSON file).
 - Resume after Save & exit, an offline upload queue, and funnel reporting (`/insights`).
