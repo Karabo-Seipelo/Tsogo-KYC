@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const statusPollMs = 2_500;
 
@@ -19,6 +19,8 @@ export type SessionStatus = {
 export function useStatusPoll() {
   const [status, setStatus] = useState<SessionStatus | null>(null);
 
+  const hadSession = useRef(false);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -28,11 +30,21 @@ export function useStatusPoll() {
       }
       try {
         const response = await fetch("/api/session/status");
-        if (!response.ok || cancelled) {
+        if (cancelled) {
+          return;
+        }
+        if (response.status === 401 && hadSession.current) {
+          setStatus((current) =>
+            current ? { ...current, expired: true } : current,
+          );
+          return;
+        }
+        if (!response.ok) {
           return;
         }
         const next = sessionStatusFrom(await response.json());
         if (next && !cancelled) {
+          hadSession.current = true;
           setStatus(next);
         }
       } catch {

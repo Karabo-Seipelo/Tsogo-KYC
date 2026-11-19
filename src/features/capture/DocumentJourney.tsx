@@ -28,7 +28,8 @@ type DocumentEvent =
   | { type: "DOC_CAPTURED" }
   | { type: "DOC_VALID" }
   | { type: "DOC_INVALID" }
-  | { type: "UPLOAD_FAILED" };
+  | { type: "UPLOAD_FAILED" }
+  | { type: "SESSION_EXPIRED" };
 
 type PassedCheck = {
   id: string;
@@ -77,6 +78,10 @@ export function DocumentJourney({
     onThumbnail?.(upload.thumbnail);
     const result = await postDocument(upload);
     if (!result.ok) {
+      if (result.expired) {
+        send({ type: "SESSION_EXPIRED" });
+        return;
+      }
       if (result.refused) {
         setPhase("refused");
         return;
@@ -227,13 +232,16 @@ async function postDocument(photo: SavedPhoto) {
         };
       }
       if (response.status === 400) {
-        return { ok: false as const, refused: true };
+        return { ok: false as const, refused: true, expired: false };
+      }
+      if (response.status === 401) {
+        return { ok: false as const, refused: false, expired: true };
       }
     } catch {
       // The next wait is longer, then the saved photo can be sent again.
     }
   }
-  return { ok: false as const, refused: false };
+  return { ok: false as const, refused: false, expired: false };
 }
 
 function documentBody(photo: SavedPhoto) {

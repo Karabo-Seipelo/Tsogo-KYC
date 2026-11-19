@@ -130,6 +130,29 @@ test("a failed face match sends NO_MATCH and returns to the selfie", async () =>
   ).toBeDefined();
 });
 
+test("AC-06.6 a 401 on the selfie upload sends SESSION_EXPIRED", async () => {
+  const send = vi.fn();
+  installJourney(Promise.resolve(json({ match: true, confidence: 0.99 })));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((url: string) => {
+      if (url.endsWith("/selfie")) {
+        return Promise.resolve(new Response(null, { status: 401 }));
+      }
+      return Promise.resolve(json({ ok: true }));
+    }),
+  );
+  renderJourney(send);
+
+  await act(async () => {
+    screen.getByRole("button", { name: content.selfie.cta }).click();
+    await flush();
+  });
+
+  expect(send).toHaveBeenCalledWith({ type: "SESSION_EXPIRED" });
+  expect(send).not.toHaveBeenCalledWith({ type: "SELFIE_CAPTURED" });
+});
+
 function renderJourney(send: (event: { type: string }) => void) {
   render(
     <ContentProvider content={content}>

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, test, vi } from "vitest";
 import bundled from "../../../content/en-ZA.json";
@@ -207,6 +207,33 @@ test("AC-03.11 a 400 asks for a retake with an upload and does not retry", async
   ).toBeDefined();
   expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
   expect(send).not.toHaveBeenCalledWith({ type: "UPLOAD_FAILED" });
+});
+
+test("AC-06.6 a 401 on document upload sends SESSION_EXPIRED and not E2", async () => {
+  const user = userEvent.setup();
+  const send = vi.fn();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => Promise.resolve(new Response(null, { status: 401 }))),
+  );
+  renderJourney(send);
+
+  await user.click(radio(content.document.select.options.passport.title));
+  await user.click(screen.getByRole("button", { name: "Continue" }));
+  await user.click(
+    screen.getByRole("button", { name: content.document.capture.takePhoto }),
+  );
+
+  await waitFor(() => {
+    expect(send).toHaveBeenCalledWith({ type: "SESSION_EXPIRED" });
+  });
+  expect(send).not.toHaveBeenCalledWith({ type: "UPLOAD_FAILED" });
+  expect(
+    screen.queryByRole("heading", {
+      name: content.errors.UPLOAD_FAILED.message,
+    }),
+  ).toBeNull();
+  expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
 });
 
 function renderJourney(send: (event: { type: string }) => void) {
