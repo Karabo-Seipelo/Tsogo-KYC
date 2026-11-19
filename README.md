@@ -20,6 +20,8 @@ Resilience and manual review were built before extra features. A failed check ha
 
 Visual design came last, once the journey worked. What was held back is the production backlog: a real verification provider, resume, an offline queue, insights, and go-live hardening.
 
+I used spec-driven development with AI: agents wrote most of the code from the specs, and I reviewed every test and diff.
+
 ## Where to start
 
 | Read | What it covers |
@@ -41,7 +43,7 @@ pnpm bootstrap   # checks Node and pnpm, and creates .env.local from .env.exampl
 pnpm dev         # http://localhost:3000, memory store
 ```
 
-`pnpm dev:phone` adds an HTTPS tunnel so a real phone can scan the QR code. Local `STORE_DRIVER` stays `memory` (see `.env.example`). Preview and production each use their own Upstash database.
+`pnpm dev:phone` adds an HTTPS tunnel so a real phone can scan the QR code. Local `STORE_DRIVER` stays `memory` (see `.env.example`). Preview and production share one Upstash database, kept apart by a key prefix per environment.
 
 ### Environments
 
@@ -50,9 +52,9 @@ The app behaves the same in every environment; only the session store changes.
 | Environment | Store | Purpose |
 |---|---|---|
 | `pnpm dev` | memory | Zero-setup single-device run |
-| `pnpm dev:phone` | memory or Upstash dev DB | Real phone over an HTTPS tunnel (`cloudflared`), for the QR handoff and camera |
-| Vercel preview | Upstash (preview DB) | Per-branch real deploy |
-| Production | Upstash (production DB) | `https://tsogo.karaboseipelo.com` |
+| `pnpm dev:phone` | memory or Upstash | Real phone over an HTTPS tunnel (`cloudflared`), for the QR handoff and camera |
+| Vercel preview | Upstash (shared database, `preview:` keys) | Per-branch real deploy |
+| Production | Upstash (shared database, `production:` keys) | `https://tsogo.karaboseipelo.com` |
 
 ## Testing failure states
 
@@ -85,9 +87,9 @@ These are the assumptions the demo was built on. The open questions are in [`spe
 
 ## Trade-offs
 
-- One XState machine holds the journey. There is no second client store. Refreshing the page starts again. Resume after Save & exit is PB-5.
-- Status polling and uploads are small hand-written hooks: one endpoint, one interval, fewer dependencies. Components call them and `send()` the result, so the machine stays separate.
-- `pnpm dev` keeps the session in memory. Preview and production each use their own Upstash database. The audit trail stays on the session in memory and is not written to Redis.
+- One XState machine holds the journey, instead of Zustand or Redux. I chose XState to work with something new, and because it maps the brief's states, transitions and actions one to one, so the flow can be read and tested directly. There is no second client store. Refreshing the page starts again. Resume after Save & exit is PB-5.
+- Status polling and uploads are small hand-written hooks instead of React Query. The project is small enough not to need it: one status endpoint, one interval, fewer dependencies. Components call them and `send()` the result, so the machine stays separate.
+- `pnpm dev` keeps the session in memory. Preview and production share one Upstash database, kept apart by a key prefix per environment. The audit trail stays on the session in memory and is not written to Redis.
 - Liveness shows the live camera and the prompts, then confirms each prompt on a timer. No face or movement is analysed.
 - The phone path is the recommended one. "Can't scan? Continue on this computer instead" continues document capture on this computer.
 - Photos are resized on the device. The server stores a thumbnail only. A session lasts 15 minutes, or 1 minute with `?ttl=1`.
@@ -114,16 +116,3 @@ Known issues from the [manual E2E run](docs/E2E-REPORT.md), not fixed for the de
 - One failure tip on desktop mentions holding your phone steady.
 - The offline banner shows on the phone only, as specified; the desktop-only path has none.
 - The Content Security Policy allows inline scripts and styles, which Next.js needs without nonces (PB-16).
-
-## Time spent
-
-| Work | Hours |
-|---|---|
-| Specs, wireframes and planning | |
-| Build P0–P4 | |
-| Visual design (P4.5) | |
-| Ship and E2E testing (P5) | |
-| Hardening (P6) | |
-| Total | |
-
-AI agents wrote most of the code from the specs, and I reviewed every test and diff.
