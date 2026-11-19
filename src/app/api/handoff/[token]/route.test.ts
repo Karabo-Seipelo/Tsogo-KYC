@@ -54,6 +54,25 @@ test("R-02.13 the phone cookie is Secure when the forwarded protocol is HTTPS", 
   expect(sessionCookie(response).attributes.has("secure")).toBe(true);
 });
 
+test("AC-11.4 the phone cookie uses the 15 minute window", async () => {
+  const { token } = await issuedToken();
+
+  const response = await POST(redeem(token), params(token));
+
+  expect(sessionCookie(response).attributes.get("max-age")).toBe("900");
+});
+
+test("AC-11.4 the phone cookie uses the 60 second window", async () => {
+  const { token } = await issuedToken(
+    {},
+    "http://localhost:3000/api/session?ttl=1",
+  );
+
+  const response = await POST(redeem(token), params(token));
+
+  expect(sessionCookie(response).attributes.get("max-age")).toBe("60");
+});
+
 test("AC-02.5 a redeemed token is 410 the second time and sets no cookie", async () => {
   const { id, token } = await issuedToken();
 
@@ -131,9 +150,12 @@ test("AC-08.6 redeeming a token logs one line and leaves the session id out", as
   expect(JSON.stringify(lines)).not.toContain(id);
 });
 
-async function issuedToken(headers: Record<string, string> = {}) {
+async function issuedToken(
+  headers: Record<string, string> = {},
+  url = "http://localhost:3000/api/session",
+) {
   const response = await createSession(
-    new Request("http://localhost:3000/api/session", {
+    new Request(url, {
       method: "POST",
       headers: {
         host: "localhost:3000",

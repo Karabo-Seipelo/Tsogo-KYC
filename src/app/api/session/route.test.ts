@@ -58,6 +58,28 @@ test("AC-02.13 the cookie is Secure when the forwarded protocol is HTTPS", async
   expect(sessionCookie(response).attributes.has("secure")).toBe(true);
 });
 
+test("AC-11.4 the session cookie expires with the 15 minute window", async () => {
+  const response = await POST(
+    request("http://localhost:3000/api/session", {
+      host: "localhost:3000",
+      origin: "http://localhost:3000",
+    }),
+  );
+
+  expect(sessionCookie(response).attributes.get("max-age")).toBe("900");
+});
+
+test("AC-11.4 ?ttl=1 sets the cookie Max-Age to 60 seconds", async () => {
+  const response = await POST(
+    request("http://localhost:3000/api/session?ttl=1", {
+      host: "localhost:3000",
+      origin: "http://localhost:3000",
+    }),
+  );
+
+  expect(sessionCookie(response).attributes.get("max-age")).toBe("60");
+});
+
 test("AC-02.14 the session id is only in the cookie", async () => {
   const response = await POST(
     request("http://localhost:3000/api/session", {
