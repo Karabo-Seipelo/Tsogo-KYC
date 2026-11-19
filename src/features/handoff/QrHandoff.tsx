@@ -62,15 +62,17 @@ export function QrHandoff({
               </li>
             ))}
           </ol>
-          {phoneConnected ? (
-            <p role="status" aria-live="polite" className="text-base leading-6">
-              {t("handoff.connected")}
-            </p>
-          ) : (
-            <p className="rounded-md bg-info-soft px-4 py-3 text-base leading-6 text-ink">
-              {t("handoff.waiting")}
-            </p>
-          )}
+          <p
+            role="status"
+            aria-live="polite"
+            className={
+              phoneConnected
+                ? "text-base leading-6"
+                : "rounded-md bg-info-soft px-4 py-3 text-base leading-6 text-ink"
+            }
+          >
+            {phoneConnected ? t("handoff.connected") : t("handoff.waiting")}
+          </p>
           <button
             type="button"
             className={`w-fit cursor-pointer text-left text-sm text-gold-strong underline ${focusRing}`}
