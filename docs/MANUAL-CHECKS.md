@@ -34,11 +34,11 @@ Desktop-only path, from D1 to "You're verified". Do not use the pointer.
 
 | Check                                                                                                            | Result |
 | ---------------------------------------------------------------------------------------------------------------- | ------ |
-| Tab order is logical                                                                                             |        |
-| Every control can be reached, and it is visible when focused                                                     |        |
-| Help traps focus and returns it to the opener on close                                                           |        |
-| Save & exit traps focus and returns it to the opener on close                                                    |        |
-| Focus lands on the h1 at every step change, including the document-type screen after Continue from device choice |        |
+| Tab order is logical                                                                                             | Pass   |
+| Every control can be reached, and it is visible when focused                                                     | Pass   |
+| Help traps focus and returns it to the opener on close                                                           | Pass   |
+| Save & exit traps focus and returns it to the opener on close                                                    | Pass   |
+| Focus lands on the h1 at every step change, including the document-type screen after Continue from device choice | Pass   |
 
 ## Lighthouse accessibility
 
